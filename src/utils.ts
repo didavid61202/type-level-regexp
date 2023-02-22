@@ -53,7 +53,7 @@
 //     : never
 //   : never
 
-type TokenizeEscapeChars<S extends string> = S
+// type TokenizeEscapeChars<S extends string> = S
 
 // type testPattern = 'a[1\\]2$*|](b(cd?e+)?f)?g{2}\\w(h|i*)j{3,4}\\dk'
 

@@ -3,22 +3,28 @@ import type { EnumerateMatchers } from '../src/match'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type testing = EnumerateMatchers<
   //  ^?
-  '"123"456"', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
+  'abcde', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
   [
     //? testing any
-    {
-      type: 'namedCapture'
-      name: 'all'
-      value: [
-        { type: 'string'; value: '"' },
-        {
-          type: 'namedCapture'
-          name: 'content'
-          value: [{ type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] }]
-        },
-        { type: 'string'; value: '"' }
-      ]
-    }
+    { type: 'string'; value: 'a' },
+    { type: 'optional'; greedy: false; value: [{ type: 'any' }] },
+    { type: 'string'; value: 'c' }
+
+    // { type: 'repeat'; greedy: true; from: '1'; to: '3'; value: [{ type: 'any' }] }
+
+    // { //? test case: '"123"456"'
+    //   type: 'namedCapture'
+    //   name: 'all'
+    //   value: [
+    //     { type: 'string'; value: '"' },
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'content'
+    //       value: [{ type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] }]
+    //     },
+    //     { type: 'string'; value: '"' }
+    //   ]
+    // }
 
     // ? testing repeat   test case: 'a572894973826367301751bdr32'
     // {
