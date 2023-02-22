@@ -163,9 +163,15 @@ type Match<
     ? RM
     : never
 > = CurrentMatcher extends {
-  type: infer Type extends 'string' | 'backreference'
-  value: infer StringOrName extends string
+  type: 'any'
 }
+  ? InputString extends `${infer AnyChar}${infer Rest}`
+    ? MatchedResult<[AnyChar], Rest>
+    : NullResult<InputString>
+  : CurrentMatcher extends {
+      type: infer Type extends 'string' | 'backreference'
+      value: infer StringOrName extends string
+    }
   ? ['backreference', undefined] extends [Type, NameCaptureValue<NamedCaptures, StringOrName>]
     ? MatchedResult<[''], InputString>
     : InputString extends `${PrefixType}${Type extends 'string'
@@ -414,7 +420,7 @@ type MatchZeroOrMoreMatcher<
       infer CurrentRestInputString,
       infer CurrentNamedCaptures
     >
-    ? // ? match oe more time
+    ? //? match one more time
       MatchZeroOrMoreMatcher<
         CurrentRestInputString,
         Matchers,
@@ -684,3 +690,5 @@ type MatchOptionalMatcher<
       InputString,
       AccMatchedResult['namedCaputres']
     > // ? repeating optional mismatched
+
+type awer = EnumerateMatchers<'a', [{ type: 'any' }], [], [''], never, true>

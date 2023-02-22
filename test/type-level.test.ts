@@ -2,41 +2,56 @@ import type { EnumerateMatchers } from '../src/match'
 
 type testing = EnumerateMatchers<
   //  ^?
-  'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
+  '"123"456"', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
   [
-    // ? testing repeat   test case: 'a572894973826367301751bdr32'
+    //? testing any
     {
       type: 'namedCapture'
-      name: 'g0'
-      value: [{ type: 'charSet'; value: 'a-z' }]
-    },
-    {
-      type: 'repeat'
-      from: '2'
-      to: ''
-      greedy: true
+      name: 'all'
       value: [
+        { type: 'string'; value: '"' },
         {
           type: 'namedCapture'
-          name: 'g1'
-          value: [
-            {
-              type: 'or'
-              value: [
-                [
-                  {
-                    type: 'namedCapture'
-                    name: 'g2'
-                    value: [{ type: 'charSet'; value: '0-4' }]
-                  }
-                ],
-                [{ type: 'charSet'; value: '5-9' }]
-              ]
-            }
-          ]
-        }
+          name: 'content'
+          value: [{ type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] }]
+        },
+        { type: 'string'; value: '"' }
       ]
     }
+
+    // ? testing repeat   test case: 'a572894973826367301751bdr32'
+    // {
+    //   type: 'namedCapture'
+    //   name: 'g0'
+    //   value: [{ type: 'charSet'; value: 'a-z' }]
+    // },
+    // {
+    //   type: 'repeat'
+    //   from: '2'
+    //   to: ''
+    //   greedy: false
+    //   value: [
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'g1'
+    //       value: [
+    //         {
+    //           type: 'or'
+    //           value: [
+    //             [
+    // {
+    //   type: 'namedCapture'
+    //   name: 'g2'
+    //   value: [{ type: 'charSet'; value: '0-4' }]
+    // }
+    //             ],
+    //             [{ type: 'charSet'; value: '5-9' }]
+    //           ]
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // }
 
     // {
     //   type: 'repeat'

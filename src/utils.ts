@@ -102,7 +102,7 @@ export type Matcher =
       value: string
     }
   | {
-      type: Exclude<keyof CharSetMap, 'charSet' | 'notCharSet'> | 'debug'
+      type: 'any' | Exclude<keyof CharSetMap, 'charSet' | 'notCharSet'> | 'debug'
     }
   | {
       type: 'capture' | 'startOf' | 'endOf' | 'captureLast'
