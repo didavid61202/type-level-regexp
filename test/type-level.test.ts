@@ -1,14 +1,29 @@
-import type { EnumerateMatchers } from '../src/match'
+import type { EnumerateMatchers, ExhaustiveMatch } from '../src/match'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-type testing = EnumerateMatchers<
+type testing = ExhaustiveMatch<
   //  ^?
-  'abcde', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
+  'wer8WEF3ss23', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
   [
+    //? testing lookahead
+    {
+      //? test case: 'wer8WEF3ss23'
+      type: 'lookahead'
+      positive: false
+      value: [
+        { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
+        { type: 'charSet'; value: 'a-z' }
+      ]
+    },
+    { type: 'charSet'; value: '0-9' }
+
+    // { type: 'lookahead'; positive: true; value: [{ type: 'charSet'; value: 'a-z' }] },
+    // { type: 'string'; value: 'ab' }
+
     //? testing any
-    { type: 'string'; value: 'a' },
-    { type: 'optional'; greedy: false; value: [{ type: 'any' }] },
-    { type: 'string'; value: 'c' }
+    // { type: 'string'; value: 'a' },
+    // { type: 'optional'; greedy: false; value: [{ type: 'any' }] },
+    // { type: 'string'; value: 'c' }
 
     // { type: 'repeat'; greedy: true; from: '1'; to: '3'; value: [{ type: 'any' }] }
 

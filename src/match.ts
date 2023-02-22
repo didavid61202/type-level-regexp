@@ -44,7 +44,7 @@ export type ExhaustiveMatch<
     ? PartialMatched extends ''
       ? InputString extends `${string}${infer Rest}`
         ? Rest extends ''
-      ? Result & { AccPartialMatched: AccPartialMatched }
+          ? Result & { AccPartialMatched: AccPartialMatched }
           : ExhaustiveMatch<Rest, Matchers, AccPartialMatched>
         : Result
       : InputString extends `${string}${PartialMatched}${infer NextSection}`
@@ -257,6 +257,25 @@ type Match<
       EndOf,
       Count
     >
+  : CurrentMatcher extends {
+      type: 'lookahead'
+      value: infer LookaheadMatchers extends Matcher[]
+      positive: infer Positive extends boolean
+    }
+  ? EnumerateMatchers<
+      InputString,
+      LookaheadMatchers,
+      [],
+      [''],
+      NamedCaptures,
+      true
+    > extends infer Result extends NullResult<any, any>
+    ? Positive extends true
+      ? Result
+      : MatchedResult<[''], InputString, NamedCaptures>
+    : Positive extends true
+    ? MatchedResult<[''], InputString, NamedCaptures>
+    : NullResult<''>
   : never
 
 type MatchOrMatchers<
