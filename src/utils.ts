@@ -1,32 +1,34 @@
-type EscapeToken = '$^'
-type CharSetToken = '$^]'
-type DefaultEscapedChars = ['(', ')', '{', '}']
+// type EscapeToken = '$^'
+// type CharSetToken = '$^]'
+// type DefaultEscapedChars = ['(', ')', '{', '}']
 
-type MatchError<S extends string> = S
+// type MatchError<S extends string> = S
 
-type TokenizeCharSets<
-  S extends string,
-  CharSets extends any[] = [],
-  Prefix extends string = ''
-> = S extends `${infer Before}[${infer After}`
-  ? Before extends `${infer BeforeEscape}\\`
-    ? TokenizeCharSets<After, CharSets, `${Prefix}${BeforeEscape}\\[`>
-    : After extends `${infer Inner}]${infer Rest}`
-    ? Inner extends `${infer BeforeEscape}\\`
-      ? Rest extends `${infer AfterBeforeEscape}]${infer RRest}`
-        ? TokenizeCharSets<
-            `${Before}(?:${CharSetToken}${CharSets['length']})${RRest}`,
-            [...CharSets, `${BeforeEscape}]${AfterBeforeEscape}`],
-            Prefix
-          >
-        : never
-      : TokenizeCharSets<
-          `${Before}(?:${CharSetToken}${CharSets['length']})${Rest}`,
-          [...CharSets, Inner],
-          Prefix
-        >
-    : MatchError<'missing closing `]`.'>
-  : TokenizeEscapeChars<`${Prefix}${S}`> & { CharSets: CharSets }
+// type TokenizeCharSets<
+//   S extends string,
+//   CharSets extends any[] = [],
+//   Prefix extends string = ''
+// > = S extends `${infer Before}[${infer After}`
+//   ? Before extends `${infer BeforeEscape}\\`
+//     ? TokenizeCharSets<After, CharSets, `${Prefix}${BeforeEscape}\\[`>
+//     : After extends `${infer Inner}]${infer Rest}`
+//     ? Inner extends `${infer BeforeEscape}\\`
+//       ? Rest extends `${infer AfterBeforeEscape}]${infer RRest}`
+//         ? TokenizeCharSets<
+//             `${Before}(?:${CharSetToken}${CharSets['length']})${RRest}`,
+//             [...CharSets, `${BeforeEscape}]${AfterBeforeEscape}`],
+//             Prefix
+//           >
+//         : never
+//       : TokenizeCharSets<
+//           `${Before}(?:${CharSetToken}${CharSets['length']})${Rest}`,
+//           [...CharSets, Inner],
+//           Prefix
+//         >
+//     : MatchError<'missing closing `]`.'>
+//   : TokenizeEscapeChars<`${Prefix}${S}`> & { CharSets: CharSets }
+//?
+//? don't need rest below
 //   extends infer ResolvedStringOrCaptureResults
 //   ? ResolvedStringOrCaptureResults extends string
 //     ? RestoreStringFromToken<

@@ -690,5 +690,3 @@ type MatchOptionalMatcher<
       InputString,
       AccMatchedResult['namedCaputres']
     > // ? repeating optional mismatched
-
-type awer = EnumerateMatchers<'a', [{ type: 'any' }], [], [''], never, true>

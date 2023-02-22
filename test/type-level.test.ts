@@ -1,5 +1,6 @@
 import type { EnumerateMatchers } from '../src/match'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type testing = EnumerateMatchers<
   //  ^?
   '"123"456"', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
@@ -328,11 +329,13 @@ type testing = EnumerateMatchers<
 // type testMatch = EnumerateMatchers<InputString, TargetResultMatcher>
 //     ^?
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type InputString = `prefix1	a1	
 2Box4D4t3@D4I7+y15y3Sy5_G-7F-R4*59ox4$z`
 // regexp: 1\t\n\d((?:b|B(?<group1>\D(x(?<group2>\d)))D)(?:4(t)\d\b\W)?)[246abC-I]+(7[^A-D](y\d\w)+(F-\w|G-\d){2}\k<group2>(?:[$-*5]|9){1,3}\k<group1>)
 // should result: ["1\t\n2Box4D4t3@D4I7+y15y3Sy5_G-2F-R4*59ox4", "Box4D4t3@", "ox4", "x4", "4", "t", "7+y15y3Sy5_G-2F-R4*59ox4", "y5_", "F-R"];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type TargetResultMatcher = [
   {
     type: 'string'
