@@ -1,0 +1,29 @@
+{
+  "name": "type-level-regexp",
+  "version": "1.0.0",
+  "description": "Type-Safe, Type Level RegExp interpreter/parser",
+  "main": "index.js",
+  "keywords": [],
+  "author": "David Tai <didavid61202@gmail.com>",
+  "homepage": "https://github.com/antfu/pkg-name#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/didavid61202/type-level-regexp.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest",
+    "test:type": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.35.2",
+    "@types/node": "^18.14.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "expect-type": "^0.15.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5",
+    "vitest": "^0.28.5"
+  }
+}
