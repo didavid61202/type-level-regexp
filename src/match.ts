@@ -46,7 +46,7 @@ export type ExhaustiveMatch<
         ? Rest extends ''
       ? Result & { AccPartialMatched: AccPartialMatched }
           : ExhaustiveMatch<Rest, Matchers, AccPartialMatched>
-        : never
+        : Result
       : InputString extends `${string}${PartialMatched}${infer NextSection}`
       ? ExhaustiveMatch<NextSection, Matchers, [...AccPartialMatched, PartialMatched]>
       : never
