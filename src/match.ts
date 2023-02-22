@@ -33,7 +33,7 @@ export type MatchRegexp<InputString extends string, Matchers extends Matcher[]> 
     : Result
   : never
 
-type ExhaustiveMatch<
+export type ExhaustiveMatch<
   InputString extends string,
   Matchers extends Matcher[],
   AccPartialMatched extends string[] = []
@@ -42,7 +42,11 @@ type ExhaustiveMatch<
     ? Result
     : Result extends NullResult<infer PartialMatched extends string>
     ? PartialMatched extends ''
+      ? InputString extends `${string}${infer Rest}`
+        ? Rest extends ''
       ? Result & { AccPartialMatched: AccPartialMatched }
+          : ExhaustiveMatch<Rest, Matchers, AccPartialMatched>
+        : never
       : InputString extends `${string}${PartialMatched}${infer NextSection}`
       ? ExhaustiveMatch<NextSection, Matchers, [...AccPartialMatched, PartialMatched]>
       : never
