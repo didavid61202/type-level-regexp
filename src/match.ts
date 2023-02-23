@@ -36,8 +36,19 @@ export type MatchRegexp<InputString extends string, Matchers extends Matcher[]> 
 export type ExhaustiveMatch<
   InputString extends string,
   Matchers extends Matcher[],
-  SkipedString extends string = ''
-> = EnumerateMatchers<InputString, Matchers, SkipedString> extends infer Result
+  SkipedString extends string = '',
+  StartOf extends boolean = false,
+  EndOf extends boolean = false
+> = EnumerateMatchers<
+  InputString,
+  Matchers,
+  SkipedString,
+  [],
+  [''],
+  never,
+  StartOf,
+  EndOf
+> extends infer Result
   ? Result extends MatchedResult<any, any, any>
     ? Result & { SkipedString: SkipedString }
     : Result extends NullResult<infer PartialMatched extends string>
