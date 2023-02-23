@@ -27,7 +27,7 @@ export type MatchRegexp<InputString extends string, Matchers extends Matcher[]> 
     ? MatchArray & {
         index: number // ? infer?
         input: InputString
-        length: number // ? infer?
+        length: MatchArray['length']
         groups: { [K in NamedCaptures[0]]: Extract<NamedCaptures, [K, any]>[1] }
       }
     : Result
