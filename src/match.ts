@@ -299,13 +299,17 @@ type Match<
       [''],
       NamedCaptures,
       true
-    > extends NullResult<any, any>
+    > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NestNamedCaptures>
     ? Positive extends true
-      ? NullResult<''>
-      : MatchedResult<[''], InputString, NamedCaptures> //! NamedCaptures can be `never`?
+      ? MatchedResult<['', ...Captures], InputString, NestNamedCaptures>
+      : NullResult<''>
     : Positive extends true
-    ? MatchedResult<[''], InputString, NamedCaptures> //! NamedCaptures can be `never`?
-    : NullResult<''>
+    ? NullResult<''>
+    : MatchedResult<
+        ['', ...CountNumOfCaptureGroupsAs<LookaheadMatchers>],
+        InputString,
+        ResolveNamedCaptureUnion<[LookaheadMatchers], never>
+      >
   : CurrentMatcher extends {
       type: 'lookbehind'
       value: infer LookbehindMatchers extends Matcher[]
