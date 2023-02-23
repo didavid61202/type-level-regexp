@@ -127,7 +127,7 @@ export type Matcher =
       name: string
     }
   | {
-      type: 'lookahead'
+      type: 'lookahead' | 'lookbehind'
       value: Matcher[]
       positive: boolean
     }
