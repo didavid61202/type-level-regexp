@@ -427,7 +427,13 @@ type MatchZeroOrMoreMatcher<
     matched: string
     captures: (string | undefined)[]
     namedCaputres: NamedCapturesTuple
-  }[] = [],
+  }[] = [
+    {
+      matched: ''
+      captures: CountNumOfCaptureGroupsAs<ZeroOrMoreMatchers>
+      namedCaputres: never
+    }
+  ],
   MatchNextMater extends boolean = Greedy extends true ? false : true
 > = Greedy extends true
   ? // ? greedy matching
@@ -456,9 +462,7 @@ type MatchZeroOrMoreMatcher<
         ZeroOrMoreMatcherIndex,
         [
           {
-            matched: `${MatchedResultsTuple[0] extends undefined
-              ? ''
-              : MatchedResultsTuple[0]['matched']}${CurrentMatched}`
+            matched: `${MatchedResultsTuple[0]['matched']}${CurrentMatched}`
             captures: CurrentMatchedRestArray
             namedCaputres: CurrentNamedCaptures
           },
@@ -526,25 +530,15 @@ type MatchZeroOrMoreMatcher<
         [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures, // ? pass in zeroOrMore match named capture?
-        StartOf,
+        true,
         EndOf,
         false,
         [...ZeroOrMoreMatcherIndex, '']
       > extends MatchedResult<any, any, any>
       ? MatchedResult<
-          [
-            MatchedResultsTuple[0] extends undefined ? '' : MatchedResultsTuple[0]['matched'],
-            ...(MatchedResultsTuple[0] extends undefined
-              ? CountNumOfCaptureGroupsAs<ZeroOrMoreMatchers>
-              : MatchedResultsTuple[0]['captures'])
-          ],
+          [MatchedResultsTuple[0]['matched'], ...MatchedResultsTuple[0]['captures']],
           InputString,
-          ResolveNamedCaptureUnion<
-            [ZeroOrMoreMatchers],
-            MatchedResultsTuple[0] extends undefined
-              ? never
-              : MatchedResultsTuple[0]['namedCaputres']
-          >
+          ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], MatchedResultsTuple[0]['namedCaputres']>
         >
       : MatchZeroOrMoreMatcher<
           InputString,
@@ -583,9 +577,7 @@ type MatchZeroOrMoreMatcher<
         ZeroOrMoreMatcherIndex,
         [
           {
-            matched: `${MatchedResultsTuple[0] extends undefined
-              ? ''
-              : MatchedResultsTuple[0]['matched']}${CurrentMatched}`
+            matched: `${MatchedResultsTuple[0]['matched']}${CurrentMatched}`
             captures: CurrentMatchedRestArray
             namedCaputres: CurrentNamedCaptures
           },
