@@ -324,7 +324,7 @@ export type CollectCaptureNames<
         RestMatchers,
         Names | ResolveNamedCaptureUnion<NestedMatchersArray, never>[0]
       >
-    : never
+    : Names
   : never
 
 export type ResolveNamedCaptureUnion<
