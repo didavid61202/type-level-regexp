@@ -36,19 +36,19 @@ export type MatchRegexp<InputString extends string, Matchers extends Matcher[]> 
 export type ExhaustiveMatch<
   InputString extends string,
   Matchers extends Matcher[],
-  AccPartialMatched extends string[] = []
-> = EnumerateMatchers<InputString, Matchers> extends infer Result
+  SkipedString extends string = ''
+> = EnumerateMatchers<InputString, Matchers, SkipedString> extends infer Result
   ? Result extends MatchedResult<any, any, any>
-    ? Result
+    ? Result & { SkipedString: SkipedString }
     : Result extends NullResult<infer PartialMatched extends string>
     ? PartialMatched extends ''
-      ? InputString extends `${string}${infer Rest}`
+      ? InputString extends `${infer FirstChar}${infer Rest}`
         ? Rest extends ''
-          ? Result & { AccPartialMatched: AccPartialMatched }
-          : ExhaustiveMatch<Rest, Matchers, AccPartialMatched>
+          ? Result & { SkipedString: SkipedString }
+          : ExhaustiveMatch<Rest, Matchers, `${SkipedString}${FirstChar}`>
         : Result
-      : InputString extends `${string}${PartialMatched}${infer NextSection}`
-      ? ExhaustiveMatch<NextSection, Matchers, [...AccPartialMatched, PartialMatched]>
+      : InputString extends `${infer Prefix}${PartialMatched}${infer NextSection}`
+      ? ExhaustiveMatch<NextSection, Matchers, `${SkipedString}${Prefix}${PartialMatched}`>
       : never
     : never
   : never
@@ -56,6 +56,7 @@ export type ExhaustiveMatch<
 export type EnumerateMatchers<
   InputString extends string,
   Matchers extends Matcher[],
+  SkipedString extends string,
   OutMostRestMatchers extends Matcher[] = [],
   MatchResultArray extends (string | undefined)[] = [''],
   NamedCaptures extends NamedCapturesTuple = never,
@@ -83,6 +84,7 @@ export type EnumerateMatchers<
   ? EnumerateMatchers<
       InputString,
       StartOrEndMatchers,
+      SkipedString,
       OutMostRestMatchers,
       MatchResultArray,
       NamedCaptures,
@@ -94,6 +96,8 @@ export type EnumerateMatchers<
       CurrentMatcher['type'] extends 'boundary'
         ? `${LastCharOfOr<MatchResultArray[0], ' '>}${InputString}`
         : InputString,
+      NonNullable<MatchResultArray[0]>,
+      SkipedString,
       Matchers,
       OutMostRestMatchers,
       ResolvedNamedCaptures,
@@ -110,6 +114,7 @@ export type EnumerateMatchers<
     ? EnumerateMatchers<
         RestInputString,
         Matchers,
+        SkipedString,
         [],
         [
           // ? matchedString and previous capture groups
@@ -151,6 +156,8 @@ export type EnumerateMatchers<
 
 type Match<
   InputString extends string,
+  SkipedString extends string,
+  PrevMatchedString extends string,
   Matchers extends Matcher[],
   OutMostRestMatchers extends Matcher[],
   NamedCaptures extends NamedCapturesTuple,
@@ -199,6 +206,7 @@ type Match<
     }
   ? MatchOptionalMatcher<
       InputString,
+      SkipedString,
       Matchers,
       OptionalMatchers,
       [...RestMatchers, ...OutMostRestMatchers],
@@ -216,6 +224,7 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       GroupMatchers,
+      SkipedString,
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
       NamedCaptures,
@@ -225,7 +234,14 @@ type Match<
       type: 'or'
       value: infer OrMatchersArray extends Matcher[][]
     }
-  ? MatchOrMatchers<InputString, OrMatchersArray, OutMostRestMatchers, NamedCaptures, StartOf>
+  ? MatchOrMatchers<
+      InputString,
+      SkipedString,
+      OrMatchersArray,
+      OutMostRestMatchers,
+      NamedCaptures,
+      StartOf
+    >
   : CurrentMatcher extends {
       type: 'repeat'
       value: infer RepeatMatchers extends Matcher[]
@@ -236,6 +252,7 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       ExpandRepeat<RepeatMatchers, From, To, Greedy>,
+      SkipedString,
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
       NamedCaptures,
@@ -248,6 +265,7 @@ type Match<
     }
   ? MatchZeroOrMoreMatcher<
       InputString,
+      SkipedString,
       Matchers,
       OutMostRestMatchers,
       ZeroOrMoreMatchers,
@@ -265,6 +283,18 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       LookaheadMatchers,
+      SkipedString,
+      [],
+      [''],
+      NamedCaptures,
+      true
+    > extends infer Result extends NullResult<any, any>
+    ? Positive extends true
+      ? Result
+      : MatchedResult<[''], InputString, NamedCaptures> //! NamedCaptures can be `never`?
+    : Positive extends true
+    ? MatchedResult<[''], InputString, NamedCaptures> //! NamedCaptures can be `never`?
+    : NullResult<''>
       [],
       [''],
       NamedCaptures,
@@ -280,6 +310,7 @@ type Match<
 
 type MatchOrMatchers<
   InputString extends string,
+  SkipedString extends string,
   OrMatchersArray extends Matcher[][],
   OutMostRestMatchers extends Matcher[],
   NamedCaptures extends NamedCapturesTuple,
@@ -295,6 +326,7 @@ type MatchOrMatchers<
   : EnumerateMatchers<
       InputString,
       CurrentOrMatchers,
+      SkipedString,
       OutMostRestMatchers,
       [''],
       NamedCaptures,
@@ -306,6 +338,7 @@ type MatchOrMatchers<
     >
   ? MatchOrMatchers<
       InputString,
+      SkipedString,
       OrMatchersArray,
       OutMostRestMatchers,
       ResolveNamedCaptureUnion<OrMatchersArray, NamedCaptures>,
@@ -335,6 +368,7 @@ type MatchOrMatchers<
     >
   : MatchOrMatchers<
       InputString,
+      SkipedString,
       OrMatchersArray,
       OutMostRestMatchers,
       ResolveNamedCaptureUnion<[CurrentOrMatchers], NamedCaptures>,
@@ -349,6 +383,7 @@ type BacktrackMatch<
     captures: (string | undefined)[]
     namedCaputres: NamedCapturesTuple
   }[],
+  SkipedString extends string,
   ZeroOrMoreMatchers extends Matcher[],
   RestMatchers extends Matcher[],
   NamedCaptures extends NamedCapturesTuple,
@@ -361,6 +396,7 @@ type BacktrackMatch<
   ? EnumerateMatchers<
       LastMatchSeg,
       RestMatchers,
+      SkipedString,
       [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
       [''],
       NamedCaptures,
@@ -386,6 +422,7 @@ type BacktrackMatch<
         EnumerateMatchers<
             Prefix,
             ZeroOrMoreMatchers,
+            SkipedString,
             [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
             [''],
             NamedCaptures,
@@ -404,6 +441,7 @@ type BacktrackMatch<
       : never
     : BacktrackMatch<
         MatchedResultsTuple,
+        SkipedString,
         ZeroOrMoreMatchers,
         RestMatchers,
         NamedCaptures,
@@ -415,6 +453,7 @@ type BacktrackMatch<
 
 type MatchZeroOrMoreMatcher<
   InputString extends string,
+  SkipedString extends string,
   Matchers extends Matcher[],
   OutMostRestMatchers extends Matcher[],
   ZeroOrMoreMatchers extends Matcher[],
@@ -440,6 +479,7 @@ type MatchZeroOrMoreMatcher<
     EnumerateMatchers<
       InputString,
       ZeroOrMoreMatchers,
+      SkipedString,
       [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
       [''],
       NamedCaptures,
@@ -452,6 +492,7 @@ type MatchZeroOrMoreMatcher<
     ? //? match one more time
       MatchZeroOrMoreMatcher<
         CurrentRestInputString,
+        SkipedString,
         Matchers,
         OutMostRestMatchers,
         ZeroOrMoreMatchers,
@@ -483,6 +524,7 @@ type MatchZeroOrMoreMatcher<
     ? EnumerateMatchers<
         InputString,
         [...Matchers, ...OutMostRestMatchers],
+        SkipedString,
         [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures,
@@ -501,6 +543,7 @@ type MatchZeroOrMoreMatcher<
             },
             ...MatchedResultsTuple
           ],
+          SkipedString,
           ZeroOrMoreMatchers,
           [...Matchers, ...OutMostRestMatchers],
           NamedCaptures,
@@ -527,6 +570,7 @@ type MatchZeroOrMoreMatcher<
     ? EnumerateMatchers<
         InputString,
         [...Matchers, ...OutMostRestMatchers],
+        SkipedString,
         [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures, // ? pass in zeroOrMore match named capture?
@@ -542,6 +586,7 @@ type MatchZeroOrMoreMatcher<
         >
       : MatchZeroOrMoreMatcher<
           InputString,
+          SkipedString,
           Matchers,
           OutMostRestMatchers,
           ZeroOrMoreMatchers,
@@ -556,6 +601,7 @@ type MatchZeroOrMoreMatcher<
     : EnumerateMatchers<
         InputString,
         ZeroOrMoreMatchers,
+        SkipedString,
         [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures,
@@ -567,6 +613,7 @@ type MatchZeroOrMoreMatcher<
       >
     ? MatchZeroOrMoreMatcher<
         CurrentRestInputString,
+        SkipedString,
         Matchers,
         OutMostRestMatchers,
         ZeroOrMoreMatchers,
@@ -594,6 +641,7 @@ type MatchZeroOrMoreMatcher<
 
 type MatchOptionalMatcher<
   InputString extends string,
+  SkipedString extends string,
   Matchers extends Matcher[],
   OptionalMatchers extends Matcher[],
   OutMostRestMatchers extends Matcher[],
@@ -611,6 +659,7 @@ type MatchOptionalMatcher<
 > = EnumerateMatchers<
   InputString,
   OptionalMatchers,
+  SkipedString,
   OutMostRestMatchers,
   [''],
   NamedCaptures,
@@ -668,6 +717,7 @@ type MatchOptionalMatcher<
       > // ? optional matched
     : MatchOptionalMatcher<
         CurrentRestInputString,
+        SkipedString,
         Matchers,
         OptionalMatchers,
         OutMostRestMatchers,
