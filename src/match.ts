@@ -126,7 +126,7 @@ export type EnumerateMatchers<
         RestInputString,
         Matchers,
         SkipedString,
-        [],
+        OutMostRestMatchers,
         [
           // ? matchedString and previous capture groups
           ...([CurrentMatcher['type'], CurrentMatched extends '' ? false : true] extends [
