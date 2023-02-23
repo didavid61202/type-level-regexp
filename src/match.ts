@@ -288,9 +288,9 @@ type Match<
       [''],
       NamedCaptures,
       true
-    > extends infer Result extends NullResult<any, any>
+    > extends NullResult<any, any>
     ? Positive extends true
-      ? Result
+      ? NullResult<''>
       : MatchedResult<[''], InputString, NamedCaptures> //! NamedCaptures can be `never`?
     : Positive extends true
     ? MatchedResult<[''], InputString, NamedCaptures> //! NamedCaptures can be `never`?
