@@ -117,7 +117,7 @@ export type Matcher =
       repeat?: [from: any[], to: string]
     }
   | {
-      type: 'zeroOrMore'
+      type: 'zeroOrMore' //! can optimize matching logic when combining with `any` matcher
       value: Matcher[]
       greedy: boolean
     }

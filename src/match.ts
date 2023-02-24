@@ -114,7 +114,6 @@ export type EnumerateMatchers<
       ResolvedNamedCaptures,
       StartOf,
       EndOf,
-      MatchEmpty,
       Count
     > extends infer Result
   ? Result extends MatchedResult<
@@ -174,7 +173,6 @@ type Match<
   NamedCaptures extends NamedCapturesTuple,
   StartOf extends boolean,
   EndOf extends boolean,
-  MatchEmpty extends boolean,
   Count extends any[] = [],
   PrefixType extends string = StartOf extends true ? '' : string,
   CurrentMatcher extends Matcher = Matchers[Count['length']],
@@ -210,22 +208,26 @@ type Match<
     }
   ? StepMatch<InputString, CharSetMap<CharSet>[Type], StartOf, Type>
   : CurrentMatcher extends {
-      type: 'optional'
-      value: infer OptionalMatchers extends Matcher[]
+      type: infer Type extends 'optional' | 'zeroOrMore'
+      value: infer OptionalOrMoreMatchers extends Matcher[]
       greedy: infer Greedy extends boolean
       repeat?: infer Repeat extends [from: any[], to: string]
     }
-  ? MatchOptionalMatcher<
+  ? MatchOptionalOrMoreMatcher<
       InputString,
       SkipedString,
       Matchers,
-      OptionalMatchers,
-      [...RestMatchers, ...OutMostRestMatchers],
+      OutMostRestMatchers,
+      OptionalOrMoreMatchers,
       Greedy,
-      [never, string] extends Repeat ? false : Repeat,
+      [never, string] extends Repeat
+        ? Type extends 'zeroOrMore'
+          ? [[], 'infinite']
+          : [[], '1']
+        : Repeat,
       NamedCaptures,
       StartOf,
-      MatchEmpty,
+      EndOf,
       Count
     >
   : CurrentMatcher extends {
@@ -249,7 +251,7 @@ type Match<
       InputString,
       SkipedString,
       OrMatchersArray,
-      OutMostRestMatchers,
+      [...RestMatchers, ...OutMostRestMatchers],
       NamedCaptures,
       StartOf
     >
@@ -268,23 +270,6 @@ type Match<
       [''],
       NamedCaptures,
       StartOf
-    >
-  : CurrentMatcher extends {
-      type: 'zeroOrMore'
-      greedy: infer Greedy extends boolean
-      value: infer ZeroOrMoreMatchers extends Matcher[]
-    }
-  ? MatchZeroOrMoreMatcher<
-      InputString,
-      SkipedString,
-      Matchers,
-      OutMostRestMatchers,
-      ZeroOrMoreMatchers,
-      Greedy,
-      NamedCaptures,
-      StartOf,
-      EndOf,
-      Count
     >
   : CurrentMatcher extends {
       type: 'lookahead'
@@ -410,28 +395,28 @@ type BacktrackMatch<
     namedCaputres: NamedCapturesTuple
   }[],
   SkipedString extends string,
-  ZeroOrMoreMatchers extends Matcher[],
+  CurrentNestedMatchers extends Matcher[],
   RestMatchers extends Matcher[],
   NamedCaptures extends NamedCapturesTuple,
   EndOf extends boolean,
-  ZeroOrMoreMatcherIndex extends any[] = [],
+  CurrentMatcherIndex extends any[] = [],
   Count extends any[] = ['']
 > = Count['length'] extends MatchedResultsTuple['length']
-  ? NullResult<MatchedResultsTuple[0]['matched']>
+  ? NullResult<''>
   : MatchedResultsTuple[0]['matched'] extends `${MatchedResultsTuple[Count['length']]['matched']}${infer LastMatchSeg}`
   ? EnumerateMatchers<
       LastMatchSeg,
       RestMatchers,
       SkipedString,
-      [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
+      [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
       [''],
       NamedCaptures,
-      false,
+      true,
       EndOf,
       false,
-      [...ZeroOrMoreMatcherIndex, '']
+      [...CurrentMatcherIndex, '']
     > extends MatchedResult<[infer Matched extends string, ...any[]], any, any>
-    ? LastMatchSeg extends `${infer Prefix}${Matched}${string}` // ? check if zeroOrMore is matching dynamic length ex: {1,3}
+    ? LastMatchSeg extends `${infer Prefix}${Matched}${string}` // ? check if zeroOrMore/optional is matching dynamic length ex: {1,3}
       ? Prefix extends ''
         ? MatchedResult<
             [
@@ -440,16 +425,16 @@ type BacktrackMatch<
             ],
             LastMatchSeg,
             ResolveNamedCaptureUnion<
-              [ZeroOrMoreMatchers],
+              [CurrentNestedMatchers],
               MatchedResultsTuple[Count['length']]['namedCaputres']
             >
           >
-        : // ? update capture groups if zeroOrMore is matching dynamic length
+        : // ? update capture groups if zeroOrMore/optional is matching dynamic length
         EnumerateMatchers<
             Prefix,
-            ZeroOrMoreMatchers,
+            CurrentNestedMatchers,
             SkipedString,
-            [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
+            [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
             [''],
             NamedCaptures,
             true
@@ -461,33 +446,34 @@ type BacktrackMatch<
         ? MatchedResult<
             [`${MatchedResultsTuple[Count['length']]['matched']}${Prefix}`, ...LastCaptures],
             LastMatchSeg extends `${Prefix}${infer Rest}` ? Rest : never,
-            ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], LastNamedCaptures>
+            ResolveNamedCaptureUnion<[CurrentNestedMatchers], LastNamedCaptures>
           >
         : never
       : never
     : BacktrackMatch<
         MatchedResultsTuple,
         SkipedString,
-        ZeroOrMoreMatchers,
+        CurrentNestedMatchers,
         RestMatchers,
         NamedCaptures,
         EndOf,
-        ZeroOrMoreMatcherIndex,
+        CurrentMatcherIndex,
         [...Count, '']
       >
   : never
 
-type MatchZeroOrMoreMatcher<
+type MatchOptionalOrMoreMatcher<
   InputString extends string,
   SkipedString extends string,
   Matchers extends Matcher[],
   OutMostRestMatchers extends Matcher[],
-  ZeroOrMoreMatchers extends Matcher[],
+  CurrentNestedMatchers extends Matcher[],
   Greedy extends boolean,
+  Repeat extends [from: any[], to: string],
   NamedCaptures extends NamedCapturesTuple,
   StartOf extends boolean,
   EndOf extends boolean,
-  ZeroOrMoreMatcherIndex extends any[] = [],
+  CurrentMatcherIndex extends any[] = [],
   MatchedResultsTuple extends {
     matched: string
     captures: (string | undefined)[]
@@ -495,38 +481,50 @@ type MatchZeroOrMoreMatcher<
   }[] = [
     {
       matched: ''
-      captures: CountNumOfCaptureGroupsAs<ZeroOrMoreMatchers>
-      namedCaputres: never
+      captures: CountNumOfCaptureGroupsAs<CurrentNestedMatchers>
+      namedCaputres: ResolveNamedCaptureUnion<[CurrentNestedMatchers], never>
     }
   ],
-  MatchNextMater extends boolean = Greedy extends true ? false : true
+  MatchNextMater extends boolean = Greedy extends true ? false : true,
+  MatchedCount extends any[] = [
+    ...(MatchedResultsTuple extends [any, ...infer OneLess] ? OneLess : []),
+    ...Repeat[0]
+  ],
+  MaxRepeatReached extends boolean = `${MatchedCount['length']}` extends Repeat[1] ? true : false
 > = Greedy extends true
   ? // ? greedy matching
-    EnumerateMatchers<
-      InputString,
-      ZeroOrMoreMatchers,
-      SkipedString,
-      [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
-      [''],
-      NamedCaptures,
-      StartOf
-    > extends MatchedResult<
-      [infer CurrentMatched extends string, ...infer CurrentMatchedRestArray extends any[]],
-      infer CurrentRestInputString,
-      infer CurrentNamedCaptures
-    >
+    [
+      MaxRepeatReached,
+      EnumerateMatchers<
+        InputString,
+        CurrentNestedMatchers,
+        SkipedString,
+        [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
+        [''],
+        NamedCaptures,
+        StartOf
+      >
+    ] extends [
+      false,
+      MatchedResult<
+        [infer CurrentMatched extends string, ...infer CurrentMatchedRestArray extends any[]],
+        infer CurrentRestInputString,
+        infer CurrentNamedCaptures
+      >
+    ]
     ? //? match one more time
-      MatchZeroOrMoreMatcher<
+      MatchOptionalOrMoreMatcher<
         CurrentRestInputString,
         SkipedString,
         Matchers,
         OutMostRestMatchers,
-        ZeroOrMoreMatchers,
+        CurrentNestedMatchers,
         Greedy,
+        Repeat,
         NamedCaptures,
         StartOf,
         EndOf,
-        ZeroOrMoreMatcherIndex,
+        CurrentMatcherIndex,
         [
           {
             matched: `${MatchedResultsTuple[0]['matched']}${CurrentMatched}`
@@ -536,28 +534,22 @@ type MatchZeroOrMoreMatcher<
           ...MatchedResultsTuple
         ]
       >
-    : MatchedResultsTuple extends [] // ? zero match
-    ? MatchedResult<
-        ['', ...CountNumOfCaptureGroupsAs<ZeroOrMoreMatchers>],
-        InputString,
-        ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], never>
-      >
     : TupleItemExtendsType<
         [...Matchers, ...OutMostRestMatchers],
-        [...ZeroOrMoreMatcherIndex, ''],
+        [...CurrentMatcherIndex, ''],
         Matcher
       > extends true
     ? EnumerateMatchers<
         InputString,
         [...Matchers, ...OutMostRestMatchers],
         SkipedString,
-        [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
+        [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures,
         true,
         EndOf,
         false,
-        [...ZeroOrMoreMatcherIndex, '']
+        [...CurrentMatcherIndex, '']
       > extends NullResult<any, any>
       ? // ? backtrak matches to match rest matchers
         BacktrackMatch<
@@ -570,65 +562,68 @@ type MatchZeroOrMoreMatcher<
             ...MatchedResultsTuple
           ],
           SkipedString,
-          ZeroOrMoreMatchers,
+          CurrentNestedMatchers,
           [...Matchers, ...OutMostRestMatchers],
           NamedCaptures,
           EndOf,
-          ZeroOrMoreMatcherIndex
+          CurrentMatcherIndex
         >
       : MatchedResult<
           [MatchedResultsTuple[0]['matched'], ...MatchedResultsTuple[0]['captures']],
           InputString,
-          ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], MatchedResultsTuple[0]['namedCaputres']>
+          ResolveNamedCaptureUnion<[CurrentNestedMatchers], MatchedResultsTuple[0]['namedCaputres']>
         >
     : MatchedResult<
         [MatchedResultsTuple[0]['matched'], ...MatchedResultsTuple[0]['captures']],
         InputString,
-        ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], MatchedResultsTuple[0]['namedCaputres']>
+        ResolveNamedCaptureUnion<[CurrentNestedMatchers], MatchedResultsTuple[0]['namedCaputres']>
       >
   : // ? lazy matching
   TupleItemExtendsType<
       [...Matchers, ...OutMostRestMatchers],
-      [...ZeroOrMoreMatcherIndex, ''],
+      [...CurrentMatcherIndex, ''],
       Matcher
     > extends true
-  ? MatchNextMater extends true
+  ? true extends MatchNextMater
     ? EnumerateMatchers<
         InputString,
         [...Matchers, ...OutMostRestMatchers],
         SkipedString,
-        [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
+        [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
-        NamedCaptures, // ? pass in zeroOrMore match named capture?
+        NamedCaptures, // ? pass in zeroOrMore/optional match named capture?
         true,
         EndOf,
         false,
-        [...ZeroOrMoreMatcherIndex, '']
+        [...CurrentMatcherIndex, '']
       > extends MatchedResult<any, any, any>
       ? MatchedResult<
           [MatchedResultsTuple[0]['matched'], ...MatchedResultsTuple[0]['captures']],
           InputString,
-          ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], MatchedResultsTuple[0]['namedCaputres']>
+          ResolveNamedCaptureUnion<[CurrentNestedMatchers], MatchedResultsTuple[0]['namedCaputres']>
         >
-      : MatchZeroOrMoreMatcher<
+      : MaxRepeatReached extends true
+      ? NullResult<''>
+      : MatchOptionalOrMoreMatcher<
           InputString,
           SkipedString,
           Matchers,
           OutMostRestMatchers,
-          ZeroOrMoreMatchers,
+          CurrentNestedMatchers,
           Greedy,
+          Repeat,
           NamedCaptures,
           StartOf,
           EndOf,
-          ZeroOrMoreMatcherIndex,
+          CurrentMatcherIndex,
           MatchedResultsTuple,
           false
         >
     : EnumerateMatchers<
         InputString,
-        ZeroOrMoreMatchers,
+        CurrentNestedMatchers,
         SkipedString,
-        [], // ! should we combined and pass donw rest of matchers and OutMostRestMatchers ??
+        [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures,
         StartOf
@@ -637,17 +632,18 @@ type MatchZeroOrMoreMatcher<
         infer CurrentRestInputString,
         infer CurrentNamedCaptures
       >
-    ? MatchZeroOrMoreMatcher<
+    ? MatchOptionalOrMoreMatcher<
         CurrentRestInputString,
         SkipedString,
         Matchers,
         OutMostRestMatchers,
-        ZeroOrMoreMatchers,
+        CurrentNestedMatchers,
         Greedy,
+        Repeat,
         NamedCaptures,
         StartOf,
         EndOf,
-        ZeroOrMoreMatcherIndex,
+        CurrentMatcherIndex,
         [
           {
             matched: `${MatchedResultsTuple[0]['matched']}${CurrentMatched}`
@@ -658,126 +654,9 @@ type MatchZeroOrMoreMatcher<
         ],
         true
       >
-    : NullResult<MatchedResultsTuple[0]['matched']>
+    : NullResult<''>
   : MatchedResult<
-      ['', ...CountNumOfCaptureGroupsAs<ZeroOrMoreMatchers>],
+      ['', ...CountNumOfCaptureGroupsAs<CurrentNestedMatchers>],
       InputString,
-      ResolveNamedCaptureUnion<[ZeroOrMoreMatchers], never>
+      ResolveNamedCaptureUnion<[CurrentNestedMatchers], never>
     >
-
-type MatchOptionalMatcher<
-  InputString extends string,
-  SkipedString extends string,
-  Matchers extends Matcher[],
-  OptionalMatchers extends Matcher[],
-  OutMostRestMatchers extends Matcher[],
-  Greedy extends boolean,
-  Repeat extends [from: any[], to: string] | false,
-  NamedCaptures extends NamedCapturesTuple,
-  StartOf extends boolean,
-  MatchEmpty extends boolean,
-  OptionalMatcherIndex extends any[] = [],
-  AccMatchedResult extends {
-    matched: string
-    captures: (string | undefined)[]
-    namedCaputres: NamedCapturesTuple
-  } = never
-> = EnumerateMatchers<
-  InputString,
-  OptionalMatchers,
-  SkipedString,
-  OutMostRestMatchers,
-  [''],
-  NamedCaptures,
-  StartOf
-> extends MatchedResult<
-  [infer CurrentMatched extends string, ...infer CurrentMatchedRestArray extends any[]],
-  infer CurrentRestInputString,
-  infer CurrentNamedCaptures
->
-  ? [Repeat, Repeat extends [from: any[], to: string] ? Repeat[1] : undefined] extends
-      | [false, undefined]
-      | [any, Repeat extends [from: any[], to: string] ? `${Repeat[0]['length']}` : undefined]
-    ? MatchedResult<
-        [false, false] extends [
-          (
-            | Greedy
-            | ([true, false] extends [
-                MatchEmpty,
-                InputString extends `${CurrentMatched}${string}` ? true : false
-              ]
-                ? false
-                : true)
-          ),
-          TupleItemExtendsType<
-            [...Matchers, ...OutMostRestMatchers],
-            [...OptionalMatcherIndex, ''],
-            Matcher
-          > // ? check if is last matcher
-        ] // ? check if not greedy or is not first char in Input
-          ? ['', ...CountNumOfCaptureGroupsAs<OptionalMatchers>]
-          : AccMatchedResult['matched'] extends never
-          ? [CurrentMatched, ...CurrentMatchedRestArray]
-          : [AccMatchedResult['matched'], ...AccMatchedResult['captures']], // ? repeating match result
-        AccMatchedResult['matched'] extends never ? CurrentRestInputString : InputString,
-        [false, false] extends [
-          (
-            | Greedy
-            | ([true, false] extends [
-                MatchEmpty,
-                InputString extends `${CurrentMatched}${string}` ? true : false
-              ]
-                ? false
-                : true)
-          ),
-          TupleItemExtendsType<
-            [...Matchers, ...OutMostRestMatchers],
-            [...OptionalMatcherIndex, ''],
-            Matcher // ? check if is last matcher
-          > // ? check if not greedy or is not first char in Input
-        ]
-          ? ResolveNamedCaptureUnion<[OptionalMatchers], NamedCaptures>
-          : AccMatchedResult['matched'] extends never
-          ? CurrentNamedCaptures
-          : AccMatchedResult['namedCaputres'] // ? repeating match result
-      > // ? optional matched
-    : MatchOptionalMatcher<
-        CurrentRestInputString,
-        SkipedString,
-        Matchers,
-        OptionalMatchers,
-        OutMostRestMatchers,
-        Greedy,
-        Repeat extends [from: any[], to: string] ? [[...Repeat[0], ''], Repeat[1]] : never,
-        NamedCaptures,
-        true,
-        false,
-        OptionalMatcherIndex,
-        {
-          matched: `${AccMatchedResult['matched'] extends never
-            ? ''
-            : AccMatchedResult['matched']}${CurrentMatched}`
-          captures: CurrentMatchedRestArray
-          namedCaputres: CurrentNamedCaptures
-        }
-      >
-  : [false, false] extends
-      | [
-          Greedy,
-          TupleItemExtendsType<
-            [...Matchers, ...OutMostRestMatchers],
-            [...OptionalMatcherIndex, ''],
-            Matcher
-          >
-        ]
-      | (AccMatchedResult['matched'] extends never ? [false, false] : [])
-  ? MatchedResult<
-      ['', ...CountNumOfCaptureGroupsAs<OptionalMatchers>],
-      InputString,
-      ResolveNamedCaptureUnion<[OptionalMatchers], NamedCaptures>
-    > // ? optional mismatched
-  : MatchedResult<
-      [AccMatchedResult['matched'], ...AccMatchedResult['captures']],
-      InputString,
-      AccMatchedResult['namedCaputres']
-    > // ? repeating optional mismatched

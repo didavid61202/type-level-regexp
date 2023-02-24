@@ -1,34 +1,79 @@
 import type { EnumerateMatchers, ExhaustiveMatch } from '../src/match'
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type testing = ExhaustiveMatch<
   //  ^?
-  'food2foobar$', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
+  'barsewfoo', //'babcdfoobarew', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
   [
-    //? testing lookbehind
+    { type: 'string'; value: 'bar' },
     {
-      type: 'lookbehind'
-      positive: false
+      type: 'lookahead'
+      positive: true
       value: [
-        // { type: 'startOf'; value: [{ type: 'string'; value: 'foo' }, { type: 'digit' }] }
+        {
+          type: 'repeat'
+          greedy: true
+          from: '1'
+          to: '5'
+          value: [
+            {
+              type: 'namedCapture'
+              name: 'g1'
+              value: [{ type: 'any' }]
+            }
+          ]
+        },
         {
           type: 'namedCapture'
-          name: 'g1'
+          name: 'g2'
           value: [{ type: 'string'; value: 'foo' }]
-        },
-        { type: 'digit' }
+        }
       ]
-    },
-    { type: 'string'; value: 'bar' }
+    }
+
+    // {
+    //   type: 'repeat'
+    //   greedy: true
+    //   from: '1'
+    //   to: '5'
+    //   value: [
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'g1'
+    //       value: [{ type: 'charSet'; value: 'a-z' }]
+    //     }
+    //   ]
+    // },
+    // { type: 'string'; value: 'foo' }
+
+    //? testing lookbehind
+    // {
+    //   type: 'lookbehind'
+    //   positive: false
+    //   value: [
+    //     // { type: 'startOf'; value: [{ type: 'string'; value: 'foo' }, { type: 'digit' }] }
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'g1'
+    //       value: [{ type: 'string'; value: 'foo' }]
+    //     },
+    //     { type: 'digit' }
+    //   ]
+    // },
+    // { type: 'string'; value: 'bar' }
 
     //? testing lookahead
-    // { //? password test case:'F53oobar$'
+    // {
+    //   //? password test case:'F53oobar$', 'f#2Oo$Bar'
     //   //? password regex check for 8 to 20 length with at leastone lowercase, one uppercase, one special char
     //   type: 'lookahead'
     //   positive: true
     //   value: [
     //     { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
-    //     { type: 'charSet'; value: '[a-z]' }
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'lower'
+    //       value: [{ type: 'charSet'; value: '[a-z]' }]
+    //     }
     //   ]
     // },
     // {
@@ -36,7 +81,11 @@ type testing = ExhaustiveMatch<
     //   positive: true
     //   value: [
     //     { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
-    //     { type: 'charSet'; value: '[A-Z]' }
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'upper'
+    //       value: [{ type: 'charSet'; value: '[A-Z]' }]
+    //     }
     //   ]
     // },
     // {
@@ -44,30 +93,57 @@ type testing = ExhaustiveMatch<
     //   positive: true
     //   value: [
     //     { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
-    //     { type: 'charSet'; value: '[!-+]' }
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'spec'
+    //       value: [{ type: 'charSet'; value: '[!-+]' }]
+    //     }
     //   ]
     // },
+    // {
+    //   type: 'namedCapture'
+    //   name: 'pass'
+    //   value: [
     // {
     //   type: 'repeat'
     //   greedy: true
     //   from: '8'
     //   to: '20'
-    //   value: [{ type: 'charSet'; value: '[!-+0-9A-Za-z]' }]
-    // }
-
-    // {  //? test case: 'wer8WEF3ss23', 'wer8WEF3ss23foo'
-    //   type: 'lookahead'
-    //   positive: false
     //   value: [
     //     {
-    //       type: 'endOf'
-    //       value: [
-    //         { type: 'zeroOrMore'; greedy: false; value: [{ type: 'any' }] },
-    //         { type: 'string'; value: 'foo' }
-    //       ]
+    //       type: 'namedCapture'
+    //       name: 'last'
+    //       value: [{ type: 'charSet'; value: '[!-+0-9A-Za-z]' }]
     //     }
     //   ]
-    // },
+    // }
+    //   ]
+    // }
+
+    // { type: 'string'; value: 'bar' },
+    // {
+    //   //? test case: 'wer8WEF3ss23', 'wer8WEF3ss23foo'
+    //   type: 'lookahead'
+    //   positive: true
+    //   value: [
+    //     // { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
+    //     {
+    //       type: 'repeat'
+    //       greedy: true
+    //       from: '1'
+    //       to: '5'
+    //       value: [{ type: 'any' }]
+    //     },
+    //     { type: 'string'; value: 'foo' }
+    //     // {
+    //     //   type: 'endOf'
+    //     //   value: [
+    //     //     { type: 'zeroOrMore'; greedy: false; value: [{ type: 'any' }] },
+    //     //     { type: 'string'; value: 'foo' }
+    //     //   ]
+    //     // }
+    //   ]
+    // }
     // { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] }
 
     // { //? test case: 'wer8WEF3ss23'
@@ -158,37 +234,34 @@ type testing = ExhaustiveMatch<
     //   //? test case string: 'tt22a7?'
     //   type: 'optional'
     //   greedy: true
-    //   repeat: [['', ''], '4']
-    //   value: [
-    // {
-    //   type: 'namedCapture'
-    //   name: 'g1'
     //   value: [
     //     {
-    //       type: 'or'
+    //       type: 'namedCapture'
+    //       name: 'g1'
     //       value: [
-    //         [
-    //           {
-    //             type: 'namedCapture'
-    //             name: 'g2'
-    //             value: [{ type: 'string'; value: '2' }]
-    //           }
-    //         ],
-    //         [{ type: 'string'; value: '3' }]
+    //         {
+    //           type: 'or'
+    //           value: [
+    //             [
+    //               {
+    //                 type: 'namedCapture'
+    //                 name: 'g2'
+    //                 value: [{ type: 'string'; value: '2' }]
+    //               }
+    //             ],
+    //             [{ type: 'string'; value: '3' }]
+    //           ]
+    //         }
     //       ]
     //     }
     //   ]
-    // }
-    //   ]
-    // }
-    // { type: 'string'; value: '3' }
-    // { type: 'string'; value: 'a' },
+    // },
+    // { type: 'string'; value: 'a' }
 
     // { type: 'string'; value: '!' },
     // {
     //   type: 'optional'
     //   greedy: false
-    //   repeat: false
     //   value: [
     //     { type: 'capture'; value: [{ type: 'charSet'; value: 'a-z' }] },
     //     { type: 'namedCapture'; name: 'g1'; value: [{ type: 'digit' }] }
@@ -404,7 +477,8 @@ type testing = ExhaustiveMatch<
     // { type: 'nonChar' },
     // { type: 'char' },
     // { type: 'string'; value: 'z' }
-  ]
+  ],
+  ''
 >
 
 //
