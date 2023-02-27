@@ -28,12 +28,12 @@ declare global {
       this: InputString,
       regexp: RE,
       flag?: Flag
-    ): [InputString] | null
+    ): MatchRegexp<InputString, RE>
 
     match<InputString extends string, RE extends string, Flag extends 'g'>(
       this: InputString,
       regexp: RE,
       flag: Flag
-    ): InputString[] | null
+    ): MatchRegexp<InputString, RE> //TODO: implement global match
   }
 }
