@@ -166,7 +166,7 @@ export type ParseRegexp<
         ParseOrAsTupleOnly
       >
     : ParseRegexp<Rest, ParsedMatchers, ParseOrAsTupleOnly, `${AccString}${FirstChar}`>
-  : [...ParsedMatchers, { type: 'string'; value: AccString }]
+  : [...ParsedMatchers, ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }])]
 
 type ResolveQuantifierForSingleToken<
   CurrentTokenResolvedMatchers extends Matcher[],
