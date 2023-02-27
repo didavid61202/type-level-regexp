@@ -117,7 +117,7 @@ export type Matcher =
       repeat?: [from: any[], to: string]
     }
   | {
-      type: 'zeroOrMore' //! can optimize matching logic when combining with `any` matcher
+      type: 'zeroOrMore' | 'oneOrMore' //! can optimize matching logic when combining with `any` matcher
       value: Matcher[]
       greedy: boolean
     }
@@ -394,6 +394,23 @@ export type NameCaptureValue<
   Key extends string,
   Value = Extract<NameCpatureUnion, [Key, any]>[1]
 > = Value
+
+export type ExpandOneOrMore<Matchers extends Matcher[], Greedy extends boolean> = [
+  {
+    type: 'captureLast'
+    value: Matchers
+  },
+  {
+    type: 'captureLast'
+    value: [
+      {
+        type: 'zeroOrMore'
+        greedy: Greedy
+        value: Matchers
+      }
+    ]
+  }
+]
 
 export type ExpandRepeat<
   Matchers extends Matcher[],

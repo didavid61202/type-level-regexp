@@ -231,6 +231,20 @@ type Match<
       Count
     >
   : CurrentMatcher extends {
+      type: 'oneOrMore'
+      value: infer OneOrMoreMatchers extends Matcher[]
+      greedy: infer Greedy extends boolean
+    }
+  ? EnumerateMatchers<
+      InputString,
+      ExpandOneOrMore<OneOrMoreMatchers, Greedy>,
+      SkipedString,
+      [...RestMatchers, ...OutMostRestMatchers],
+      [''],
+      NamedCaptures,
+      StartOf
+    >
+  : CurrentMatcher extends {
       type: 'capture' | 'namedCapture' | 'captureLast'
       value: infer GroupMatchers extends Matcher[]
     }
