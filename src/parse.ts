@@ -107,20 +107,35 @@ export type ParseRegexp<
         `${infer SetFirstChar}${infer RestAfterSetFirstChar}`,
         infer Rest extends string
       ]
-      ? ParseRegexp<
-          Rest,
-          [
-            ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
-            ...ParsedMatchers,
-            {
-              type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
-              value: SetFirstChar extends '^'
-                ? RestAfterSetFirstChar
-                : `${SetFirstChar}${RestAfterSetFirstChar}`
-            }
-          ],
-          ParseOrAsTupleOnly
-        >
+      ? Rest extends `${'?' | '*' | '+' | '{'}${string}`
+        ? ResolveQuantifierForSingleToken<
+            [
+              {
+                type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
+                value: SetFirstChar extends '^'
+                  ? RestAfterSetFirstChar
+                  : `${SetFirstChar}${RestAfterSetFirstChar}`
+              }
+            ],
+            Rest,
+            ParsedMatchers,
+            AccString,
+            ParseOrAsTupleOnly
+          >
+        : ParseRegexp<
+            Rest,
+            [
+              ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+              ...ParsedMatchers,
+              {
+                type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
+                value: SetFirstChar extends '^'
+                  ? RestAfterSetFirstChar
+                  : `${SetFirstChar}${RestAfterSetFirstChar}`
+              }
+            ],
+            ParseOrAsTupleOnly
+          >
       : never
     : FirstChar extends '('
     ? ParsePair<FirstChar, Rest> extends [
