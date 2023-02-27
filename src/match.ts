@@ -4,6 +4,7 @@ import type {
   ConcatParialMatched,
   ConcatToFirstElement,
   CountNumOfCaptureGroupsAs,
+  ExpandOneOrMore,
   ExpandRepeat,
   IndexOf,
   LastCharOfOr,
@@ -51,8 +52,10 @@ export type ExhaustiveMatch<
 > extends infer Result
   ? Result extends MatchedResult<any, any, any>
     ? Result & { SkipedString: SkipedString }
-    : Result extends NullResult<infer PartialMatched extends string>
-    ? PartialMatched extends ''
+    : Result extends NullResult<infer PartialMatched extends string, any, infer Abort>
+    ? Abort extends true
+      ? Result
+      : PartialMatched extends ''
       ? InputString extends `${infer FirstChar}${infer Rest}`
         ? Rest extends ''
           ? Result & { SkipedString: SkipedString }
@@ -160,7 +163,8 @@ export type EnumerateMatchers<
       >
     : NullResult<
         ConcatParialMatched<MatchResultArray[0], Result>,
-        Result extends NullResult<any, any> ? Result['debugObj'] : unknown
+        Result extends NullResult<any, any> ? Result['debugObj'] : unknown,
+        StartOf
       >
   : never
 

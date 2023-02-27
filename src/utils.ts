@@ -176,11 +176,13 @@ export interface MatchedResult<
 
 export interface NullResult<
   PartialMatched extends string | undefined = undefined,
-  DebugObj = unknown
+  DebugObj = unknown,
+  Abort extends boolean = false
 > {
   matched: false
   results: null
   partialMatched: PartialMatched
+  abort: Abort
   debugObj: DebugObj
 }
 
