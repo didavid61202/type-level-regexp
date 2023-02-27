@@ -20,20 +20,6 @@ import type {
   TupleItemExtendsType,
 } from './utils'
 
-export type MatchRegexp<InputString extends string, Matchers extends Matcher[]> = ExhaustiveMatch<
-  InputString,
-  Matchers
-> extends infer Result
-  ? Result extends MatchedResult<infer MatchArray extends any[], any, infer NamedCaptures>
-    ? MatchArray & {
-        index: number // ? infer?
-        input: InputString
-        length: MatchArray['length']
-        groups: { [K in NamedCaptures[0]]: Extract<NamedCaptures, [K, any]>[1] }
-      }
-    : Result
-  : never
-
 export type ExhaustiveMatch<
   InputString extends string,
   Matchers extends Matcher[],
