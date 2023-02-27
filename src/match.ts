@@ -149,7 +149,7 @@ export type EnumerateMatchers<
       >
     : NullResult<
         ConcatParialMatched<MatchResultArray[0], Result>,
-        Result extends NullResult<any, any> ? Result['debugObj'] : unknown,
+        Result extends NullResult<any, any, any> ? Result['debugObj'] : unknown,
         StartOf
       >
   : never
@@ -333,7 +333,7 @@ type MatchOrMatchers<
   Count extends any[] = [],
   BestMatchedWithPrefix extends [
     prefix: string | undefined,
-    matchedResult: MatchedResult<any, any, any> | NullResult<any, any>
+    matchedResult: MatchedResult<any, any, any> | NullResult<any, any, any>
   ] = [undefined, NullResult<''>],
   CurrentOrMatchers extends Matcher[] = OrMatchersArray[Count['length']]
 > = Count['length'] extends OrMatchersArray['length']
@@ -554,7 +554,7 @@ type MatchOptionalOrMoreMatcher<
         EndOf,
         false,
         [...CurrentMatcherIndex, '']
-      > extends NullResult<any, any>
+      > extends NullResult<any, any, any>
       ? // ? backtrak matches to match rest matchers
         BacktrackMatch<
           [
