@@ -1,21 +1,35 @@
 import { ExhaustiveMatch } from './match'
 import { ParseRegexp } from './parse'
-import { ArrayToFixReadonlyTupple, MatchedResult, NullResult } from './utils'
+import { PermutationResult, ResolvePermutation } from './permutation'
+import { ArrayToFixReadonlyTupple, MatchedResult, Matcher, NullResult } from './utils'
 
 export type FlagUnion = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
 
-export type MatchRegexp<InputString extends string, Regexp extends string> = ExhaustiveMatch<
-  InputString,
-  ParseRegexp<Regexp>
-> extends infer Result
-  ? Result extends MatchedResult<infer MatchArray extends any[], any, infer NamedCaptures>
-    ? RegexpMatchResult<{
-        matched: MatchArray
-        namedCaptures: NamedCaptures
-        input: InputString
-      }>
-    : Result extends NullResult<any, any, any>
-    ? Result['results']
+export type MatchRegexp<
+  InputString extends string,
+  Regexp extends string
+> = ParseRegexp<Regexp> extends infer ParsedRegexpAST extends Matcher[]
+  ? string extends InputString
+    ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
+        infer MatchArray,
+        infer NamedCaptures
+      >
+      ? RegexpMatchResult<{
+          matched: MatchArray
+          namedCaptures: NamedCaptures
+          input: InputString
+        }>
+      : never
+    : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
+    ? Result extends MatchedResult<infer MatchArray extends any[], any, infer NamedCaptures>
+      ? RegexpMatchResult<{
+          matched: MatchArray
+          namedCaptures: NamedCaptures
+          input: InputString
+        }>
+      : Result extends NullResult<any, any, any>
+      ? Result['results']
+      : never
     : never
   : never
 

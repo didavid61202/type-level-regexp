@@ -150,7 +150,7 @@ export type ConcatParialMatched<
 
 export type ConcatToFirstElement<
   Arr extends (string | undefined)[],
-  AppendingString extends string
+  AppendingString extends string | undefined
 > = Arr extends [infer First extends string, ...infer Rest]
   ? [`${First}${AppendingString}`, ...Rest]
   : []
