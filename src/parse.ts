@@ -47,7 +47,25 @@ export type ParseRegexp<
         }
       ]
     : FirstChar extends '\\'
-    ? Rest extends `${infer EscapedChar}${infer RestAfterEscapedChar}`
+    ? Rest extends `k<${infer GroupName}>${infer RestAfterBackreference}`
+      ? RestAfterBackreference extends `${'?' | '*' | '+' | '{'}${string}`
+        ? ResolveQuantifierForSingleToken<
+            [{ type: 'backreference'; value: GroupName }],
+            RestAfterBackreference,
+            ParsedMatchers,
+            AccString,
+            ParseOrAsTupleOnly
+          >
+        : ParseRegexp<
+            RestAfterBackreference,
+            [
+              ...ParsedMatchers,
+              ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+              { type: 'backreference'; value: GroupName }
+            ],
+            ParseOrAsTupleOnly
+          >
+      : Rest extends `${infer EscapedChar}${infer RestAfterEscapedChar}`
       ? EscapedChar extends keyof ShorthandMap
         ? RestAfterEscapedChar extends `${'?' | '*' | '+' | '{'}${string}`
           ? ResolveQuantifierForSingleToken<
