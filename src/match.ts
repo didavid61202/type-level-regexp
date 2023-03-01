@@ -53,14 +53,14 @@ export type ExhaustiveMatch<
   EndOf
 > extends infer Result
   ? Result extends MatchedResult<any, any, any>
-    ? Result & { SkipedString: SkipedString }
+    ? Result
     : Result extends NullResult<infer PartialMatched extends string, any, infer Abort>
     ? Abort extends true
       ? Result
       : PartialMatched extends ''
       ? InputString extends `${infer FirstChar}${infer Rest}`
         ? Rest extends ''
-          ? Result & { SkipedString: SkipedString }
+          ? Result
           : ExhaustiveMatch<Rest, Matchers, `${SkipedString}${FirstChar}`>
         : Result
       : InputString extends `${infer Prefix}${PartialMatched}${infer NextSection}`
@@ -166,7 +166,7 @@ export type EnumerateMatchers<
     : NullResult<
         ConcatParialMatched<MatchResultArray[0], Result>,
         Result extends NullResult<any, any, any> ? Result['debugObj'] : unknown,
-        StartOf
+        [StartOf, EndOf] extends [true, true] ? true : false //? abort ExhaustiveMatch for lookbehind
       >
   : never
 
