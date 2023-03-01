@@ -34,6 +34,8 @@ export type MatchRegexp<
       : never
     : Flag extends 'g'
     ? GlobalMatch<InputString, ParsedRegexpAST>
+    : Flag extends 'g'
+    ? GlobalMatch<InputString, ParsedRegexpAST>
     : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
     ? Result extends MatchedResult<
         infer MatchArray extends any[],
