@@ -6,6 +6,7 @@ import {
   LengthOfString,
   MatchedResult,
   Matcher,
+  NamedCapturesTuple,
   NullResult,
 } from './utils'
 
@@ -19,7 +20,7 @@ export type MatchRegexp<
   ? string extends InputString
     ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
         infer MatchArray,
-        infer NamedCaptures
+        infer NamedCaptures extends NamedCapturesTuple
       >
       ? Flag extends 'g'
         ? MatchArray[0][]
@@ -36,7 +37,7 @@ export type MatchRegexp<
     ? Result extends MatchedResult<
         infer MatchArray extends any[],
         infer RestInputString extends string,
-        infer NamedCaptures
+        infer NamedCaptures extends NamedCapturesTuple
       >
       ? RegexpMatchResult<{
           matched: MatchArray
@@ -61,8 +62,8 @@ type RegexpMatchResult<
   Readonly<{
     index: Result['restInput'] extends undefined
       ? number
-      : Result['input'] extends `${infer Prefix}${Result['matched'][0]}${Result['restInput']}`
-      ? LengthOfString<Prefix>
+      : Result['input'] extends `${infer Precedes}${Result['matched'][0]}${Result['restInput']}`
+      ? LengthOfString<Precedes>
       : never
     input: Result['input']
     length: Result['matched']['length']
@@ -73,16 +74,27 @@ type RegexpMatchResult<
 
 declare global {
   interface String {
-    match<InputString extends string, RE extends string, Flag extends Exclude<FlagUnion, 'g'>>(
+    match<
+      InputString extends string,
+      RE extends `/${string}/`,
+      Flag extends Exclude<FlagUnion, 'g'>,
+      ExtractedRE extends string = RE extends `/${infer R}/` ? R : never
+    >(
       this: InputString,
       regexp: RE,
       flag?: Flag
-    ): MatchRegexp<InputString, RE, Flag>
+    ): MatchRegexp<InputString, ExtractedRE, Flag>
 
-    match<InputString extends string, RE extends string, Flag extends 'g'>(
+    match<
+      InputString extends string,
+      RE extends `/${string}/`,
+      Flag extends 'g',
+      ExtractedRE extends string = RE extends `/${infer R}/` ? R : never
+    >(
       this: InputString,
       regexp: RE,
       flag: Flag
-    ): MatchRegexp<InputString, RE, Flag>
+    ): MatchRegexp<InputString, ExtractedRE, Flag>
+
   }
 }
