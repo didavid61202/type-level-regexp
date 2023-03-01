@@ -1,7 +1,7 @@
 import { ConcatToFirstElement, Matcher, NameCaptureValue, NamedCapturesTuple } from './utils'
 
 export type PermutationResult<
-  MatchArray extends string[],
+  MatchArray extends (string | undefined)[],
   NamedCaptures extends NamedCapturesTuple
 > = {
   results: MatchArray
@@ -10,7 +10,7 @@ export type PermutationResult<
 
 export type ResolvePermutation<
   Matchers extends Matcher[],
-  MatchResultArray extends string[] = [''],
+  MatchResultArray extends (string | undefined)[] = [''],
   NamedCaptures extends NamedCapturesTuple = never,
   CurrentIndex extends any[] = [],
   CurrentMatcher extends Matcher = Matchers[CurrentIndex['length']]
