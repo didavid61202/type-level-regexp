@@ -20,6 +20,22 @@ import type {
   TupleItemExtendsType,
 } from './utils'
 
+export type GlobalMatch<
+  InputString extends string,
+  Matchers extends Matcher[],
+  MatchResultArray extends string[] = []
+> = ExhaustiveMatch<InputString, Matchers> extends infer Result
+  ? Result extends MatchedResult<
+      infer MatchArray extends any[],
+      infer RestInputString extends string,
+      any
+    >
+    ? GlobalMatch<RestInputString, Matchers, [...MatchResultArray, MatchArray[0]]>
+    : MatchResultArray extends []
+    ? null
+    : MatchResultArray
+  : never
+
 export type ExhaustiveMatch<
   InputString extends string,
   Matchers extends Matcher[],
