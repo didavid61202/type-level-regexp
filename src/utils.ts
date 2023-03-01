@@ -32,7 +32,7 @@ export interface CharSetMap<
   boundary: string
 }
 
-type ResolveCharSet<
+export type ResolveCharSet<
   CharSet extends string,
   Result extends string = ''
 > = CharSet extends `${infer Before}-${infer To}${infer Rest}`
@@ -182,6 +182,17 @@ export type LastCharOfOr<
     ? First
     : LastCharOfOr<Rest>
   : Or
+
+export type StrintToUnion<
+  S extends string,
+  Original extends string = S,
+  Union extends string = never,
+  Count extends any[] = []
+> = Count['length'] extends 8
+  ? `[ any char in [${Original}] ]`
+  : S extends `${infer Char}${infer Rest}`
+  ? StrintToUnion<Rest, Original, Union | Char, [...Count, '']>
+  : Union
 
 export type SliceMatchers<
   Matchers extends Matcher[],

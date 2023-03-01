@@ -1,4 +1,13 @@
-import { ConcatToFirstElement, Matcher, NameCaptureValue, NamedCapturesTuple } from './utils'
+import {
+  ConcatToFirstElement,
+  IndexOf,
+  Matcher,
+  NameCaptureValue,
+  NamedCapturesTuple,
+  ResolveCharSet,
+  ResolveOrCaptureTuple,
+  StrintToUnion,
+} from './utils'
 
 export type PermutationResult<
   MatchArray extends (string | undefined)[],
@@ -6,6 +15,20 @@ export type PermutationResult<
 > = {
   results: MatchArray
   namedCapture: NamedCaptures
+}
+
+interface LiteralCharSetMap<
+  CharSet extends string = string,
+  ResolvedCharSet extends string = ResolveCharSet<CharSet>
+> {
+  any: '[any char]'
+  char: '[any word char]'
+  nonChar: '[any non-char]'
+  digit: `${number}` | '[any digit]'
+  nonDigit: '[any non-digit]'
+  charSet: StrintToUnion<ResolvedCharSet>
+  notCharSet: `[any char NOT in [${CharSet}]]`
+  boundary: '[boundary]'
 }
 
 export type ResolvePermutation<
@@ -27,6 +50,65 @@ export type ResolvePermutation<
       NamedCaptures,
       [...CurrentIndex, '']
     >
+  : CurrentMatcher extends {
+      type: infer Type extends keyof LiteralCharSetMap
+      value?: infer CharSet extends string
+    }
+  ? ResolvePermutation<
+      Matchers,
+      ConcatToFirstElement<MatchResultArray, LiteralCharSetMap<CharSet>[Type]>,
+      NamedCaptures,
+      [...CurrentIndex, '']
+    >
+  : CurrentMatcher extends {
+      type: infer Type extends 'startOf' | 'endOf'
+      value: infer StartEndMatchers extends Matcher[]
+    }
+  ? ResolvePermutation<StartEndMatchers> extends PermutationResult<
+      infer StartEndResult extends string[],
+      infer NextedNamedCapture
+    >
+    ? ResolvePermutation<
+        Matchers,
+        ConcatToFirstElement<
+          MatchResultArray,
+          | Exclude<StartEndResult[0], `End with${string}`>
+          | (Extract<
+              `${Type extends 'startOf' ? 'Start' : 'End'} with [${StartEndResult[0]}]`,
+              `Start with [End with${string}`
+            > extends never
+              ? `${Type extends 'startOf' ? 'Start' : 'End'} with [${StartEndResult[0]}]`
+              : Extract<
+                  `${Type extends 'startOf' ? 'Start' : 'End'} with [${StartEndResult[0]}]`,
+                  `Start with [End with${string}`
+                >)
+        >,
+        NamedCaptures | NextedNamedCapture,
+        [...CurrentIndex, '']
+      >
+    : never
+  : CurrentMatcher extends {
+      type: infer Type extends 'lookahead' | 'lookbehind'
+      positive: infer Positive extends boolean
+      value: infer LookaroundMatchers extends Matcher[]
+    }
+  ? ResolvePermutation<LookaroundMatchers> extends PermutationResult<
+      infer LookaroundResult extends string[],
+      infer NextedNamedCapture
+    >
+    ? ResolvePermutation<
+        Matchers,
+        ConcatToFirstElement<
+          MatchResultArray,
+          | `[${Type extends 'lookahead' ? 'following' : 'previous'} pattern${Positive extends true
+              ? ''
+              : ' not'} contain: [${LookaroundResult[0]}] ]`
+          | ''
+        >,
+        NamedCaptures | NextedNamedCapture,
+        [...CurrentIndex, '']
+      >
+    : never
   : CurrentMatcher extends {
       type: infer Type extends 'capture' | 'namedCapture'
       value: infer GroupMatchers extends Matcher[]
@@ -58,12 +140,12 @@ export type ResolvePermutation<
       value: infer OptionalMatchers extends Matcher[]
     }
   ? ResolvePermutation<OptionalMatchers> extends PermutationResult<
-      infer OptionalResult extends string[],
+      [infer ResultString extends string, ...infer Captures extends any[]],
       infer NextedNamedCapture
     >
     ? ResolvePermutation<
         Matchers,
-        ConcatToFirstElement<MatchResultArray, OptionalResult[0] | ''>,
+        [...ConcatToFirstElement<MatchResultArray, ResultString | ''>, ...Captures],
         NamedCaptures | NextedNamedCapture,
         [...CurrentIndex, '']
       >
@@ -73,40 +155,56 @@ export type ResolvePermutation<
       value: infer OrMatchersArray extends Matcher[][]
     }
   ? OrMatchersArray[number] extends infer OrMatchers extends Matcher[]
-    ? ResolvePermutation<OrMatchers> extends PermutationResult<
-        infer OrResult extends string[],
-        infer NextedNamedCapture
-      >
-      ? ResolvePermutation<
-          Matchers,
-          ConcatToFirstElement<MatchResultArray, OrResult[0]>,
-          NamedCaptures | NextedNamedCapture,
-          [...CurrentIndex, '']
+    ? OrMatchers extends OrMatchers
+      ? ResolvePermutation<OrMatchers> extends PermutationResult<
+          [infer ResultString extends string, ...infer Captures extends any[]],
+          infer NextedNamedCapture
         >
+        ? ResolvePermutation<
+            Matchers,
+            [
+              ...ConcatToFirstElement<MatchResultArray, ResultString>,
+              ...ResolveOrCaptureTuple<
+                OrMatchersArray,
+                Captures,
+                IndexOf<OrMatchersArray, OrMatchers>
+              >
+            ],
+            NamedCaptures | NextedNamedCapture,
+            [...CurrentIndex, '']
+          >
+        : never
       : never
     : never
   : CurrentMatcher extends {
       type: infer Type extends 'zeroOrMore' | 'oneOrMore'
-      value: infer Matchers extends Matcher[]
+      value: infer AnyOrMoreMatchers extends Matcher[]
     }
-  ? ResolvePermutation<Matchers> extends PermutationResult<
-      infer ZeroOrMoreResult extends string[],
+  ? ResolvePermutation<AnyOrMoreMatchers> extends PermutationResult<
+      [infer ResultString extends string, ...infer Captures extends any[]],
       infer NextedNamedCapture
     >
-    ? ResolvePermutation<
-        Matchers,
-        | ConcatToFirstElement<
-            MatchResultArray,
-            | (Type extends 'zeroOrMore' ? '' : never)
-            | ZeroOrMoreResult[0]
-            | `${ZeroOrMoreResult[0]}${string}${ZeroOrMoreResult[0]}`
-          >
-        | ConcatToFirstElement<
-            MatchResultArray,
-            `[${Type extends 'zeroOrMore' ? 'zero' : 'one'} or more of \`${ZeroOrMoreResult[0]}\`]`
-          >,
-        NamedCaptures | NextedNamedCapture,
-        [...CurrentIndex, '']
-      >
+    ? ResultString extends ResultString
+      ? ResolvePermutation<
+          Matchers,
+          [
+            ...(
+              | ConcatToFirstElement<
+                  MatchResultArray,
+                  | (Type extends 'zeroOrMore' ? '' : never)
+                  | ResultString
+                  | `${ResultString}${string}${ResultString}`
+                >
+              | ConcatToFirstElement<
+                  MatchResultArray,
+                  `[ ${Type extends 'zeroOrMore' ? 'zero' : 'one'} or more of \`${ResultString}\` ]`
+                >
+            ),
+            ...Captures
+          ],
+          NamedCaptures | NextedNamedCapture,
+          [...CurrentIndex, '']
+        >
+      : never
     : never
   : PermutationResult<MatchResultArray, NamedCaptures>
