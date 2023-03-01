@@ -1,6 +1,7 @@
 import { ExhaustiveMatch, GlobalMatch } from './match'
 import { ParseRegexp } from './parse'
 import { PermutationResult, ResolvePermutation } from './permutation'
+import { GlobalReplace, ResolveRepalceValue } from './replace'
 import {
   ArrayToFixReadonlyTupple,
   LengthOfString,
@@ -72,6 +73,35 @@ type RegexpMatchResult<
       : { [K in Result['namedCaptures'][0]]: Extract<Result['namedCaptures'], [K, any]>[1] }
   }>
 
+export type ReplaceWithRegexp<
+  InputString extends string,
+  Regexp extends string,
+  ReplaceValue extends string,
+  Flag extends 'g' | '' = ''
+> = ParseRegexp<Regexp> extends infer ParsedRegexpAST extends Matcher[]
+  ? Flag extends 'g'
+    ? GlobalReplace<InputString, ParsedRegexpAST, ReplaceValue>
+    : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
+    ? Result extends MatchedResult<
+        infer MatchArray extends any[],
+        infer RestInputString extends string,
+        infer NamedCaptures extends NamedCapturesTuple
+      >
+      ? InputString extends `${infer Precedes}${MatchArray[0]}${RestInputString}`
+        ? `${Precedes}${ResolveRepalceValue<
+            ReplaceValue,
+            Precedes,
+            MatchArray,
+            RestInputString,
+            NamedCaptures
+          >}${RestInputString}`
+        : never
+      : Result extends NullResult<any, any, any>
+      ? Result['results']
+      : never
+    : never
+  : never
+
 declare global {
   interface String {
     match<
@@ -96,5 +126,16 @@ declare global {
       flag: Flag
     ): MatchRegexp<InputString, ExtractedRE, Flag>
 
+    replace<
+      InputString extends string,
+      RE extends `/${string}/${'g' | ''}`,
+      ReplaceValue extends string,
+      ExtractedRE extends string = RE extends `/${infer R}/${'g' | ''}` ? R : never,
+      Flag extends 'g' | '' = RE extends `/${string}/${infer F extends 'g' | ''}` ? F : never
+    >(
+      this: InputString,
+      regexp: RE,
+      replaceValue: ReplaceValue | ((substring: ReplaceValue, ...args: any[]) => string)
+    ): ReplaceWithRegexp<InputString, ExtractedRE, ReplaceValue, Flag>
   }
 }
