@@ -25,7 +25,7 @@ export type MatchRegexp<
           namedCaptures: NamedCaptures
           input: InputString
           restInput: undefined
-        }>
+        }> | null
       : never
     : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
     ? Result extends MatchedResult<
