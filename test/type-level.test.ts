@@ -1,67 +1,11 @@
 import type { EnumerateMatchers, ExhaustiveMatch } from '../src/match'
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type testing = ExhaustiveMatch<
   //  ^?
-  'barsewfoo', //'babcdfoobarew', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
+  'barseA$2lfoo', //'babcdfoobarew', //'a572894973826367301751bdr3', // 'tt22a7?', //'123456789D', //'"12"34"', //'"1"23"526"', //'!a7u8z9?dw', //'!a7?', //'a3xa7za2x;lk', //'xsa3cbb', //'1b9x72!3z42',
   [
-    { type: 'string'; value: 'bar' },
-    {
-      type: 'lookahead'
-      positive: true
-      value: [
-        {
-          type: 'repeat'
-          greedy: true
-          from: '1'
-          to: '5'
-          value: [
-            {
-              type: 'namedCapture'
-              name: 'g1'
-              value: [{ type: 'any' }]
-            }
-          ]
-        },
-        {
-          type: 'namedCapture'
-          name: 'g2'
-          value: [{ type: 'string'; value: 'foo' }]
-        }
-      ]
-    }
-
-    // {
-    //   type: 'repeat'
-    //   greedy: true
-    //   from: '1'
-    //   to: '5'
-    //   value: [
-    //     {
-    //       type: 'namedCapture'
-    //       name: 'g1'
-    //       value: [{ type: 'charSet'; value: 'a-z' }]
-    //     }
-    //   ]
-    // },
-    // { type: 'string'; value: 'foo' }
-
-    //? testing lookbehind
-    // {
-    //   type: 'lookbehind'
-    //   positive: false
-    //   value: [
-    //     // { type: 'startOf'; value: [{ type: 'string'; value: 'foo' }, { type: 'digit' }] }
-    //     {
-    //       type: 'namedCapture'
-    //       name: 'g1'
-    //       value: [{ type: 'string'; value: 'foo' }]
-    //     },
-    //     { type: 'digit' }
-    //   ]
-    // },
-    // { type: 'string'; value: 'bar' }
-
-    //? testing lookahead
+    // //? testing lookahead
     // {
     //   //? password test case:'F53oobar$', 'f#2Oo$Bar'
     //   //? password regex check for 8 to 20 length with at leastone lowercase, one uppercase, one special char
@@ -95,6 +39,18 @@ type testing = ExhaustiveMatch<
     //     { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
     //     {
     //       type: 'namedCapture'
+    //       name: 'upper'
+    //       value: [{ type: 'digit' }]
+    //     }
+    //   ]
+    // },
+    // {
+    //   type: 'lookahead'
+    //   positive: true
+    //   value: [
+    //     { type: 'zeroOrMore'; greedy: true; value: [{ type: 'any' }] },
+    //     {
+    //       type: 'namedCapture'
     //       name: 'spec'
     //       value: [{ type: 'charSet'; value: '[!-+]' }]
     //     }
@@ -104,21 +60,81 @@ type testing = ExhaustiveMatch<
     //   type: 'namedCapture'
     //   name: 'pass'
     //   value: [
-    // {
-    //   type: 'repeat'
-    //   greedy: true
-    //   from: '8'
-    //   to: '20'
-    //   value: [
     //     {
-    //       type: 'namedCapture'
-    //       name: 'last'
-    //       value: [{ type: 'charSet'; value: '[!-+0-9A-Za-z]' }]
+    //       type: 'repeat'
+    //       greedy: true
+    //       from: '8'
+    //       to: '20'
+    //       value: [
+    //         {
+    //           type: 'namedCapture'
+    //           name: 'last'
+    //           value: [{ type: 'charSet'; value: '[!-+0-9A-Za-z]' }]
+    //         }
+    //       ]
     //     }
     //   ]
     // }
+
+    // {
+    //   type: 'repeat'
+    //   greedy: true
+    //   from: '1'
+    //   to: '3'
+    //   value: [
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'g1'
+    //       value: [{ type: 'any' }]
+    //     }
     //   ]
     // }
+
+    //! should test for `repeat` with lookahead and lookbehind, for stirng' barseloefoo'
+    { type: 'string'; value: 'bar' }
+    // {
+    //   type: 'lookahead'
+    //   positive: true
+    //   value: [
+    //     {
+    //       type: 'zeroOrMore'
+    //       greedy: true
+    //       value: [{ type: 'any' }]
+    //     },
+    //     { type: 'string'; value: 'foo' }
+    //   ]
+    // }
+
+    // {
+    //   type: 'repeat'
+    //   greedy: true
+    //   from: '1'
+    //   to: '5'
+    //   value: [
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'g1'
+    //       value: [{ type: 'charSet'; value: 'a-z' }]
+    //     }
+    //   ]
+    // },
+    // { type: 'string'; value: 'foo' }
+
+    //? testing lookbehind
+    // {
+    //   type: 'lookbehind'
+    //   positive: false
+    //   value: [
+    //     // { type: 'startOf'; value: [{ type: 'string'; value: 'foo' }, { type: 'digit' }] }
+    //     {
+    //       type: 'namedCapture'
+    //       name: 'g1'
+    //       value: [{ type: 'string'; value: 'foo' }]
+    //     },
+    //     { type: 'digit' }
+    //   ]
+    // },
+    // { type: 'string'; value: 'bar' }
 
     // { type: 'string'; value: 'bar' },
     // {
@@ -415,7 +431,7 @@ type testing = ExhaustiveMatch<
     //   ]
     // }
 
-    // ? testing captrue / namedCaptrues
+    // ? testing capture / namedCapture
     // { type: 'string'; value: 'a' },
     // {
     //   type: 'optional'

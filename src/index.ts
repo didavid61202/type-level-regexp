@@ -1,7 +1,13 @@
 import { ExhaustiveMatch } from './match'
 import { ParseRegexp } from './parse'
 import { PermutationResult, ResolvePermutation } from './permutation'
-import { ArrayToFixReadonlyTupple, MatchedResult, Matcher, NullResult } from './utils'
+import {
+  ArrayToFixReadonlyTupple,
+  LengthOfString,
+  MatchedResult,
+  Matcher,
+  NullResult,
+} from './utils'
 
 export type FlagUnion = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
 
@@ -15,17 +21,23 @@ export type MatchRegexp<
         infer NamedCaptures
       >
       ? RegexpMatchResult<{
-          matched: MatchArray
+          matched: MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
           namedCaptures: NamedCaptures
           input: InputString
+          restInput: undefined
         }>
       : never
     : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
-    ? Result extends MatchedResult<infer MatchArray extends any[], any, infer NamedCaptures>
+    ? Result extends MatchedResult<
+        infer MatchArray extends any[],
+        infer RestInputString extends string,
+        infer NamedCaptures
+      >
       ? RegexpMatchResult<{
           matched: MatchArray
           namedCaptures: NamedCaptures
           input: InputString
+          restInput: RestInputString
         }>
       : Result extends NullResult<any, any, any>
       ? Result['results']
@@ -34,10 +46,19 @@ export type MatchRegexp<
   : never
 
 type RegexpMatchResult<
-  Result extends { matched: any[]; namedCaptures: [string, any]; input: string }
+  Result extends {
+    matched: any[]
+    namedCaptures: [string, any]
+    input: string
+    restInput: string | undefined
+  }
 > = ArrayToFixReadonlyTupple<Result['matched']> &
   Readonly<{
-    index: number // ? infer?
+    index: Result['restInput'] extends undefined
+      ? number
+      : Result['input'] extends `${infer Prefix}${Result['matched'][0]}${Result['restInput']}`
+      ? LengthOfString<Prefix>
+      : never
     input: Result['input']
     length: Result['matched']['length']
     groups: (() => Result['namedCaptures']) extends () => never

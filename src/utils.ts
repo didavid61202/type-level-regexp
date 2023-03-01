@@ -138,6 +138,16 @@ export interface NullResult<
   debugObj: DebugObj
 }
 
+export type LengthOfString<
+  String extends string,
+  Count extends any[] = [],
+  Length extends number = Count['length']
+> = Length extends 990
+  ? number
+  : String extends `${string}${infer R}`
+  ? LengthOfString<R, [...Count, '']>
+  : Length
+
 export type ConcatParialMatched<
   PartialMatched extends string | undefined,
   NestedNullResult,
