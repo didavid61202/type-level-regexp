@@ -1,4 +1,4 @@
-import { ExhaustiveMatch, GlobalMatch } from './match'
+import { ExhaustiveMatch, GlobalMatch, GlobalMatch } from './match'
 import { ParseRegexp } from './parse'
 import { PermutationResult, ResolvePermutation } from './permutation'
 import { GlobalReplace, ResolveRepalceValue } from './replace'
@@ -16,6 +16,7 @@ export type FlagUnion = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
 export type MatchRegexp<
   InputString extends string,
   Regexp extends string,
+  Flag extends FlagUnion | undefined = undefined,
   Flag extends FlagUnion | undefined = undefined
 > = ParseRegexp<Regexp> extends infer ParsedRegexpAST extends Matcher[]
   ? string extends InputString
@@ -32,6 +33,8 @@ export type MatchRegexp<
             restInput: undefined
           }> | null
       : never
+    : Flag extends 'g'
+    ? GlobalMatch<InputString, ParsedRegexpAST>
     : Flag extends 'g'
     ? GlobalMatch<InputString, ParsedRegexpAST>
     : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
