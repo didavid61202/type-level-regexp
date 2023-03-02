@@ -44,6 +44,7 @@ type ResolveRangeSet<
 export type Matcher =
   | {
       type: 'string' | 'charSet' | 'notCharSet' | 'backreference'
+      //TODO: add case insensitive boolean for flag `i`
       value: string
     }
   | {

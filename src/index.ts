@@ -1,6 +1,7 @@
 import { ExhaustiveMatch, GlobalMatch } from './match'
 import { ParseRegexp } from './parse'
 import { PermutationResult, ResolvePermutation } from './permutation'
+import { ExtractRegExpParts, Flag, RegExpParts, TypedRegExp } from './regexp'
 import { GlobalReplace, ResolveRepalceValue } from './replace'
 import {
   LengthOfString,
@@ -11,19 +12,17 @@ import {
   ToReadonlyTuple,
 } from './utils'
 
-export type FlagUnion = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
-
 export type MatchRegExp<
   InputString extends string,
   Regexp extends string,
-  Flag extends FlagUnion | undefined = undefined,
+  Flags extends Flag | undefined = undefined,
   ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
 > = string extends InputString
   ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
       infer MatchArray,
       infer NamedCaptures extends NamedCapturesTuple
     >
-    ? Flag extends 'g'
+    ? 'g' extends Flags
       ? MatchArray[0][]
       : RegExpMatchResult<{
           matched: MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
@@ -32,7 +31,7 @@ export type MatchRegExp<
           restInput: undefined
         }> | null
     : never
-  : Flag extends 'g'
+  : 'g' extends Flags
   ? GlobalMatch<InputString, ParsedRegexpAST>
   : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
   ? Result extends MatchedResult<
@@ -76,9 +75,9 @@ export type ReplaceWithRegExp<
   InputString extends string,
   Regexp extends string,
   ReplaceValue extends string,
-  Flag extends 'g' | '' = '',
+  Flags extends Flag = never,
   ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
-> = Flag extends 'g'
+> = 'g' extends Flags
   ? GlobalReplace<InputString, ParsedRegexpAST, ReplaceValue>
   : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
   ? Result extends MatchedResult<
@@ -102,36 +101,31 @@ declare global {
   interface String {
     match<
       InputString extends string,
-      RE extends `/${string}/`,
-      Flag extends Exclude<FlagUnion, 'g'>,
-      ExtractedRE extends string = RE extends `/${infer R}/` ? R : never
+      RE extends TypedRegExp,
+      REParts extends RegExpParts = ExtractRegExpParts<RE>
     >(
       this: InputString,
-      regexp: RE,
-      flag?: Flag
-    ): MatchRegExp<InputString, ExtractedRE, Flag>
+      regexp: RE
+    ): MatchRegExp<InputString, REParts['pattern'], REParts['flags']>
 
     match<
       InputString extends string,
-      RE extends `/${string}/`,
-      Flag extends 'g',
-      ExtractedRE extends string = RE extends `/${infer R}/` ? R : never
+      RE extends TypedRegExp,
+      REParts extends RegExpParts = ExtractRegExpParts<RE>
     >(
       this: InputString,
-      regexp: RE,
-      flag: Flag
-    ): MatchRegExp<InputString, ExtractedRE, Flag>
+      regexp: RE
+    ): MatchRegExp<InputString, REParts['pattern'], REParts['flags']>
 
     replace<
       InputString extends string,
-      RE extends `/${string}/${'g' | ''}`,
+      RE extends TypedRegExp,
       ReplaceValue extends string,
-      ExtractedRE extends string = RE extends `/${infer R}/${'g' | ''}` ? R : never,
-      Flag extends 'g' | '' = RE extends `/${string}/${infer F extends 'g' | ''}` ? F : never
+      REParts extends RegExpParts = ExtractRegExpParts<RE>
     >(
       this: InputString,
       regexp: RE,
       replaceValue: ReplaceValue | ((substring: ReplaceValue, ...args: any[]) => string)
-    ): ReplaceWithRegExp<InputString, ExtractedRE, ReplaceValue, Flag>
+    ): ReplaceWithRegExp<InputString, REParts['pattern'], ReplaceValue, REParts['flags']>
   }
 }
