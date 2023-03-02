@@ -13,7 +13,7 @@ import {
 
 export type FlagUnion = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
 
-export type MatchRegexp<
+export type MatchRegExp<
   InputString extends string,
   Regexp extends string,
   Flag extends FlagUnion | undefined = undefined,
@@ -25,7 +25,7 @@ export type MatchRegexp<
     >
     ? Flag extends 'g'
       ? MatchArray[0][]
-      : RegexpMatchResult<{
+      : RegExpMatchResult<{
           matched: MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
           namedCaptures: NamedCaptures
           input: InputString
@@ -40,7 +40,7 @@ export type MatchRegexp<
       infer RestInputString extends string,
       infer NamedCaptures extends NamedCapturesTuple
     >
-    ? RegexpMatchResult<{
+    ? RegExpMatchResult<{
         matched: MatchArray
         namedCaptures: NamedCaptures
         input: InputString
@@ -51,7 +51,7 @@ export type MatchRegexp<
     : never
   : never
 
-type RegexpMatchResult<
+type RegExpMatchResult<
   Result extends {
     matched: any[]
     namedCaptures: [string, any]
@@ -72,7 +72,7 @@ type RegexpMatchResult<
       : { [K in Result['namedCaptures'][0]]: Extract<Result['namedCaptures'], [K, any]>[1] }
   }>
 
-export type ReplaceWithRegexp<
+export type ReplaceWithRegExp<
   InputString extends string,
   Regexp extends string,
   ReplaceValue extends string,
@@ -109,7 +109,7 @@ declare global {
       this: InputString,
       regexp: RE,
       flag?: Flag
-    ): MatchRegexp<InputString, ExtractedRE, Flag>
+    ): MatchRegExp<InputString, ExtractedRE, Flag>
 
     match<
       InputString extends string,
@@ -120,7 +120,7 @@ declare global {
       this: InputString,
       regexp: RE,
       flag: Flag
-    ): MatchRegexp<InputString, ExtractedRE, Flag>
+    ): MatchRegExp<InputString, ExtractedRE, Flag>
 
     replace<
       InputString extends string,
@@ -132,6 +132,6 @@ declare global {
       this: InputString,
       regexp: RE,
       replaceValue: ReplaceValue | ((substring: ReplaceValue, ...args: any[]) => string)
-    ): ReplaceWithRegexp<InputString, ExtractedRE, ReplaceValue, Flag>
+    ): ReplaceWithRegExp<InputString, ExtractedRE, ReplaceValue, Flag>
   }
 }

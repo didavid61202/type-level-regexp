@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { MatchRegexp } from '../src'
+import { MatchRegExp } from '../src'
 import { ParseRegexp } from '../src/parse'
 
 const matchedResult =
