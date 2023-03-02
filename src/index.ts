@@ -3,12 +3,12 @@ import { ParseRegexp } from './parse'
 import { PermutationResult, ResolvePermutation } from './permutation'
 import { GlobalReplace, ResolveRepalceValue } from './replace'
 import {
-  ArrayToFixReadonlyTupple,
   LengthOfString,
   MatchedResult,
   Matcher,
   NamedCapturesTuple,
   NullResult,
+  ToReadonlyTuple,
 } from './utils'
 
 export type FlagUnion = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
@@ -61,15 +61,15 @@ type RegexpMatchResult<
     input: string
     restInput: string | undefined
   }
-> = ArrayToFixReadonlyTupple<Result['matched']> &
+> = ToReadonlyTuple<Result['matched']> &
   Readonly<{
+    [K: number]: undefined
     index: Result['restInput'] extends undefined
       ? number
       : Result['input'] extends `${infer Precedes}${Result['matched'][0]}${Result['restInput']}`
       ? LengthOfString<Precedes>
       : never
     input: Result['input']
-    length: Result['matched']['length']
     groups: (() => Result['namedCaptures']) extends () => never
       ? undefined
       : { [K in Result['namedCaptures'][0]]: Extract<Result['namedCaptures'], [K, any]>[1] }

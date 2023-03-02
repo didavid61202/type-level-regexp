@@ -1,14 +1,5 @@
-export type ArrayToFixReadonlyTupple<
-  DynArray extends any[],
-  OutOfIndexAs = undefined,
-  IndexKeys extends keyof DynArray = Extract<keyof DynArray, `${number}`>,
-  RestKeys extends keyof DynArray = Exclude<keyof DynArray, `${number}` | number>
-> = {
-  readonly [K in IndexKeys | number | RestKeys]: K extends IndexKeys
-    ? DynArray[K]
-    : K extends RestKeys
-    ? DynArray[K]
-    : OutOfIndexAs
+export type ToReadonlyTuple<Tuple> = {
+  readonly [P in keyof Tuple]: Tuple[P]
 }
 
 type UppercaseLetterN = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

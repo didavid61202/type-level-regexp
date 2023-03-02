@@ -21,9 +21,9 @@ replaceURL.length
 //          ^?
 replaceURL.groups
 //          ^?
-replaceURL[3]
+replaceURL[4]
 //         ^?
-const outOfIndex = replaceURL['6']
+replaceURL['1']
+//         ^?
+const outOfIndex = replaceURL['8']
 //          ^?
-
-//
