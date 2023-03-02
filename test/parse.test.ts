@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { MatchRegexp } from '../src'
 import { ParseRegexp } from '../src/parse'
 
 const matchedResult =
-  `The Best docs is at https://nuxt.com/docs, with clear and concise explaining, and excellent examples`.match(
-    '(?<protocal>https?):\\/\\/(?:www.)?(?<second-domain>[a-zA-Z0-9@:%._+~#=]{2,20})\\.(?<top-domain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
+  //     ^?
+  `Checkout https://nuxt.com/docs, it's the best docs with clear and concise explaining, and excellent examples`.match(
+    '/(?<protocal>https?):\\/\\/(?:www.)?(?<second-domain>[a-zA-Z0-9@:%._+~#=]{2,20})\\.(?<top-domain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*/'
   )
 
-const test = matchedResult.index
+const matchedArray = matchedResult.groups
 //     ^?
+const index = matchedResult.index
+//      ^?
 
 // const passswword = `aBd${'dsd'}3!fEhe2`.match(
 //   //    ^?
