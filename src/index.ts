@@ -15,7 +15,7 @@ import {
 export type MatchRegExp<
   InputString extends string,
   Regexp extends string,
-  Flags extends Flag | undefined = undefined,
+  Flags extends Flag,
   ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
 > = string extends InputString
   ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
@@ -32,8 +32,8 @@ export type MatchRegExp<
         }> | null
     : never
   : 'g' extends Flags
-  ? GlobalMatch<InputString, ParsedRegexpAST>
-  : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
+  ? GlobalMatch<InputString, ParsedRegexpAST, Flags>
+  : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
   ? Result extends MatchedResult<
       infer MatchArray extends any[],
       infer RestInputString extends string,
@@ -75,11 +75,11 @@ export type ReplaceWithRegExp<
   InputString extends string,
   Regexp extends string,
   ReplaceValue extends string,
-  Flags extends Flag = never,
+  Flags extends Flag,
   ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
 > = 'g' extends Flags
-  ? GlobalReplace<InputString, ParsedRegexpAST, ReplaceValue>
-  : ExhaustiveMatch<InputString, ParsedRegexpAST> extends infer Result
+  ? GlobalReplace<InputString, ParsedRegexpAST, ReplaceValue, Flags>
+  : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
   ? Result extends MatchedResult<
       infer MatchArray extends any[],
       infer RestInputString extends string,

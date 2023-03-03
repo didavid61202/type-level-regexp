@@ -1,4 +1,5 @@
 import { ExhaustiveMatch } from './match'
+import { Flag } from './regexp'
 import { NamedCapturesTuple, Matcher, MatchedResult } from './utils'
 
 export type ResolveRepalceValue<
@@ -55,9 +56,10 @@ export type GlobalReplace<
   InputString extends string,
   Matchers extends Matcher[],
   ReplaceValue extends string,
+  Flags extends Flag,
   AccPrecedes extends string = '',
   ResultString extends string = ''
-> = ExhaustiveMatch<InputString, Matchers> extends infer Result
+> = ExhaustiveMatch<InputString, Matchers, Flags> extends infer Result
   ? Result extends MatchedResult<
       infer MatchArray extends any[],
       infer RestInputString extends string,
@@ -68,6 +70,7 @@ export type GlobalReplace<
           RestInputString,
           Matchers,
           ReplaceValue,
+          Flags,
           Precedes,
           `${ResultString}${Precedes}${ResolveRepalceValue<
             ReplaceValue,

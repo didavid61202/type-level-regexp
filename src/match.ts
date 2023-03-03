@@ -1,3 +1,4 @@
+import { Flag } from './regexp'
 import type {
   CharSetMap,
   CollectCaptureNames,
@@ -23,14 +24,15 @@ import type {
 export type GlobalMatch<
   InputString extends string,
   Matchers extends Matcher[],
+  Flags extends Flag,
   MatchResultArray extends string[] = []
-> = ExhaustiveMatch<InputString, Matchers> extends infer Result
+> = ExhaustiveMatch<InputString, Matchers, Flags> extends infer Result
   ? Result extends MatchedResult<
       infer MatchArray extends any[],
       infer RestInputString extends string,
       any
     >
-    ? GlobalMatch<RestInputString, Matchers, [...MatchResultArray, MatchArray[0]]>
+    ? GlobalMatch<RestInputString, Matchers, Flags, [...MatchResultArray, MatchArray[0]]>
     : MatchResultArray extends []
     ? null
     : MatchResultArray
@@ -39,12 +41,14 @@ export type GlobalMatch<
 export type ExhaustiveMatch<
   InputString extends string,
   Matchers extends Matcher[],
+  Flags extends Flag,
   SkipedString extends string = '',
   StartOf extends boolean = false,
   EndOf extends boolean = false
 > = EnumerateMatchers<
   InputString,
   Matchers,
+  Flags,
   SkipedString,
   [],
   [''],
@@ -61,10 +65,10 @@ export type ExhaustiveMatch<
       ? InputString extends `${infer FirstChar}${infer Rest}`
         ? Rest extends ''
           ? Result
-          : ExhaustiveMatch<Rest, Matchers, `${SkipedString}${FirstChar}`>
+          : ExhaustiveMatch<Rest, Matchers, Flags, `${SkipedString}${FirstChar}`>
         : Result
       : InputString extends `${infer Prefix}${PartialMatched}${infer NextSection}`
-      ? ExhaustiveMatch<NextSection, Matchers, `${SkipedString}${Prefix}${PartialMatched}`>
+      ? ExhaustiveMatch<NextSection, Matchers, Flags, `${SkipedString}${Prefix}${PartialMatched}`>
       : never
     : never
   : never
@@ -72,6 +76,7 @@ export type ExhaustiveMatch<
 export type EnumerateMatchers<
   InputString extends string,
   Matchers extends Matcher[],
+  Flags extends Flag,
   SkipedString extends string,
   OutMostRestMatchers extends Matcher[] = [],
   MatchResultArray extends (string | undefined)[] = [''],
@@ -100,6 +105,7 @@ export type EnumerateMatchers<
   ? EnumerateMatchers<
       InputString,
       StartOrEndMatchers,
+      Flags,
       SkipedString,
       OutMostRestMatchers,
       MatchResultArray,
@@ -112,6 +118,7 @@ export type EnumerateMatchers<
       CurrentMatcher['type'] extends 'boundary'
         ? `${LastCharOfOr<MatchResultArray[0], ' '>}${InputString}`
         : InputString,
+      Flags,
       NonNullable<MatchResultArray[0]>,
       SkipedString,
       Matchers,
@@ -129,6 +136,7 @@ export type EnumerateMatchers<
     ? EnumerateMatchers<
         RestInputString,
         Matchers,
+        Flags,
         SkipedString,
         OutMostRestMatchers,
         [
@@ -172,6 +180,7 @@ export type EnumerateMatchers<
 
 type Match<
   InputString extends string,
+  Flags extends Flag,
   SkipedString extends string,
   PrevMatchedString extends string,
   Matchers extends Matcher[],
@@ -221,6 +230,7 @@ type Match<
     }
   ? MatchOptionalOrMoreMatcher<
       InputString,
+      Flags,
       SkipedString,
       Matchers,
       OutMostRestMatchers,
@@ -244,6 +254,7 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       ExpandOneOrMore<OneOrMoreMatchers, Greedy>,
+      Flags,
       SkipedString,
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
@@ -257,6 +268,7 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       GroupMatchers,
+      Flags,
       SkipedString,
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
@@ -269,6 +281,7 @@ type Match<
     }
   ? MatchOrMatchers<
       InputString,
+      Flags,
       SkipedString,
       OrMatchersArray,
       [...RestMatchers, ...OutMostRestMatchers],
@@ -285,6 +298,7 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       ExpandRepeat<RepeatMatchers, From, To, Greedy>,
+      Flags,
       SkipedString,
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
@@ -299,6 +313,7 @@ type Match<
   ? EnumerateMatchers<
       InputString,
       LookaheadMatchers,
+      Flags,
       SkipedString,
       [],
       [''],
@@ -323,6 +338,7 @@ type Match<
   ? ExhaustiveMatch<
       `${SkipedString}${PrevMatchedString}`,
       LookbehindMatchers,
+      Flags,
       SkipedString,
       false,
       true
@@ -341,6 +357,7 @@ type Match<
 
 type MatchOrMatchers<
   InputString extends string,
+  Flags extends Flag,
   SkipedString extends string,
   OrMatchersArray extends Matcher[][],
   OutMostRestMatchers extends Matcher[],
@@ -357,6 +374,7 @@ type MatchOrMatchers<
   : EnumerateMatchers<
       InputString,
       CurrentOrMatchers,
+      Flags,
       SkipedString,
       OutMostRestMatchers,
       [''],
@@ -369,6 +387,7 @@ type MatchOrMatchers<
     >
   ? MatchOrMatchers<
       InputString,
+      Flags,
       SkipedString,
       OrMatchersArray,
       OutMostRestMatchers,
@@ -399,6 +418,7 @@ type MatchOrMatchers<
     >
   : MatchOrMatchers<
       InputString,
+      Flags,
       SkipedString,
       OrMatchersArray,
       OutMostRestMatchers,
@@ -414,6 +434,7 @@ type BacktrackMatch<
     captures: (string | undefined)[]
     namedCaputres: NamedCapturesTuple
   }[],
+  Flags extends Flag,
   SkipedString extends string,
   CurrentNestedMatchers extends Matcher[],
   RestMatchers extends Matcher[],
@@ -427,6 +448,7 @@ type BacktrackMatch<
   ? EnumerateMatchers<
       LastMatchSeg,
       RestMatchers,
+      Flags,
       SkipedString,
       [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
       [''],
@@ -453,6 +475,7 @@ type BacktrackMatch<
         EnumerateMatchers<
             Prefix,
             CurrentNestedMatchers,
+            Flags,
             SkipedString,
             [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
             [''],
@@ -472,6 +495,7 @@ type BacktrackMatch<
       : never
     : BacktrackMatch<
         MatchedResultsTuple,
+        Flags,
         SkipedString,
         CurrentNestedMatchers,
         RestMatchers,
@@ -484,6 +508,7 @@ type BacktrackMatch<
 
 type MatchOptionalOrMoreMatcher<
   InputString extends string,
+  Flags extends Flag,
   SkipedString extends string,
   Matchers extends Matcher[],
   OutMostRestMatchers extends Matcher[],
@@ -518,6 +543,7 @@ type MatchOptionalOrMoreMatcher<
       EnumerateMatchers<
         InputString,
         CurrentNestedMatchers,
+        Flags,
         SkipedString,
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
@@ -535,6 +561,7 @@ type MatchOptionalOrMoreMatcher<
     ? //? match one more time
       MatchOptionalOrMoreMatcher<
         CurrentRestInputString,
+        Flags,
         SkipedString,
         Matchers,
         OutMostRestMatchers,
@@ -562,6 +589,7 @@ type MatchOptionalOrMoreMatcher<
     ? EnumerateMatchers<
         InputString,
         [...Matchers, ...OutMostRestMatchers],
+        Flags,
         SkipedString,
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
@@ -581,6 +609,7 @@ type MatchOptionalOrMoreMatcher<
             },
             ...MatchedResultsTuple
           ],
+          Flags,
           SkipedString,
           CurrentNestedMatchers,
           [...Matchers, ...OutMostRestMatchers],
@@ -608,6 +637,7 @@ type MatchOptionalOrMoreMatcher<
     ? EnumerateMatchers<
         InputString,
         [...Matchers, ...OutMostRestMatchers],
+        Flags,
         SkipedString,
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
@@ -626,6 +656,7 @@ type MatchOptionalOrMoreMatcher<
       ? NullResult<''>
       : MatchOptionalOrMoreMatcher<
           InputString,
+          Flags,
           SkipedString,
           Matchers,
           OutMostRestMatchers,
@@ -642,6 +673,7 @@ type MatchOptionalOrMoreMatcher<
     : EnumerateMatchers<
         InputString,
         CurrentNestedMatchers,
+        Flags,
         SkipedString,
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
@@ -654,6 +686,7 @@ type MatchOptionalOrMoreMatcher<
       >
     ? MatchOptionalOrMoreMatcher<
         CurrentRestInputString,
+        Flags,
         SkipedString,
         Matchers,
         OutMostRestMatchers,
