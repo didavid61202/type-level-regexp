@@ -25,11 +25,7 @@ export type ParseRegexp<
         >
       : ParseRegexp<
           Rest,
-          [
-            ...ParsedMatchers,
-            ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
-            { type: 'any' }
-          ],
+          [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>, { type: 'any' }],
           ParseOrAsTupleOnly
         >
     : FirstChar extends '^'
@@ -40,10 +36,7 @@ export type ParseRegexp<
     ? [
         {
           type: 'endOf'
-          value: [
-            ...ParsedMatchers,
-            ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }])
-          ]
+          value: [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>]
         }
       ]
     : FirstChar extends '\\'
@@ -60,7 +53,7 @@ export type ParseRegexp<
             RestAfterBackreference,
             [
               ...ParsedMatchers,
-              ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+              ...ResolvesAccStringMatcher<AccString>,
               { type: 'backreference'; value: GroupName }
             ],
             ParseOrAsTupleOnly
@@ -79,7 +72,7 @@ export type ParseRegexp<
               RestAfterEscapedChar,
               [
                 ...ParsedMatchers,
-                ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+                ...ResolvesAccStringMatcher<AccString>,
                 { type: ShorthandMap[EscapedChar] }
               ],
               ParseOrAsTupleOnly
@@ -95,10 +88,7 @@ export type ParseRegexp<
     ? ParseOrAsTupleOnly extends true
       ? ParseRegexp<Rest, [], true> extends infer RestOrMatchersTuple
         ? [
-            [
-              ...ParsedMatchers,
-              ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }])
-            ],
+            [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>],
             ...(RestOrMatchersTuple extends Matcher[][]
               ? RestOrMatchersTuple
               : [RestOrMatchersTuple])
@@ -109,10 +99,7 @@ export type ParseRegexp<
           {
             type: 'or'
             value: [
-              [
-                ...ParsedMatchers,
-                ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }])
-              ],
+              [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>],
               ...(RestOrMatchersTuple extends Matcher[][]
                 ? RestOrMatchersTuple
                 : [RestOrMatchersTuple])
@@ -143,8 +130,8 @@ export type ParseRegexp<
         : ParseRegexp<
             Rest,
             [
-              ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
               ...ParsedMatchers,
+              ...ResolvesAccStringMatcher<AccString>,
               {
                 type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
                 value: SetFirstChar extends '^'
@@ -178,7 +165,7 @@ export type ParseRegexp<
             Rest,
             [
               ...ParsedMatchers,
-              ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+              ...ResolvesAccStringMatcher<AccString>,
               ...ResolveQuantifierTypeMatcher<
                 Quantifier,
                 Greedy,
@@ -199,7 +186,11 @@ export type ParseRegexp<
         ParseOrAsTupleOnly
       >
     : ParseRegexp<Rest, ParsedMatchers, ParseOrAsTupleOnly, `${AccString}${FirstChar}`>
-  : [...ParsedMatchers, ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }])]
+  : [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>]
+
+type ResolvesAccStringMatcher<AccString> = AccString extends ''
+  ? []
+  : [{ type: 'string'; value: AccString }]
 
 type ResolveQuantifierForSingleToken<
   CurrentTokenResolvedMatchers extends Matcher[],
@@ -214,7 +205,7 @@ type ResolveQuantifierForSingleToken<
         : RestAfterQuantifier,
       [
         ...ParsedMatchers,
-        ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+        ...ResolvesAccStringMatcher<AccString>,
         ...ResolveQuantifierTypeMatcher<
           QuantifierMap[Quantifier],
           RestAfterQuantifier extends `?${string}` ? false : true,
@@ -233,7 +224,7 @@ type ResolveQuantifierForSingleToken<
         RestAfterRepeat extends `?${infer RestAfterGreedy}` ? RestAfterGreedy : RestAfterRepeat,
         [
           ...ParsedMatchers,
-          ...(AccString extends '' ? [] : [{ type: 'string'; value: AccString }]),
+          ...ResolvesAccStringMatcher<AccString>,
           ...ResolveQuantifierTypeMatcher<
             'repeat',
             RestAfterRepeat extends `?${string}` ? false : true,
