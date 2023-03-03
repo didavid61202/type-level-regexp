@@ -1,7 +1,13 @@
 import { ExhaustiveMatch, GlobalMatch } from './match'
 import { ParseRegexp } from './parse'
 import { PermutationResult, PrependAndUnionToAll, ResolvePermutation } from './permutation'
-import { ExtractRegExpParts, Flag, RegExpParts, TypedRegExp } from './regexp'
+import {
+  ExtractRegExpParts,
+  Flag,
+  RegExpIterableIterator,
+  RegExpParts,
+  TypedRegExp,
+} from './regexp'
 import { GlobalReplace, ResolveRepalceValue } from './replace'
 import {
   LengthOfString,
@@ -52,7 +58,7 @@ export type MatchRegExp<
     : never
   : never
 
-type RegExpMatchResult<
+export type RegExpMatchResult<
   Result extends {
     matched: any[]
     namedCaptures: [string, any]
@@ -72,6 +78,53 @@ type RegExpMatchResult<
       ? undefined
       : { [K in Result['namedCaptures'][0]]: Extract<Result['namedCaptures'], [K, any]>[1] }
   }>
+
+export type MatchAllRegExp<
+  InputString extends string,
+  Regexp extends string,
+  Flags extends Flag,
+  MatchedResultTuple extends any[] = [],
+  InitialInputString extends string = InputString,
+  ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
+> = string extends InputString
+  ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
+      infer MatchArray,
+      infer NamedCaptures extends NamedCapturesTuple
+    >
+    ? RegExpIterableIterator<
+        (RegExpMatchResult<{
+          matched: 'i' extends Flags
+            ? PrependAndUnionToAll<MatchArray, '[Case Insensitive] ', string & { all: true }>
+            : MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
+          namedCaptures: NamedCaptures //TODO: add '[Case Insensitive] ' prefix to named captures values
+          input: InputString
+          restInput: undefined
+        }> | null)[]
+      >
+    : never
+  : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
+  ? Result extends MatchedResult<
+      infer MatchArray extends any[],
+      infer RestInputString extends string,
+      infer NamedCaptures extends NamedCapturesTuple
+    >
+    ? MatchAllRegExp<
+        RestInputString,
+        Regexp,
+        Flags,
+        [
+          ...MatchedResultTuple,
+          RegExpMatchResult<{
+            matched: MatchArray
+            namedCaptures: NamedCaptures
+            input: InitialInputString
+            restInput: RestInputString
+          }>
+        ],
+        InitialInputString
+      >
+    : RegExpIterableIterator<MatchedResultTuple>
+  : never
 
 export type ReplaceWithRegExp<
   InputString extends string,
@@ -110,14 +163,23 @@ declare global {
       regexp: RE
     ): MatchRegExp<InputString, REParts['pattern'], REParts['flags']>
 
-    match<
+    /** @deprecated String.matchAll requires global flag to be set. */
+    matchAll<InputString extends string, RE extends TypedRegExp<string, Exclude<Flag, 'g'>>>(
+      this: InputString,
+      regexp: RE
+    ): never
+
+    matchAll<
       InputString extends string,
       RE extends TypedRegExp,
       REParts extends RegExpParts = ExtractRegExpParts<RE>
     >(
       this: InputString,
       regexp: RE
-    ): MatchRegExp<InputString, REParts['pattern'], REParts['flags']>
+    ): MatchAllRegExp<InputString, REParts['pattern'], REParts['flags']>
+
+    /** @deprecated String.matchAll requires global flag to be set. */
+    matchAll<RE extends TypedRegExp<string, never>>(regexp: RE): never
 
     replace<
       InputString extends string,

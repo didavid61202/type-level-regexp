@@ -1,11 +1,12 @@
-import { createRegExp } from '../src/regexp'
+import { createRegExp, spreadRegExpIterator } from '../src/regexp'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-const replacePrecedes = 'abc1d2eyyxyec1oopopc2d2ere'.replace(
+const replacePrecedes = 'abC1d2eyyxyec1oopopc2d2ere'.replace(
   //     ^?
-  createRegExp('c(?<g1>(?<inner>1|2)d)2', ['g']),
+  createRegExp('c(?<g1>(?<inner>1|2)d)2', ['g', 'i']),
   '[$<inner>]'
 )
+
 const RE = createRegExp(
   '(?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
 )
@@ -24,8 +25,6 @@ replaceURL.length
 replaceURL.groups
 //          ^?
 replaceURL[4]
-//         ^?
-replaceURL['1']
 //         ^?
 const outOfIndex = replaceURL['8']
 //          ^?

@@ -20,9 +20,21 @@ export type RegExpParts<Pattern extends string = string, Flags extends Flag = Fl
   flags: Flags
 }
 
+export type RegExpIterableIterator<MatchedTuple extends any[]> = Omit<
+  IterableIterator<MatchedTuple[number]>,
+  'next'
+> & {
+  _matchedTuple: MatchedTuple
+  next: () => IteratorResult<MatchedTuple[number], MatchedTuple[number] | undefined>
+}
+
 export function createRegExp<Pattern extends string, Flags extends Flag = never>(
   pattern: Pattern,
   flags?: Flags[] | Set<Flags>
 ) {
   return new RegExp(pattern, [...(flags || '')].join('')) as TypedRegExp<Pattern, Flags>
+}
+
+export function spreadRegExpIterator<T extends any[]>(t: Iterable<any> & { _matchedTuple: T }) {
+  return [...t] as T
 }
