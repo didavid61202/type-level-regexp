@@ -10,10 +10,66 @@ type AlphanumericN = `_${Digit}${UppercaseLetterN}${LowercaseLetterN}`
 type CommonChar =
   `!"#$%&'()*+,-./${Digit}:;<=>?@${UppercaseLetterN}[\\]^_\`${LowercaseLetterN}{|}~ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡ΢ΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψω`
 
+type CaseMap = {
+  a: 'A'
+  b: 'B'
+  c: 'C'
+  d: 'D'
+  e: 'E'
+  f: 'F'
+  g: 'G'
+  h: 'H'
+  i: 'I'
+  j: 'J'
+  k: 'K'
+  l: 'L'
+  m: 'M'
+  n: 'N'
+  o: 'O'
+  p: 'P'
+  q: 'Q'
+  r: 'R'
+  s: 'S'
+  t: 'T'
+  u: 'U'
+  v: 'V'
+  w: 'W'
+  x: 'X'
+  y: 'Y'
+  z: 'Z'
+  A: 'a'
+  B: 'b'
+  C: 'c'
+  D: 'd'
+  E: 'e'
+  F: 'f'
+  G: 'g'
+  H: 'h'
+  I: 'i'
+  J: 'j'
+  K: 'k'
+  L: 'l'
+  M: 'm'
+  N: 'n'
+  O: 'o'
+  P: 'p'
+  Q: 'q'
+  R: 'r'
+  S: 's'
+  T: 't'
+  U: 'u'
+  V: 'v'
+  W: 'w'
+  X: 'x'
+  Y: 'y'
+  Z: 'z'
+}
+
 export interface CharSetMap<
   CharSet extends string = string,
   ResolvedCharSet extends string = ResolveCharSet<CharSet>
 > {
+  step: CharSet
   char: AlphanumericN
   nonChar: AlphanumericN
   digit: Digit
@@ -61,7 +117,7 @@ export type Matcher =
       repeat?: [from: any[], to: string]
     }
   | {
-      type: 'zeroOrMore' | 'oneOrMore' //! can optimize matching logic when combining with `any` matcher
+      type: 'zeroOrMore' | 'oneOrMore' //TODO: can optimize matching logic when combining with `any` matcher
       value: Matcher[]
       greedy: boolean
     }
@@ -319,14 +375,51 @@ export type StepMatch<
   InputString extends string,
   MatchingString extends string,
   StartOf extends boolean,
-  MatchingType extends keyof CharSetMap
-> = MatchingType extends 'string'
+  MatchingType extends keyof CharSetMap,
+  CaseInsensitive extends boolean = false,
+  AccMatchedString extends string = ''
+> = MatchingType extends 'step'
+  ? InputString extends `${infer FirstChar}${infer Rest}`
+    ? MatchingString extends `${infer FirstMatchingChar}${infer MatchingRest}`
+      ? FirstChar extends
+          | FirstMatchingChar
+          | (CaseInsensitive extends true
+              ? FirstMatchingChar extends keyof CaseMap
+                ? CaseMap[FirstMatchingChar]
+                : never
+              : never)
+        ? StepMatch<
+            Rest,
+            MatchingRest,
+            StartOf,
+            MatchingType,
+            CaseInsensitive,
+            `${AccMatchedString}${FirstChar}`
+          >
+        : StartOf extends true
+        ? NullResult<''>
+        : InputString extends `${string}${infer Rest}`
+        ? StepMatch<
+            Rest,
+            `${AccMatchedString}${MatchingString}`,
+            StartOf,
+            MatchingType,
+            CaseInsensitive
+          >
+        : NullResult<''>
+      : AccMatchedString extends ''
+      ? NullResult<''>
+      : MatchedResult<[AccMatchedString], InputString>
+    : AccMatchedString extends ''
+    ? NullResult<''>
+    : MatchedResult<[AccMatchedString], ''>
+  : MatchingType extends 'string'
   ? InputString extends `${infer Matched extends MatchingString}${infer Rest}`
-    ? MatchedResult<[Matched], Rest> // [matched: Matched, rest: Rest]
+    ? MatchedResult<[Matched], Rest>
     : StartOf extends true
-    ? NullResult<''> // null
+    ? NullResult<''>
     : InputString extends `${string}${infer Rest}`
-    ? StepMatch<Rest, MatchingString, StartOf, MatchingType>
+    ? StepMatch<Rest, MatchingString, StartOf, MatchingType, CaseInsensitive>
     : NullResult<''>
   : MatchingType extends 'boundary'
   ? InputString extends `${infer First}${infer Second}${infer Rest}`
@@ -334,26 +427,32 @@ export type StepMatch<
         o: NullResult<''>
         r: NullResult<''>
       } extends {
-        o: StepMatch<First | Second, CharSetMap['char'], true, 'char'>
-        r: StepMatch<Second | First, CharSetMap['nonChar'], true, 'nonChar'>
+        o: StepMatch<First | Second, CharSetMap['char'], true, 'char', CaseInsensitive>
+        r: StepMatch<Second | First, CharSetMap['nonChar'], true, 'nonChar', CaseInsensitive>
       }
-      ? MatchedResult<[''], `${Second}${Rest}`> // [matched: '', rest: `${Second}${Rest}`]
+      ? MatchedResult<[''], `${Second}${Rest}`>
       : StartOf extends true
       ? NullResult<''>
-      : StepMatch<`${Second}${Rest}`, MatchingString, StartOf, MatchingType>
+      : StepMatch<`${Second}${Rest}`, MatchingString, StartOf, MatchingType, CaseInsensitive>
     : NullResult<''>
   : InputString extends `${infer FirstChar}${infer Rest}`
-  ? MatchingString extends `${string}${FirstChar}${string}`
+  ? MatchingString extends `${string}${
+      | FirstChar
+      | (CaseInsensitive extends true
+          ? FirstChar extends keyof CaseMap
+            ? CaseMap[FirstChar]
+            : never
+          : never)}${string}`
     ? MatchingType extends 'notCharSet' | 'nonChar' | 'nonDigit'
       ? StartOf extends true
         ? NullResult<''>
-        : StepMatch<Rest, MatchingString, StartOf, MatchingType>
-      : MatchedResult<[FirstChar], Rest> // [matched: FirstChar, rest: Rest]
+        : StepMatch<Rest, MatchingString, StartOf, MatchingType, CaseInsensitive>
+      : MatchedResult<[FirstChar], Rest>
     : MatchingType extends 'notCharSet' | 'nonChar' | 'nonDigit'
-    ? MatchedResult<[FirstChar], Rest> // [matched: FirstChar, rest: Rest]
+    ? MatchedResult<[FirstChar], Rest>
     : StartOf extends true
     ? NullResult<''>
-    : StepMatch<Rest, MatchingString, StartOf, MatchingType>
+    : StepMatch<Rest, MatchingString, StartOf, MatchingType, CaseInsensitive>
   : NullResult<''>
 
 export type NameCaptureValue<

@@ -209,6 +209,14 @@ type Match<
     }
   ? ['backreference', undefined] extends [Type, NameCaptureValue<NamedCaptures, StringOrName>]
     ? MatchedResult<[''], InputString>
+    : 'i' extends Flags
+    ? StepMatch<
+        InputString,
+        `${Type extends 'string' ? StringOrName : NameCaptureValue<NamedCaptures, StringOrName>}`,
+        StartOf,
+        'step',
+        true
+      >
     : InputString extends `${PrefixType}${Type extends 'string'
         ? StringOrName
         : NameCaptureValue<NamedCaptures, StringOrName>}${infer Rest}`
@@ -221,7 +229,13 @@ type Match<
       type: infer Type extends keyof CharSetMap
       value?: infer CharSet extends string
     }
-  ? StepMatch<InputString, CharSetMap<CharSet>[Type], StartOf, Type>
+  ? StepMatch<
+      InputString,
+      CharSetMap<CharSet>[Type],
+      StartOf,
+      Type,
+      'i' extends Flags ? true : false
+    >
   : CurrentMatcher extends {
       type: infer Type extends 'optional' | 'zeroOrMore'
       value: infer OptionalOrMoreMatchers extends Matcher[]

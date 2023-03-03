@@ -1,6 +1,6 @@
 import { ExhaustiveMatch, GlobalMatch } from './match'
 import { ParseRegexp } from './parse'
-import { PermutationResult, ResolvePermutation } from './permutation'
+import { PermutationResult, PrependAndUnionToAll, ResolvePermutation } from './permutation'
 import { ExtractRegExpParts, Flag, RegExpParts, TypedRegExp } from './regexp'
 import { GlobalReplace, ResolveRepalceValue } from './replace'
 import {
@@ -25,8 +25,10 @@ export type MatchRegExp<
     ? 'g' extends Flags
       ? MatchArray[0][]
       : RegExpMatchResult<{
-          matched: MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
-          namedCaptures: NamedCaptures
+          matched: 'i' extends Flags
+            ? PrependAndUnionToAll<MatchArray, '[Case Insensitive] ', string & { all: true }>
+            : MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
+          namedCaptures: NamedCaptures //TODO: add '[Case Insensitive] ' prefix to named captures values
           input: InputString
           restInput: undefined
         }> | null

@@ -17,6 +17,27 @@ export type PermutationResult<
   namedCapture: NamedCaptures
 }
 
+export type PrependAndUnionToAll<
+  Arr extends (string | undefined)[],
+  PrependingString extends string | undefined,
+  Union,
+  ResultArr extends any[] = [],
+  Length extends number = Arr['length']
+> = ResultArr['length'] extends Length
+  ? ResultArr
+  : Arr extends [
+      infer First extends string | undefined,
+      ...infer Rest extends (string | undefined)[]
+    ]
+  ? PrependAndUnionToAll<
+      Rest,
+      PrependingString,
+      Union,
+      [...ResultArr, First extends undefined ? undefined : `${PrependingString}${First}` | Union],
+      Length
+    >
+  : []
+
 interface LiteralCharSetMap<
   CharSet extends string = string,
   ResolvedCharSet extends string = ResolveCharSet<CharSet>
