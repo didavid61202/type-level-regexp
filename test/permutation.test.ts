@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { U } from 'vitest/dist/types-0373403c'
 import { ParseRegexp } from '../src/parse'
 import { ResolvePermutation } from '../src/permutation'
-import { ExpandRepeat } from '../src/utils'
 import { Equal, Expect } from './helper'
-
-// type RegexAST = ParseRegexp<'1(2)a(b(c)?d(e)*f)gh(?:i){1,3}jk'>
-// type RegexAST = ParseRegexp<'1a(b(?<g1>3|6|9)[^di](?<g2>x|y))\\k<g1>e\\k<g2>f'>
-// type RegexAST = ParseRegexp<'1(?:(?:(x)|y))*2'> //? still testing
-// type RegexAST = ParseRegexp<'1(?<g1>foo)+?'> //? still testing
-//    ^?
 
 type Tests = [
   /** Exact string */
@@ -428,3 +420,10 @@ type testNamedCapture = ResolvePermutation<matchers>['namedCapture']
 
 // const test: testzsdf[1] = ''
 // //     ^?
+
+//TODO: add more complex/edge cases:
+// type RegexAST = ParseRegexp<'1(2)a(b(c)?d(e)*f)gh(?:i){1,3}jk'>
+// type RegexAST = ParseRegexp<'1a(b(?<g1>3|6|9)[^di](?<g2>x|y))\\k<g1>e\\k<g2>f'>
+// type RegexAST = ParseRegexp<'1(?:(?:(x)|y))*2'>
+// type RegexAST = ParseRegexp<'1(?<g1>foo)+?'>
+//    ^?
