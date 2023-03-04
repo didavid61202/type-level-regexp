@@ -94,13 +94,16 @@ type Tests = [
   Expect<
     Equal<
       ResolvePermutation<ParseRegexp<'(fo??o-(?<g1>bar-)??)baz'>>['results'],
-      ['fo-baz', 'fo-', undefined]
+      | ['foo-baz', 'foo-', 'bar-']
+      | ['foo-bar-baz', 'foo-bar-', 'bar-']
+      | ['fo-baz', 'fo-', 'bar-']
+      | ['fo-bar-baz', 'fo-bar-', 'bar-']
     >
   >,
   Expect<
     Equal<
       ResolvePermutation<ParseRegexp<'(fo??o-(?<g1>bar-)??)baz'>>['namedCapture'],
-      ['g1', undefined]
+      ['g1', 'bar-']
     >
   >,
 
@@ -363,7 +366,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?-baz'>>['namedCapture'],
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,}?-baz'>>['namedCapture'],
       ['g1', 'bar'] | ['g1', 'qux']
     >
   >,
@@ -374,8 +377,8 @@ type Tests = [
       ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}-baz'>>['results'],
       | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'bar']
       | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'qux']
-      | ['foo-qux-baz' | 'foo-quxbar-baz' | 'foo-quxqux-baz', 'bar']
-      | ['foo-qux-baz' | 'foo-quxbar-baz' | 'foo-quxqux-baz', 'qux']
+      | ['foo-quxbar-baz' | 'foo-quxqux-baz' | 'foo-qux-baz', 'bar']
+      | ['foo-quxbar-baz' | 'foo-quxqux-baz' | 'foo-qux-baz', 'qux']
     >
   >,
   Expect<
@@ -401,7 +404,10 @@ type Tests = [
   Expect<
     Equal<
       ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?-baz'>>['results'],
-      ['foo-qux-baz', 'qux'] | ['foo-bar-baz', 'bar']
+      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'bar']
+      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'qux']
+      | ['foo-qux-baz' | 'foo-quxqux-baz' | 'foo-quxbar-baz', 'bar']
+      | ['foo-qux-baz' | 'foo-quxqux-baz' | 'foo-quxbar-baz', 'qux']
     >
   >,
   Expect<

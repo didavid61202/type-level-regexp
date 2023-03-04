@@ -9,6 +9,7 @@ import {
   ResolveCharSet,
   ResolveNamedCaptureUnion,
   ResolveOrCaptureTuple,
+  SliceMatchers,
   StrintToUnion,
   TupleItemExtendsType,
 } from './utils'
@@ -56,6 +57,17 @@ interface LiteralCharSetMap<
   boundary: '[boundary]'
 }
 
+type ConcateRestMatchers<
+  CurrentMatchers extends Matcher[],
+  OutMostRestMatchers extends Matcher[],
+  CurrentIndex extends any[]
+> = [
+  ...(SliceMatchers<CurrentMatchers, [...CurrentIndex, '']> extends infer RM extends Matcher[]
+    ? RM
+    : never),
+  ...OutMostRestMatchers
+]
+
 export type ResolvePermutation<
   Matchers extends Matcher[],
   OutMostRestMatchers extends Matcher[] = [],
@@ -69,7 +81,7 @@ export type ResolvePermutation<
 }
   ? ResolvePermutation<
       Matchers,
-      [],
+      OutMostRestMatchers,
       ConcatToFirstElement<
         MatchResultArray,
         Type extends 'backreference' ? NameCaptureValue<NamedCaptures, StringValue> : StringValue
@@ -83,7 +95,7 @@ export type ResolvePermutation<
     }
   ? ResolvePermutation<
       Matchers,
-      [],
+      OutMostRestMatchers,
       ConcatToFirstElement<MatchResultArray, LiteralCharSetMap<CharSet>[Type]>,
       NamedCaptures,
       [...CurrentIndex, '']
@@ -98,7 +110,7 @@ export type ResolvePermutation<
     >
     ? ResolvePermutation<
         Matchers,
-        [],
+        OutMostRestMatchers,
         [
           ...ConcatToFirstElement<
             MatchResultArray,
@@ -124,13 +136,13 @@ export type ResolvePermutation<
       positive: infer Positive extends boolean
       value: infer LookaroundMatchers extends Matcher[]
     }
-  ? ResolvePermutation<LookaroundMatchers, OutMostRestMatchers> extends PermutationResult<
-      infer LookaroundResult extends string[],
-      infer NextedNamedCapture
-    >
+  ? ResolvePermutation<
+      LookaroundMatchers,
+      ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
+    > extends PermutationResult<infer LookaroundResult extends string[], infer NextedNamedCapture>
     ? ResolvePermutation<
         Matchers,
-        [],
+        OutMostRestMatchers,
         ConcatToFirstElement<
           MatchResultArray,
           | `[${Type extends 'lookahead' ? 'following' : 'previous'} pattern${Positive extends true
@@ -147,7 +159,10 @@ export type ResolvePermutation<
       value: infer GroupMatchers extends Matcher[]
       name?: infer GroupName extends string
     }
-  ? ResolvePermutation<GroupMatchers, OutMostRestMatchers> extends infer Result
+  ? ResolvePermutation<
+      GroupMatchers,
+      ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
+    > extends infer Result
     ? Result extends PermutationResult<
         [infer ResultString extends string, ...infer Captures extends any[]],
         infer NextedNamedCapture
@@ -155,7 +170,7 @@ export type ResolvePermutation<
       ? ResultString extends ResultString
         ? ResolvePermutation<
             Matchers,
-            [],
+            OutMostRestMatchers,
             [
               ...ConcatToFirstElement<MatchResultArray, ResultString>,
               ...[ResultString],
@@ -181,7 +196,7 @@ export type ResolvePermutation<
       ? Captures extends Captures
         ? ResolvePermutation<
             Matchers,
-            [],
+            OutMostRestMatchers,
             [
               ...(Captures[number] extends undefined
                 ? ConcatToFirstElement<MatchResultArray, ResultString>
@@ -200,26 +215,48 @@ export type ResolvePermutation<
       value: infer OptionalMatchers extends Matcher[]
       greedy: infer Greedy extends boolean
     }
-  ? ResolvePermutation<OptionalMatchers, OutMostRestMatchers> extends PermutationResult<
+  ? ResolvePermutation<
+      OptionalMatchers,
+      ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
+    > extends PermutationResult<
       [infer ResultString extends string, ...infer Captures extends any[]],
       infer NextedNamedCapture
     >
     ? ResolvePermutation<
         Matchers,
-        [],
+        OutMostRestMatchers,
         [
           ...ConcatToFirstElement<
             MatchResultArray,
-            '' | (Greedy extends true ? ResultString : never)
+            Greedy extends true
+              ? ResultString | ''
+              : TupleItemExtendsType<
+                  [...Matchers, ...OutMostRestMatchers],
+                  [...CurrentIndex, ''],
+                  Matcher
+                > extends true
+              ? ResultString | ''
+              : ''
           >,
-          ...(
-            | CountNumOfCaptureGroupsAs<OptionalMatchers>
-            | (Greedy extends true ? Captures : never)
-          )
+          ...(Greedy extends true
+            ? Captures | CountNumOfCaptureGroupsAs<OptionalMatchers>
+            : TupleItemExtendsType<
+                [...Matchers, ...OutMostRestMatchers],
+                [...CurrentIndex, ''],
+                Matcher
+              > extends true
+            ? Captures
+            : CountNumOfCaptureGroupsAs<OptionalMatchers>)
         ],
-        | NamedCaptures
-        | ResolveNamedCaptureUnion<[OptionalMatchers], never>
-        | (Greedy extends true ? NextedNamedCapture : never),
+        Greedy extends true
+          ? NamedCaptures | NextedNamedCapture | ResolveNamedCaptureUnion<[OptionalMatchers], never>
+          : TupleItemExtendsType<
+              [...Matchers, ...OutMostRestMatchers],
+              [...CurrentIndex, ''],
+              Matcher
+            > extends true
+          ? NamedCaptures | NextedNamedCapture
+          : ResolveNamedCaptureUnion<[OptionalMatchers], never>,
         [...CurrentIndex, '']
       >
     : never
@@ -229,13 +266,16 @@ export type ResolvePermutation<
     }
   ? OrMatchersArray[number] extends infer OrMatchers extends Matcher[]
     ? OrMatchers extends OrMatchers
-      ? ResolvePermutation<OrMatchers, OutMostRestMatchers> extends PermutationResult<
+      ? ResolvePermutation<
+          OrMatchers,
+          ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
+        > extends PermutationResult<
           [infer ResultString extends string, ...infer Captures extends any[]],
           infer NextedNamedCapture
         >
         ? ResolvePermutation<
             Matchers,
-            [],
+            OutMostRestMatchers,
             [
               ...ConcatToFirstElement<MatchResultArray, ResultString>,
               ...ResolveOrCaptureTuple<
@@ -255,7 +295,10 @@ export type ResolvePermutation<
       value: infer AnyOrMoreMatchers extends Matcher[]
       greedy: infer Greedy extends boolean
     }
-  ? ResolvePermutation<AnyOrMoreMatchers, OutMostRestMatchers> extends infer Result
+  ? ResolvePermutation<
+      AnyOrMoreMatchers,
+      ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
+    > extends infer Result
     ? Result extends PermutationResult<
         [infer ResultString extends string, ...infer Captures extends any[]],
         infer NextedNamedCapture
@@ -263,7 +306,7 @@ export type ResolvePermutation<
       ? ResultString extends ResultString
         ? ResolvePermutation<
             Matchers,
-            [],
+            OutMostRestMatchers,
             [
               ...ConcatToFirstElement<
                 MatchResultArray,
@@ -327,7 +370,7 @@ export type ResolvePermutation<
     }
   ? ResolvePermutation<
       ExpandRepeat<OrMatchers, From, To, Greedy>,
-      OutMostRestMatchers
+      ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
     > extends infer Result
     ? Result extends PermutationResult<
         [infer ResultString extends string, ...infer Captures extends any[]],
@@ -335,7 +378,7 @@ export type ResolvePermutation<
       >
       ? ResolvePermutation<
           Matchers,
-          [],
+          OutMostRestMatchers,
           [
             ...ConcatToFirstElement<
               MatchResultArray,
