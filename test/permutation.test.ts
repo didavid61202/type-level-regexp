@@ -70,13 +70,13 @@ type Tests = [
     >
   >,
 
-  /** Char, non-char, ditig, non-digit*/
+  /** AnyChar, Char, non-char, ditig, non-digit*/
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'\\w_\\W_\\d_\\D'>>['results'],
+      ResolvePermutation<ParseRegexp<'._\\w_\\W_\\d_\\D'>>['results'],
       [
-        | `[any word char]_[any non-char]_${number}_[any non-digit]`
-        | '[any word char]_[any non-char]_[any digit]_[any non-digit]'
+        | `[any char]_[any word char]_[any non-char]_${number}_[any non-digit]`
+        | '[any char]_[any word char]_[any non-char]_[any digit]_[any non-digit]'
       ]
     >
   >,
@@ -222,10 +222,24 @@ type Tests = [
       ResolvePermutation<ParseRegexp<'foo(?<!(?<g1>bar))'>>['results'],
       ['foo' | 'foo[previous pattern not contain: [bar] ]']
     >
+  >,
+
+  /** Or */
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|baz)-fao'>>['results'],
+      ['foo-bar-fao', 'bar'] | ['foo-baz-fao', 'baz']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|baz)-fao'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'baz']
+    >
   >
 ]
 
-type testzsdf = ResolvePermutation<ParseRegexp<'foo(?=(?<g1>bar))'>>['results']
+type testzsdf = ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|baz)-fao'>>['results']
 
 const test: testzsdf[2] = 'bar-'
 ;('[any word char]_[any non-char]_[any digit]_[any non-digit]_a_[any char NOT in [X-Z]]')
