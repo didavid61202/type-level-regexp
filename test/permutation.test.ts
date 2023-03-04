@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { U } from 'vitest/dist/types-0373403c'
 import { ParseRegexp } from '../src/parse'
 import { ResolvePermutation } from '../src/permutation'
+import { ExpandRepeat } from '../src/utils'
 import { Equal, Expect } from './helper'
 
 // type RegexAST = ParseRegexp<'1(2)a(b(c)?d(e)*f)gh(?:i){1,3}jk'>
@@ -8,12 +10,6 @@ import { Equal, Expect } from './helper'
 // type RegexAST = ParseRegexp<'1(?:(?:(x)|y))*2'> //? still testing
 // type RegexAST = ParseRegexp<'1(?<g1>foo)+?'> //? still testing
 //    ^?
-// type RegexAST = ParseRegexp<'a(?:1|2)b'>
-
-// type test = ResolvePermutation<RegexAST>
-//    ^?
-// const testing: test['results'][0] = '1f2'
-//                    ^?[]
 
 type Tests = [
   /** Exact string */
@@ -236,10 +232,199 @@ type Tests = [
       ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|baz)-fao'>>['namedCapture'],
       ['g1', 'bar'] | ['g1', 'baz']
     >
+  >,
+
+  /** Repeat exactly n times (Greedy)*/
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}-baz'>>['results'],
+      | ['foo-barbar-baz', 'bar']
+      | ['foo-barqux-baz', 'qux']
+      | ['foo-quxbar-baz', 'bar']
+      | ['foo-quxqux-baz', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}-baz'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+
+  /** Repeat exactly n times (Lazy)*/
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}?'>>['results'],
+      ['foo-barbar', 'bar'] | ['foo-barqux', 'qux'] | ['foo-quxbar', 'bar'] | ['foo-quxqux', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}?'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}?-baz'>>['results'],
+      | ['foo-barbar-baz', 'bar']
+      | ['foo-barqux-baz', 'qux']
+      | ['foo-quxbar-baz', 'bar']
+      | ['foo-quxqux-baz', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}?-baz'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+
+  /** Repeat n or more times (Greedy)*/
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,}-baz'>>['results'],
+      | [
+          (
+            | 'foo-bar-baz'
+            | 'foo-barbar-baz'
+            | `foo-barbar${string}bar-baz`
+            | 'foo-[ repeat `bar` unlimited times ]-baz'
+          ),
+          'bar'
+        ]
+      | [
+          (
+            | 'foo-bar-baz'
+            | 'foo-barqux-baz'
+            | `foo-barqux${string}qux-baz`
+            | 'foo-[ repeat `qux` unlimited times ]-baz'
+          ),
+          'bar'
+        ]
+      | [
+          (
+            | 'foo-bar-baz'
+            | 'foo-barqux-baz'
+            | `foo-barqux${string}qux-baz`
+            | 'foo-[ repeat `qux` unlimited times ]-baz'
+          ),
+          'qux'
+        ]
+      | [
+          (
+            | 'foo-qux-baz'
+            | 'foo-quxqux-baz'
+            | `foo-quxqux${string}qux-baz`
+            | 'foo-[ repeat `qux` unlimited times ]-baz'
+          ),
+          'qux'
+        ]
+      | [
+          (
+            | 'foo-qux-baz'
+            | 'foo-quxbar-baz'
+            | `foo-quxbar${string}bar-baz`
+            | 'foo-[ repeat `bar` unlimited times ]-baz'
+          ),
+          'bar'
+        ]
+      | [
+          (
+            | 'foo-qux-baz'
+            | 'foo-quxbar-baz'
+            | `foo-quxbar${string}bar-baz`
+            | 'foo-[ repeat `bar` unlimited times ]-baz'
+          ),
+          'qux'
+        ]
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,}-baz'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+
+  /** Repeat n or more times (Lazy)*/
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?'>>['results'],
+      ['foo-barbar', 'bar'] | ['foo-barqux', 'qux'] | ['foo-quxbar', 'bar'] | ['foo-quxqux', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?-baz'>>['results'],
+      | ['foo-quxqux-baz', 'qux']
+      | ['foo-quxbar-baz', 'bar']
+      | ['foo-barqux-baz', 'qux']
+      | ['foo-barbar-baz', 'bar']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?-baz'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+
+  /** Repeat n to m times (Greedy)*/
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}-baz'>>['results'],
+      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'bar']
+      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'qux']
+      | ['foo-qux-baz' | 'foo-quxbar-baz' | 'foo-quxqux-baz', 'bar']
+      | ['foo-qux-baz' | 'foo-quxbar-baz' | 'foo-quxqux-baz', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}-baz'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+
+  /** Repeat n to m times (Lazy)*/
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?'>>['results'],
+      ['foo-qux', 'qux'] | ['foo-bar', 'bar']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?-baz'>>['results'],
+      ['foo-qux-baz', 'qux'] | ['foo-bar-baz', 'bar']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?-baz'>>['namedCapture'],
+      ['g1', 'bar'] | ['g1', 'qux']
+    >
   >
 ]
 
-type testzsdf = ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|baz)-fao'>>['results']
+type matchers = ParseRegexp<'foo-(?<g1>bar|qux){1,2}?'>
+type testResult = ResolvePermutation<matchers>['results']
+//    ^?
+type testNamedCapture = ResolvePermutation<matchers>['namedCapture']
+//    ^?
 
-const test: testzsdf[2] = 'bar-'
-;('[any word char]_[any non-char]_[any digit]_[any non-digit]_a_[any char NOT in [X-Z]]')
+// const test: testzsdf[1] = ''
+// //     ^?
