@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ParseRegexp } from '../src/parse'
 import { ResolvePermutation } from '../src/permutation'
-import { Equal, Expect } from './helper'
+import { Equal, Expect, MergeUnion } from './helper'
+
+//TODO: add test case for `boundary` (\b)
 
 type Tests = [
   /** Exact string */
@@ -72,15 +74,12 @@ type Tests = [
   /** Optional (Greedy) */
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'(fo?o-(?<g1>bar-)?)baz'>>['results'],
-      | ['fo-baz', 'fo-', 'bar-']
-      | ['foo-baz', 'foo-', 'bar-']
-      | ['fo-bar-baz', 'fo-bar-', 'bar-']
-      | ['foo-bar-baz', 'foo-bar-', 'bar-']
-      | ['fo-baz', 'fo-', undefined]
-      | ['foo-baz', 'foo-', undefined]
-      | ['fo-bar-baz', 'fo-bar-', undefined]
-      | ['foo-bar-baz', 'foo-bar-', undefined]
+      MergeUnion<ResolvePermutation<ParseRegexp<'(fo?o-(?<g1>bar-)?)baz'>>['results']>,
+      [
+        'foo-bar-baz' | 'foo-baz' | 'fo-baz' | 'fo-bar-baz',
+        'foo-' | 'foo-bar-' | 'fo-' | 'fo-bar-',
+        'bar-' | undefined
+      ]
     >
   >,
   Expect<
@@ -93,11 +92,12 @@ type Tests = [
   /** Optional (Lazy) */
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'(fo??o-(?<g1>bar-)??)baz'>>['results'],
-      | ['foo-baz', 'foo-', 'bar-']
-      | ['foo-bar-baz', 'foo-bar-', 'bar-']
-      | ['fo-baz', 'fo-', 'bar-']
-      | ['fo-bar-baz', 'fo-bar-', 'bar-']
+      MergeUnion<ResolvePermutation<ParseRegexp<'(fo??o-(?<g1>bar-)??)baz'>>['results']>,
+      [
+        'foo-bar-baz' | 'foo-baz' | 'fo-baz' | 'fo-bar-baz',
+        'foo-' | 'foo-bar-' | 'fo-' | 'fo-bar-',
+        'bar-'
+      ]
     >
   >,
   Expect<
@@ -110,9 +110,12 @@ type Tests = [
   /** ZeroOrMore (Greedy) */
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'1(?<g1>foo)*'>>['results'],
-      | ['1' | '1foo' | `1foo${string}foo` | '1[ zero or more of `foo` ]', 'foo']
-      | ['1' | '1foo' | `1foo${string}foo` | '1[ zero or more of `foo` ]', undefined]
+      MergeUnion<ResolvePermutation<ParseRegexp<'1(?<g1>foo)*'>>['results']>,
+      [
+        '1' | '1foo' | `1foo${string}foo` | '1[ zero or more of `foo` ]',
+        'foo' | undefined
+        //
+      ]
     >
   >,
   Expect<
@@ -126,9 +129,12 @@ type Tests = [
   Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)*?'>>['results'], ['1', undefined]>>,
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'1(?<g1>foo)*?2'>>['results'],
-      | ['12' | '1foo2' | `1foo${string}foo2` | '1[ zero or more of `foo` ]2', 'foo']
-      | ['12' | '1foo2' | `1foo${string}foo2` | '1[ zero or more of `foo` ]2', undefined]
+      MergeUnion<ResolvePermutation<ParseRegexp<'1(?<g1>foo)*?2'>>['results']>,
+      [
+        '12' | '1foo2' | `1foo${string}foo2` | '1[ zero or more of `foo` ]2',
+        'foo' | undefined
+        //
+      ]
     >
   >,
   Expect<
@@ -232,11 +238,12 @@ type Tests = [
   /** Repeat exactly n times (Greedy)*/
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}-baz'>>['results'],
-      | ['foo-barbar-baz', 'bar']
-      | ['foo-barqux-baz', 'qux']
-      | ['foo-quxbar-baz', 'bar']
-      | ['foo-quxqux-baz', 'qux']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}-baz'>>['results']>,
+      [
+        'foo-barbar-baz' | 'foo-barqux-baz' | 'foo-quxbar-baz' | 'foo-quxqux-baz',
+        'bar' | 'qux'
+        //
+      ]
     >
   >,
   Expect<
@@ -261,11 +268,12 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}?-baz'>>['results'],
-      | ['foo-barbar-baz', 'bar']
-      | ['foo-barqux-baz', 'qux']
-      | ['foo-quxbar-baz', 'bar']
-      | ['foo-quxqux-baz', 'qux']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2}?-baz'>>['results']>,
+      [
+        'foo-barbar-baz' | 'foo-barqux-baz' | 'foo-quxbar-baz' | 'foo-quxqux-baz',
+        'bar' | 'qux'
+        //
+      ]
     >
   >,
   Expect<
@@ -278,61 +286,24 @@ type Tests = [
   /** Repeat n or more times (Greedy)*/
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,}-baz'>>['results'],
-      | [
-          (
-            | 'foo-bar-baz'
-            | 'foo-barbar-baz'
-            | `foo-barbar${string}bar-baz`
-            | 'foo-[ repeat `bar` unlimited times ]-baz'
-          ),
-          'bar'
-        ]
-      | [
-          (
-            | 'foo-bar-baz'
-            | 'foo-barqux-baz'
-            | `foo-barqux${string}qux-baz`
-            | 'foo-[ repeat `qux` unlimited times ]-baz'
-          ),
-          'bar'
-        ]
-      | [
-          (
-            | 'foo-bar-baz'
-            | 'foo-barqux-baz'
-            | `foo-barqux${string}qux-baz`
-            | 'foo-[ repeat `qux` unlimited times ]-baz'
-          ),
-          'qux'
-        ]
-      | [
-          (
-            | 'foo-qux-baz'
-            | 'foo-quxqux-baz'
-            | `foo-quxqux${string}qux-baz`
-            | 'foo-[ repeat `qux` unlimited times ]-baz'
-          ),
-          'qux'
-        ]
-      | [
-          (
-            | 'foo-qux-baz'
-            | 'foo-quxbar-baz'
-            | `foo-quxbar${string}bar-baz`
-            | 'foo-[ repeat `bar` unlimited times ]-baz'
-          ),
-          'bar'
-        ]
-      | [
-          (
-            | 'foo-qux-baz'
-            | 'foo-quxbar-baz'
-            | `foo-quxbar${string}bar-baz`
-            | 'foo-[ repeat `bar` unlimited times ]-baz'
-          ),
-          'qux'
-        ]
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,}-baz'>>['results']>,
+      [
+        (
+          | 'foo-qux-baz'
+          | 'foo-quxqux-baz'
+          | `foo-quxqux${string}qux-baz`
+          | 'foo-[ repeat `qux` unlimited times ]-baz'
+          | 'foo-quxbar-baz'
+          | `foo-quxbar${string}bar-baz`
+          | 'foo-bar-baz'
+          | 'foo-barbar-baz'
+          | `foo-barbar${string}bar-baz`
+          | 'foo-[ repeat `bar` unlimited times ]-baz'
+          | 'foo-barqux-baz'
+          | `foo-barqux${string}qux-baz`
+        ),
+        'bar' | 'qux'
+      ]
     >
   >,
   Expect<
@@ -345,8 +316,12 @@ type Tests = [
   /** Repeat n or more times (Lazy)*/
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?'>>['results'],
-      ['foo-barbar', 'bar'] | ['foo-barqux', 'qux'] | ['foo-quxbar', 'bar'] | ['foo-quxqux', 'qux']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?'>>['results']>,
+      [
+        'foo-barbar' | 'foo-barqux' | 'foo-quxbar' | 'foo-quxqux',
+        'bar' | 'qux'
+        //
+      ]
     >
   >,
   Expect<
@@ -357,11 +332,24 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){2,}?-baz'>>['results'],
-      | ['foo-quxqux-baz', 'qux']
-      | ['foo-quxbar-baz', 'bar']
-      | ['foo-barqux-baz', 'qux']
-      | ['foo-barbar-baz', 'bar']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,}?-baz'>>['results']>,
+      [
+        (
+          | 'foo-bar-baz'
+          | 'foo-barbar-baz'
+          | `foo-barbar${string}bar-baz`
+          | 'foo-[ repeat `bar` unlimited times ]-baz'
+          | 'foo-barqux-baz'
+          | `foo-barqux${string}qux-baz`
+          | 'foo-qux-baz'
+          | 'foo-quxqux-baz'
+          | `foo-quxqux${string}qux-baz`
+          | 'foo-[ repeat `qux` unlimited times ]-baz'
+          | 'foo-quxbar-baz'
+          | `foo-quxbar${string}bar-baz`
+        ),
+        'bar' | 'qux'
+      ]
     >
   >,
   Expect<
@@ -374,11 +362,18 @@ type Tests = [
   /** Repeat n to m times (Greedy)*/
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}-baz'>>['results'],
-      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'bar']
-      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'qux']
-      | ['foo-quxbar-baz' | 'foo-quxqux-baz' | 'foo-qux-baz', 'bar']
-      | ['foo-quxbar-baz' | 'foo-quxqux-baz' | 'foo-qux-baz', 'qux']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}-baz'>>['results']>,
+      [
+        (
+          | 'foo-bar-baz'
+          | 'foo-barbar-baz'
+          | 'foo-barqux-baz'
+          | 'foo-qux-baz'
+          | 'foo-quxqux-baz'
+          | 'foo-quxbar-baz'
+        ),
+        'bar' | 'qux'
+      ]
     >
   >,
   Expect<
@@ -391,8 +386,8 @@ type Tests = [
   /** Repeat n to m times (Lazy)*/
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?'>>['results'],
-      ['foo-qux', 'qux'] | ['foo-bar', 'bar']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?'>>['results']>,
+      ['foo-qux' | 'foo-bar', 'bar' | 'qux']
     >
   >,
   Expect<
@@ -403,11 +398,18 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?-baz'>>['results'],
-      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'bar']
-      | ['foo-bar-baz' | 'foo-barbar-baz' | 'foo-barqux-baz', 'qux']
-      | ['foo-qux-baz' | 'foo-quxqux-baz' | 'foo-quxbar-baz', 'bar']
-      | ['foo-qux-baz' | 'foo-quxqux-baz' | 'foo-quxbar-baz', 'qux']
+      MergeUnion<ResolvePermutation<ParseRegexp<'foo-(?<g1>bar|qux){1,2}?-baz'>>['results']>,
+      [
+        (
+          | 'foo-bar-baz'
+          | 'foo-barbar-baz'
+          | 'foo-barqux-baz'
+          | 'foo-qux-baz'
+          | 'foo-quxqux-baz'
+          | 'foo-quxbar-baz'
+        ),
+        'bar' | 'qux'
+      ]
     >
   >,
   Expect<
@@ -417,9 +419,9 @@ type Tests = [
     >
   >
 ]
-
-type matchers = ParseRegexp<'foo-(?<g1>bar|qux){1,2}?'>
-type testResult = ResolvePermutation<matchers>['results']
+// type matchers = ParseRegexp<'(a(?<g1>bar-)??)z'>
+type matchers = ParseRegexp<'foo-(?<g1>bar|qux){1,2}?-baz'>
+type testResult = MergeUnion<ResolvePermutation<matchers>['results']>
 //    ^?
 type testNamedCapture = ResolvePermutation<matchers>['namedCapture']
 //    ^?
