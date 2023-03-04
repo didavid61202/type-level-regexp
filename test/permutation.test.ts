@@ -18,8 +18,10 @@ import { Equal, Expect } from './helper'
 type Tests = [
   /** Exact string */
   Expect<Equal<ResolvePermutation<ParseRegexp<'foo'>>['results'], ['foo']>>,
+
   /** Non-Capture */
   Expect<Equal<ResolvePermutation<ParseRegexp<'(?:foo-(?:bar)-baz)'>>['results'], ['foo-bar-baz']>>,
+
   /** Capture */
   Expect<
     Equal<
@@ -27,6 +29,7 @@ type Tests = [
       ['foo-bar-baz', 'foo-bar-baz', 'bar', 'baz']
     >
   >,
+
   /** Named Capture */
   Expect<
     Equal<
@@ -40,6 +43,7 @@ type Tests = [
       ['g1', 'foo-bar-baz'] | ['g2', 'bar']
     >
   >,
+
   /** Backreference */
   Expect<
     Equal<
@@ -49,6 +53,7 @@ type Tests = [
       ['foo-bar-baz_g2:bar_g1:foo-bar-baz', 'foo-bar-baz', 'bar']
     >
   >,
+
   /** CharSet, not-charSet */
   Expect<
     Equal<
@@ -64,6 +69,7 @@ type Tests = [
       ]
     >
   >,
+
   /** Char, non-char, ditig, non-digit*/
   Expect<
     Equal<
@@ -74,6 +80,7 @@ type Tests = [
       ]
     >
   >,
+
   /** Optional (Greedy) */
   Expect<
     Equal<
@@ -94,6 +101,7 @@ type Tests = [
       ['g1', 'bar-'] | ['g1', undefined]
     >
   >,
+
   /** Optional (Lazy) */
   Expect<
     Equal<
@@ -107,6 +115,7 @@ type Tests = [
       ['g1', undefined]
     >
   >,
+
   /** ZeroOrMore (Greedy) */
   Expect<
     Equal<
@@ -121,6 +130,7 @@ type Tests = [
       ['g1', 'foo'] | ['g1', undefined]
     >
   >,
+
   /** ZeroOrMore (Lazy) */
   Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)*?'>>['results'], ['1', undefined]>>,
   Expect<
@@ -139,6 +149,7 @@ type Tests = [
       ['g1', 'foo'] | ['g1', undefined]
     >
   >,
+
   /** oneOrMore (Greedy) */
   Expect<
     Equal<
@@ -147,6 +158,7 @@ type Tests = [
     >
   >,
   Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)+'>>['namedCapture'], ['g1', 'foo']>>,
+
   /** oneOrMore (lazy) */
   Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)+?'>>['results'], ['1foo', 'foo']>>,
   Expect<
@@ -155,10 +167,65 @@ type Tests = [
       ['1foo2' | `1foo${string}foo2` | '1[ one or more of `foo` ]2', 'foo']
     >
   >,
-  Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)+?2'>>['namedCapture'], ['g1', 'foo']>>
+  Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)+?2'>>['namedCapture'], ['g1', 'foo']>>,
+
+  /** StartOf / EndOf matching string */
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'^foo-(bar)'>>['results'],
+      ['foo-bar' | 'Start with [foo-bar]', 'bar']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo-(bar)$'>>['results'],
+      ['foo-bar' | 'End with [foo-bar]', 'bar']
+    >
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'^foo-(bar)$'>>['results'],
+      ['foo-bar' | 'Start with [End with [foo-bar]]', 'bar']
+    >
+  >,
+  Expect<Equal<ResolvePermutation<ParseRegexp<'^foo-(?<g1>bar)$'>>['namedCapture'], ['g1', 'bar']>>,
+
+  /** Lookahead (positive/negative) */
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo(?=(?<g1>bar))'>>['results'],
+      ['foo' | 'foo[following pattern contain: [bar] ]']
+    >
+  >,
+  Expect<
+    Equal<ResolvePermutation<ParseRegexp<'foo(?=(?<g1>bar))'>>['namedCapture'], ['g1', 'bar']>
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo(?!(?<g1>bar))'>>['results'],
+      ['foo' | 'foo[following pattern not contain: [bar] ]']
+    >
+  >,
+
+  /** Lookbehind (positive/negative) */
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo(?<=(?<g1>bar))'>>['results'],
+      ['foo' | 'foo[previous pattern contain: [bar] ]']
+    >
+  >,
+  Expect<
+    Equal<ResolvePermutation<ParseRegexp<'foo(?=(?<g1>bar))'>>['namedCapture'], ['g1', 'bar']>
+  >,
+  Expect<
+    Equal<
+      ResolvePermutation<ParseRegexp<'foo(?<!(?<g1>bar))'>>['results'],
+      ['foo' | 'foo[previous pattern not contain: [bar] ]']
+    >
+  >
 ]
 
-type testzsdf = ResolvePermutation<ParseRegexp<'1(?<g1>foo)+?2'>>['results']
+type testzsdf = ResolvePermutation<ParseRegexp<'foo(?=(?<g1>bar))'>>['results']
 
 const test: testzsdf[2] = 'bar-'
 ;('[any word char]_[any non-char]_[any digit]_[any non-digit]_a_[any char NOT in [X-Z]]')

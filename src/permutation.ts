@@ -92,25 +92,28 @@ export type ResolvePermutation<
       value: infer StartEndMatchers extends Matcher[]
     }
   ? ResolvePermutation<StartEndMatchers> extends PermutationResult<
-      infer StartEndResult extends string[],
+      [infer ResultString extends string, ...infer Captures extends any[]],
       infer NextedNamedCapture
     >
     ? ResolvePermutation<
         Matchers,
         [],
-        ConcatToFirstElement<
-          MatchResultArray,
-          | Exclude<StartEndResult[0], `End with${string}`>
-          | (Extract<
-              `${Type extends 'startOf' ? 'Start' : 'End'} with [${StartEndResult[0]}]`,
-              `Start with [End with${string}`
-            > extends never
-              ? `${Type extends 'startOf' ? 'Start' : 'End'} with [${StartEndResult[0]}]`
-              : Extract<
-                  `${Type extends 'startOf' ? 'Start' : 'End'} with [${StartEndResult[0]}]`,
-                  `Start with [End with${string}`
-                >)
-        >,
+        [
+          ...ConcatToFirstElement<
+            MatchResultArray,
+            | Exclude<ResultString, `End with${string}`>
+            | (Extract<
+                `${Type extends 'startOf' ? 'Start' : 'End'} with [${ResultString}]`,
+                `Start with [End with${string}`
+              > extends never
+                ? `${Type extends 'startOf' ? 'Start' : 'End'} with [${ResultString}]`
+                : Extract<
+                    `${Type extends 'startOf' ? 'Start' : 'End'} with [${ResultString}]`,
+                    `Start with [End with${string}`
+                  >)
+          >,
+          ...Captures
+        ],
         NamedCaptures | NextedNamedCapture,
         [...CurrentIndex, '']
       >
