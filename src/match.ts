@@ -166,7 +166,9 @@ export type EnumerateMatchers<
         RestInputString,
         Matchers,
         Flags,
-        SkipedString,
+        `${InputString extends `${infer FirstSkipString}${CurrentMatched}${string}`
+          ? `${SkipedString}${FirstSkipString}`
+          : SkipedString}`,
         OutMostRestMatchers,
         [
           // ? matchedString and previous capture groups
@@ -400,7 +402,7 @@ type Match<
       positive: infer Positive extends boolean
     }
   ? ExhaustiveMatch<
-      `${SkipedString}${PrevMatchedString}`,
+      `${PrevMatchedString}${SkipedString}`,
       LookbehindMatchers,
       Flags,
       SkipedString,
