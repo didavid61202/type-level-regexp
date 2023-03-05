@@ -471,15 +471,206 @@ type Tests = [
       >,
       NullResult<'', unknown, false>
     >
+  >,
+
+  /** Or */
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g0>bar)-foo-qux|(?<g1>ba(?:r|z)-(?:b+az|(?<g2>foo)))-(?<g3>[a-f]oo|qur|qu[x-z])'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', undefined, 'bar-baz', undefined, 'qux'],
+        '-foo',
+        ['g0', undefined] | ['g1', 'bar-baz'] | ['g2', undefined] | ['g3', 'qux']
+      >
+    >
+  >,
+
+  /** Repeat exactly n times (Greedy)*/
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baiz-bluz-brez-quuuuuxxxx-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2}z-){3})(?<g3>qu{5}\\w{4})'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baiz-bluz-brez-quuuuuxxxx', 'bar-baiz-bluz-brez-', 'brez-', 'quuuuuxxxx'],
+        '-foo',
+        ['g1', 'bar-baiz-bluz-brez-'] | ['g2', 'brez-'] | ['g3', 'quuuuuxxxx']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2}z-))(?<g3>qu{5})'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+
+  /** Repeat exactly n times (Lazy)*/
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baiz-bluz-brez-quuuuuxxxx-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2}?z-){3}?)(?<g3>qu{5}?\\w{4}?)'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baiz-bluz-brez-quuuuuxxxx', 'bar-baiz-bluz-brez-', 'brez-', 'quuuuuxxxx'],
+        '-foo',
+        ['g1', 'bar-baiz-bluz-brez-'] | ['g2', 'brez-'] | ['g3', 'quuuuuxxxx']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2}?z-))(?<g3>qu{5}?x)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+
+  /** Repeat n or more times (Greedy)*/
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxxxxx-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,}z-){3,})(?<g3>qu{5,}\\w{4,})'>,
+        never
+      >,
+      MatchedResult<
+        [
+          'bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxxxxx',
+          'bar-baiez-bluraz-bremuiz-buildz-',
+          'buildz-',
+          'quuuuuuxxxxxx'
+        ],
+        '-foo',
+        ['g1', 'bar-baiez-bluraz-bremuiz-buildz-'] | ['g2', 'buildz-'] | ['g3', 'quuuuuuxxxxxx']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,}z-))(?<g3>qu{5,}x)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+
+  /** Repeat n or more times (Lazy)*/
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxxxxx-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,}?z-){3,}?)(?<g3>qu{5,}?\\w{4,}?)'>,
+        never
+      >,
+      MatchedResult<
+        [
+          'bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxx',
+          'bar-baiez-bluraz-bremuiz-buildz-',
+          'buildz-',
+          'quuuuuuxxx'
+        ],
+        'xxx-foo',
+        ['g1', 'bar-baiez-bluraz-bremuiz-buildz-'] | ['g2', 'buildz-'] | ['g3', 'quuuuuuxxx']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-quuuuux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,}?z-))(?<g3>qu{5,}?x)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+
+  /** Repeat n to m times (Greedy)*/
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxxxxx-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,5}z-){1,5})(?<g3>qu{1,5}\\w{2,4})'>,
+        never
+      >,
+      MatchedResult<
+        [
+          'bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxx',
+          'bar-baiez-bluraz-bremuiz-buildz-',
+          'buildz-',
+          'quuuuuuxxx'
+        ],
+        'xxx-foo',
+        ['g1', 'bar-baiez-bluraz-bremuiz-buildz-'] | ['g2', 'buildz-'] | ['g3', 'quuuuuuxxx']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-quuux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,3}z-))(?<g3>qu{2,5}x)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+
+  /** Repeat n to m times (Lazy)*/
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxxxxx-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,5}?z-){1,5}?)(?<g3>qu{1,5}?\\w{2,4}?)'>,
+        never
+      >,
+      MatchedResult<
+        [
+          'bar-baiez-bluraz-bremuiz-buildz-quuu',
+          'bar-baiez-bluraz-bremuiz-buildz-',
+          'buildz-',
+          'quuu'
+        ],
+        'uuuxxxxxx-foo',
+        ['g1', 'bar-baiez-bluraz-bremuiz-buildz-'] | ['g2', 'buildz-'] | ['g3', 'quuu']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-quuux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,3}?z-))(?<g3>qu{2,5}?x?)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
   >
 ]
 
 type parsed = ParseRegexp<'(?=.*[a-z])(?=.*[A-Z])(?=.*[!-.])(?=.*[0-9]).{8,24}$'>
 
 type testMatch = ExhaustiveMatch<
-  //     ^?
-  'bar-foo-bar-baz-qux-foo',
-  ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?<!-foo.{12})'>,
+  'bar-foo-bar-baiez-bluraz-bremuiz-buildz-quuuuuuxxxxxx-foo',
+  ParseRegexp<'(?<g1>bar-(?<g2>b[a-z]{2,5}?z-){1,5}?)(?<g3>qu{1,5}?\\w{2,4}?)'>,
   never
 >
 
