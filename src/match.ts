@@ -59,7 +59,7 @@ export type ExhaustiveMatch<
   ? Result extends MatchedResult<any, any, any>
     ? Result
     : Result extends NullResult<infer PartialMatched extends string, any, infer Abort>
-    ? Abort extends true
+    ? true extends Abort | StartOf
       ? Result
       : PartialMatched extends ''
       ? InputString extends `${infer FirstChar}${infer Rest}`
@@ -102,18 +102,22 @@ export type EnumerateMatchers<
       type: infer Type extends 'endOf' | 'startOf'
       value: infer StartOrEndMatchers extends Matcher[]
     }
-  ? EnumerateMatchers<
+  ? ExhaustiveMatch<
       InputString,
       StartOrEndMatchers,
       Flags,
       SkipedString,
-      OutMostRestMatchers,
-      MatchResultArray,
-      NamedCaptures,
       Type extends 'startOf' ? true : StartOf,
-      Type extends 'endOf' ? true : EndOf,
-      MatchEmpty
-    >
+      Type extends 'endOf' ? true : EndOf
+    > extends infer Result
+    ? Result extends MatchedResult<infer MatchArray, infer RestInputString, any>
+      ? '' extends (Type extends 'endOf' ? false : '') | RestInputString
+        ? Result
+        : NullResult<MatchArray[0], undefined, true>
+      : Result extends NullResult<infer PartialMatched extends string, infer DebugObj, any>
+      ? NullResult<PartialMatched, DebugObj, true>
+      : never
+    : never
   : Match<
       CurrentMatcher['type'] extends 'boundary'
         ? `${LastCharOfOr<MatchResultArray[0], ' '>}${InputString}`

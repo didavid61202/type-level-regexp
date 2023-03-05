@@ -147,7 +147,7 @@ type Tests = [
     >
   >,
 
-  /** oneOrMore (Greedy) */
+  /** OneOrMore (Greedy) */
   Expect<
     Equal<
       ResolvePermutation<ParseRegexp<'1(?<g1>foo)+'>>['results'],
@@ -156,7 +156,7 @@ type Tests = [
   >,
   Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)+'>>['namedCapture'], ['g1', 'foo']>>,
 
-  /** oneOrMore (lazy) */
+  /** OneOrMore (lazy) */
   Expect<Equal<ResolvePermutation<ParseRegexp<'1(?<g1>foo)+?'>>['results'], ['1foo', 'foo']>>,
   Expect<
     Equal<
