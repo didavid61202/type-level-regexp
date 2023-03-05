@@ -312,13 +312,13 @@ type Tests = [
     Equal<
       ExhaustiveMatch<
         'bar-foo-bar-baz-qux-foo',
-        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?=\\Wf.[a-z])'>,
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?=\\W(?<g4>f.[a-z]))'>,
         never
       >,
       MatchedResult<
-        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux', 'foo'],
         '-foo',
-        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux']
+        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux'] | ['g4', 'foo']
       >
     >
   >,
@@ -336,13 +336,13 @@ type Tests = [
     Equal<
       ExhaustiveMatch<
         'bar-foo-bar-baz-qux-foo',
-        ParseRegexp<'(?=.*baz)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        ParseRegexp<'(?=.*(?<g4>baz))(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
         never
       >,
       MatchedResult<
-        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        ['bar-baz-qux', 'baz', 'bar-baz', 'baz', 'qux'],
         '-foo',
-        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux']
+        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', 'baz']
       >
     >
   >,
@@ -352,13 +352,13 @@ type Tests = [
     Equal<
       ExhaustiveMatch<
         'bar-foo-bar-baz-qux-foo',
-        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?!-bar)'>,
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?!-(?<g4>bar))'>,
         never
       >,
       MatchedResult<
-        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux', undefined],
         '-foo',
-        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux']
+        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux'] | ['g4', undefined]
       >
     >
   >,
