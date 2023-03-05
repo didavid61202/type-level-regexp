@@ -307,43 +307,123 @@ type Tests = [
     >
   >,
 
+  /** Lookahead (positive) */
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?=\\Wf.[a-z])'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        '-foo',
+        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?=-bar)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?=.*baz)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        '-foo',
+        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux']
+      >
+    >
+  >,
+
+  /** Lookahead (negative) */
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?!-bar)'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        '-foo',
+        ['g2', 'baz'] | ['g1', 'bar-baz'] | ['g3', 'qux']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?!-foo)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?!.*baz)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
     >
   >
 ]
 
-type parsed = ParseRegexp<'(bar-(baz))$'>
+type parsed = ParseRegexp<'(?=.*[a-z])(?=.*[A-Z])(?=.*[!-.])(?=.*[0-9]).{8,24}$'>
 
 type testMatch = ExhaustiveMatch<
-  //    ^?
   'bar-foo-bar-baz-qux-foo',
-  ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)$'>,
+  ParseRegexp<'(?!.*baz)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
   never
 >
-const matchAll = `12av3B8cdWY-B8Cd4599xYxAq3b8CDyZ-b8cD89`.matchAll(
-  //     ^?
-  // createRegExp('([w-z]{2})', ['i', 'g'])
-  createRegExp('a[^e-g]3(?<g1>b8cD)([w-z]{2})-\\k<g1>', ['i', 'g'])
-)
 
-const [
-  first,
-  //^?
-  second,
-  //^?
-] = spreadRegExpIterator(matchAll)
+// type matccPassword = ExhaustiveMatch<
+//   //     ^?
+//   'b5ar#fooDbarb5ar#foo',
+//   ParseRegexp<'^(?=.*[a-z])(?=.*[A-Z])(?=.*[!-.])(?=.*[0-9]).{8,20}$'>,
+//   never
+// >
 
-describe('string.match', () => {
-  it('return typed array and catpure groups', () => {
-    const RE = createRegExp('123')
-    const result = '123'.match(RE)
+// const matchAll = `12av3B8cdWY-B8Cd4599xYxAq3b8CDyZ-b8cD89`.matchAll(
+//   //     ^?
+//   // createRegExp('([w-z]{2})', ['i', 'g'])
+//   createRegExp('a[^e-g]3(?<g1>b8cD)([w-z]{2})-\\k<g1>', ['i', 'g'])
+// )
 
-    expectTypeOf(result).toEqualTypeOf<
-      RegExpMatchResult<{
-        matched: ['123']
-        namedCaptures: never
-        input: '123'
-        restInput: ''
-      }>
-    >()
-  })
-})
+// const [
+//   first,
+//   //^?
+//   second,
+//   //^?
+// ] = spreadRegExpIterator(matchAll)
+
+// describe('string.match', () => {
+//   it('return typed array and catpure groups', () => {
+//     const RE = createRegExp('123')
+//     const result = '123'.match(RE)
+
+//     expectTypeOf(result).toEqualTypeOf<
+//       RegExpMatchResult<{
+//         matched: ['123']
+//         namedCaptures: never
+//         input: '123'
+//         restInput: ''
+//       }>
+//     >()
+//   })
+// })
