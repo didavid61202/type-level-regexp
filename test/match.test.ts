@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { it, describe } from 'vitest'
 import { expectTypeOf } from 'expect-type'
 import { createRegExp, spreadRegExpIterator } from '../src/regexp'
@@ -301,7 +303,10 @@ type Tests = [
         ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)$'>,
         never
       >,
-      NullResult<'bar-baz-qux', undefined, true>
+      NullResult<'bar-baz-qux', { msg: 'not matching at the end of input string.' }, true>
+    >
+  >,
+
     >
   >
 ]
