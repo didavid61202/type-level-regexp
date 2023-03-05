@@ -100,7 +100,6 @@ type ResolveRangeSet<
 export type Matcher =
   | {
       type: 'string' | 'charSet' | 'notCharSet' | 'backreference'
-      //TODO: add case insensitive boolean for flag `i`
       value: string
     }
   | {
@@ -117,7 +116,7 @@ export type Matcher =
       repeat?: [from: any[], to: string]
     }
   | {
-      type: 'zeroOrMore' | 'oneOrMore' //TODO: can optimize matching logic when combining with `any` matcher
+      type: 'zeroOrMore' | 'oneOrMore'
       value: Matcher[]
       greedy: boolean
     }
@@ -370,6 +369,22 @@ export type ResolveNamedCaptureUnion<
       CollectedNames | CollectCaptureNames<CurrentMatchers>
     >
   : never
+
+export type MatchersMatchAny<
+  Matchers extends Matcher[],
+  Count extends any[] = [],
+  CurrentMatcher extends Matcher = Matchers[Count['length']]
+> = Count['length'] extends Matchers['length']
+  ? false
+  : CurrentMatcher extends { type: 'any' }
+  ? true
+  : CurrentMatcher extends { value: infer NestMatchers extends Matcher[] }
+  ? MatchersMatchAny<NestMatchers>
+  : CurrentMatcher extends { value: infer NestOrMatchers extends Matcher[][] }
+  ? Extract<MatchersMatchAny<NestOrMatchers[number]>, true> extends never
+    ? false
+    : true
+  : false
 
 export type StepMatch<
   InputString extends string,

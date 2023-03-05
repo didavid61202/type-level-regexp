@@ -11,6 +11,7 @@ import type {
   LastCharOfOr,
   MatchedResult,
   Matcher,
+  MatchersMatchAny,
   NameCaptureValue,
   NamedCapturesTuple,
   NullResult,
@@ -71,6 +72,30 @@ export type ExhaustiveMatch<
       ? ExhaustiveMatch<NextSection, Matchers, Flags, `${SkipedString}${Prefix}${PartialMatched}`>
       : never
     : never
+  : never
+
+export type MatchLast<
+  InputString extends string,
+  Matchers extends Matcher[],
+  Flags extends Flag,
+  NamedCaptures extends NamedCapturesTuple,
+  SkipedString extends string = '',
+  EndOf extends boolean = false,
+  LastMatched extends MatchedResult<any, any, any> | NullResult<''> = NullResult<''>
+> = EnumerateMatchers<
+  InputString,
+  Matchers,
+  Flags,
+  SkipedString,
+  [],
+  [''],
+  NamedCaptures,
+  false,
+  EndOf
+> extends infer Result
+  ? Result extends MatchedResult<any, infer RestInput, any>
+    ? MatchLast<RestInput, Matchers, Flags, NamedCaptures, SkipedString, EndOf, Result>
+    : LastMatched
   : never
 
 export type EnumerateMatchers<
@@ -246,24 +271,45 @@ type Match<
       greedy: infer Greedy extends boolean
       repeat?: infer Repeat extends [from: any[], to: string]
     }
-  ? MatchOptionalOrMoreMatcher<
-      InputString,
-      Flags,
-      SkipedString,
-      Matchers,
-      OutMostRestMatchers,
-      OptionalOrMoreMatchers,
-      Greedy,
-      [never, string] extends Repeat
-        ? Type extends 'zeroOrMore'
-          ? [[], 'infinite']
-          : [[], '1']
-        : Repeat,
-      NamedCaptures,
-      StartOf,
-      EndOf,
-      Count
-    >
+  ? [Type, Greedy, MatchersMatchAny<OptionalOrMoreMatchers>] extends ['zeroOrMore', true, true]
+    ? [...RestMatchers, ...OutMostRestMatchers] extends []
+      ? MatchLast<
+          InputString,
+          OptionalOrMoreMatchers,
+          Flags,
+          NamedCaptures,
+          SkipedString,
+          EndOf
+        > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NamedCapture>
+        ? MatchedResult<[InputString, ...Captures], '', NamedCapture>
+        : never
+      : BacktrackGreedyAnyMatch<
+          InputString,
+          Flags,
+          SkipedString,
+          OptionalOrMoreMatchers,
+          [...RestMatchers, ...OutMostRestMatchers],
+          NamedCaptures,
+          EndOf
+        >
+    : MatchOptionalOrMoreMatcher<
+        InputString,
+        Flags,
+        SkipedString,
+        Matchers,
+        OutMostRestMatchers,
+        OptionalOrMoreMatchers,
+        Greedy,
+        [never, string] extends Repeat
+          ? Type extends 'zeroOrMore'
+            ? [[], 'infinite']
+            : [[], '1']
+          : Repeat,
+        NamedCaptures,
+        StartOf,
+        EndOf,
+        Count
+      >
   : CurrentMatcher extends {
       type: 'oneOrMore'
       value: infer OneOrMoreMatchers extends Matcher[]
@@ -445,6 +491,38 @@ type MatchOrMatchers<
       [...Count, ''],
       BestMatchedWithPrefix
     >
+
+type BacktrackGreedyAnyMatch<
+  GreedyMatchedString extends string,
+  Flags extends Flag,
+  SkipedString extends string,
+  CurrentNestedMatchers extends Matcher[],
+  RestMatchers extends Matcher[],
+  NamedCaptures extends NamedCapturesTuple,
+  EndOf extends boolean
+> = MatchLast<
+  GreedyMatchedString,
+  RestMatchers,
+  Flags,
+  NamedCaptures,
+  SkipedString,
+  EndOf
+> extends infer Result
+  ? Result extends MatchedResult<infer MatchArray extends any[], infer RestInputString, any>
+    ? GreedyMatchedString extends `${infer ResolvedGreedyMatched}${MatchArray[0]}${RestInputString}`
+      ? MatchLast<
+          ResolvedGreedyMatched,
+          CurrentNestedMatchers,
+          Flags,
+          NamedCaptures,
+          SkipedString,
+          EndOf
+        > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NamedCapture>
+        ? MatchedResult<[ResolvedGreedyMatched, ...Captures], MatchArray[0], NamedCapture>
+        : never
+      : never
+    : NullResult<''>
+  : never
 
 type BacktrackMatch<
   MatchedResultsTuple extends {
