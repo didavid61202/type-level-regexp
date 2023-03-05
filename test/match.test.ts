@@ -381,14 +381,105 @@ type Tests = [
       >,
       NullResult<'', unknown, false>
     >
+  >,
+
+  /** Lookbehind (positive) */
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<=(?<g4>f.[a-z])\\W)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', 'foo', 'bar-baz', 'baz', 'qux'],
+        '-foo',
+        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', 'foo']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<=bar-)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?<=(?<g4>b\\w[^a-y])-.{3})'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux', 'baz'],
+        '-foo',
+        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', 'baz']
+      >
+    >
+  >,
+
+  /** Lookbehind (negative) */
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<!(?<g4>bar)-)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', undefined, 'bar-baz', 'baz', 'qux'],
+        '-foo',
+        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', undefined]
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<!foo-)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?<!-foo.{6})'>,
+        never
+      >,
+      MatchedResult<
+        ['bar-baz-qux', 'bar-baz', 'baz', 'qux'],
+        '-foo',
+        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux']
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      ExhaustiveMatch<
+        'bar-foo-bar-baz-qux-foo',
+        ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?<!-foo.{12})'>,
+        never
+      >,
+      NullResult<'', unknown, false>
+    >
   >
 ]
 
 type parsed = ParseRegexp<'(?=.*[a-z])(?=.*[A-Z])(?=.*[!-.])(?=.*[0-9]).{8,24}$'>
 
 type testMatch = ExhaustiveMatch<
+  //     ^?
   'bar-foo-bar-baz-qux-foo',
-  ParseRegexp<'(?!.*baz)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>,
+  ParseRegexp<'(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?<!-foo.{12})'>,
   never
 >
 
