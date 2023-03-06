@@ -163,12 +163,12 @@ export type ContextValue<
 > = Value
 
 export interface MatchedResult<
-  MatchArray extends (string | undefined)[],
+  MatchedArray extends (string | undefined)[],
   RestInputString extends string,
   NamedCaptures extends NamedCapturesTuple = never
 > {
   matched: true
-  results: MatchArray
+  results: MatchedArray
   namedCaptures: NamedCaptures
   restInputString: RestInputString
 }
