@@ -15,8 +15,6 @@
     "test": "vitest typecheck"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.35.2",
-    "@types/node": "^18.14.0",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
