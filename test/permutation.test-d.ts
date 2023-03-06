@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ParseRegExp } from '../src/parse'
 import { PermutationResult, ResolvePermutation } from '../src/permutation'
-import { ExpandRepeat } from '../src/utils'
-import { Equal, Expect, MergeUnion } from './helper'
+import { MergeUnion } from './helper'
 
 type PRE<RE extends string> = ResolvePermutation<ParseRegExp<RE>> extends PermutationResult<
   infer ResultArray,
