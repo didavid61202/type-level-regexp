@@ -235,7 +235,7 @@ export type StrintToUnion<
   Original extends string = S,
   Union extends string = never,
   Count extends any[] = []
-> = Count['length'] extends 8
+> = Count['length'] extends 13
   ? `[ any char in [${Original}] ]`
   : S extends `${infer Char}${infer Rest}`
   ? StrintToUnion<Rest, Original, Union | Char, [...Count, '']>
