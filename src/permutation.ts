@@ -296,7 +296,7 @@ export type ResolvePermutation<
                 IndexOf<OrMatchersArray, OrMatchers>
               >
             ],
-            NamedCaptures | NextedNamedCapture,
+            NamedCaptures | ResolveNamedCaptureUnion<OrMatchersArray, NextedNamedCapture>,
             [...CurrentIndex, '']
           >
         : never
