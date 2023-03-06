@@ -9,6 +9,7 @@ specifiers:
   expect-type: ^0.15.0
   prettier: ^2.8.4
   typescript: ^4.9.5
+  vite: ^4.1.4
   vitest: ^0.28.5
 
 devDependencies:
@@ -20,6 +21,7 @@ devDependencies:
   expect-type: 0.15.0
   prettier: 2.8.4
   typescript: 4.9.5
+  vite: 4.1.4_@types+node@18.14.0
   vitest: 0.28.5
 
 packages:
