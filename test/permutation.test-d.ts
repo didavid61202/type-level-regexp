@@ -2,7 +2,7 @@ import { ParseRegExp } from '../src/parse'
 import { PermutationResult, ResolvePermutation } from '../src/permutation'
 import { MergeUnion } from './helper'
 
-type PRE<RE extends string> = ResolvePermutation<ParseRegExp<RE>> extends PermutationResult<
+type PRE<RegExp extends string> = ResolvePermutation<ParseRegExp<RegExp>> extends PermutationResult<
   infer ResultArray,
   infer NamedCaptures
 >
@@ -16,14 +16,14 @@ type PRE<RE extends string> = ResolvePermutation<ParseRegExp<RE>> extends Permut
     }
   : never
 
-describe('Generic type `ResolvePermutation<[ParsedRegExp]>`Permutate all possible match results of', () => {
-  it('exact string', () => {
+describe('Generic type `ResolvePermutation<[ParsedRegExp]>` can Permutate all possible matches of', () => {
+  it('Exact string', () => {
     expectTypeOf<PRE<'foo'>>().toEqualTypeOf<{
       resultArray: ['foo']
       namedCapture: never
     }>()
   })
-  it('non-Capture groups', () => {
+  it('Non-Capture groups', () => {
     expectTypeOf<PRE<'(?:foo_(?:bar)_baz)'>>().toEqualTypeOf<{
       resultArray: ['foo_bar_baz']
       namedCapture: never
