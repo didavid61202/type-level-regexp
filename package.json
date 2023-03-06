@@ -1,11 +1,11 @@
 {
   "name": "type-level-regexp",
   "version": "1.0.0",
-  "description": "Type-Safe, Type Level RegExp interpreter/parser",
+  "description": "Type-Safe, Type-Level RegExp interpreter/parser",
   "main": "index.js",
   "keywords": [],
   "author": "David Tai <didavid61202@gmail.com>",
-  "homepage": "https://github.com/antfu/pkg-name#readme",
+  "homepage": "https://github.com/didavid61202/type-level-regexp#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/didavid61202/type-level-regexp.git"
