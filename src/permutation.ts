@@ -248,15 +248,16 @@ export type ResolvePermutation<
             ? Captures
             : CountNumOfCaptureGroupsAs<OptionalMatchers>)
         ],
-        Greedy extends true
-          ? NamedCaptures | NextedNamedCapture | ResolveNamedCaptureUnion<[OptionalMatchers], never>
-          : TupleItemExtendsType<
-              [...Matchers, ...OutMostRestMatchers],
-              [...CurrentIndex, ''],
-              Matcher
-            > extends true
-          ? NamedCaptures | NextedNamedCapture
-          : ResolveNamedCaptureUnion<[OptionalMatchers], never>,
+        | NamedCaptures
+        | (Greedy extends true
+            ? NextedNamedCapture | ResolveNamedCaptureUnion<[OptionalMatchers], never>
+            : TupleItemExtendsType<
+                [...Matchers, ...OutMostRestMatchers],
+                [...CurrentIndex, ''],
+                Matcher
+              > extends true
+            ? NextedNamedCapture
+            : ResolveNamedCaptureUnion<[OptionalMatchers], NamedCaptures>),
         [...CurrentIndex, '']
       >
     : never
