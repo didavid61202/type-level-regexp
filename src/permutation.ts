@@ -43,6 +43,15 @@ export type PrependAndUnionToAll<
     >
   : []
 
+type RepeatStringFromTo<
+  RepeatingString extends string,
+  From extends any[],
+  To extends string,
+  RepeatResult extends string = ''
+> = `${From['length']}` extends To
+  ? RepeatResult
+  : RepeatStringFromTo<RepeatingString, [...From, ''], To, `${RepeatResult}${RepeatingString}`>
+
 interface LiteralCharSetMap<
   CharSet extends string = string,
   ResolvedCharSet extends string = ResolveCharSet<CharSet>
@@ -212,7 +221,11 @@ export type ResolvePermutation<
               ...(Captures[number] extends undefined
                 ? ConcatToFirstElement<MatchResultArray, ResultString>
                 : [`${MatchResultArray[0]}${ResultString}`]),
-              ...(Captures[number] extends undefined ? [] : Captures)
+              ...(MatchResultArray['length'] extends 1
+                ? Captures
+                : Captures[number] extends undefined
+                ? []
+                : Captures)
             ],
             | NamedCaptures
             | Exclude<NextedNamedCapture, [Extract<NamedCaptures, [string, string]>[0], undefined]>,
@@ -225,6 +238,7 @@ export type ResolvePermutation<
       type: 'optional'
       value: infer OptionalMatchers extends Matcher[]
       greedy: infer Greedy extends boolean
+      repeat?: infer Repeat extends [from: any[], to: string]
     }
   ? ResolvePermutation<
       OptionalMatchers,
@@ -240,13 +254,17 @@ export type ResolvePermutation<
           ...ConcatToFirstElement<
             MatchResultArray,
             Greedy extends true
-              ? ResultString | ''
+              ? [never, string] extends Repeat
+                ? ResultString | ''
+                : RepeatStringFromTo<ResultString | '', Repeat[0], Repeat[1]>
               : TupleItemExtendsType<
                   [...Matchers, ...OutMostRestMatchers],
                   [...CurrentIndex, ''],
                   Matcher
                 > extends true
-              ? ResultString | ''
+              ? [never, string] extends Repeat
+                ? ResultString | ''
+                : RepeatStringFromTo<ResultString | '', Repeat[0], Repeat[1]>
               : ''
           >,
           ...(Greedy extends true
@@ -375,13 +393,13 @@ export type ResolvePermutation<
     : never
   : CurrentMatcher extends {
       type: 'repeat'
-      value: infer OrMatchers extends Matcher[]
+      value: infer RepeatMatchers extends Matcher[]
       from: infer From extends `${number}`
       to: infer To extends `${number}` | '' | string
       greedy: infer Greedy extends boolean
     }
   ? ResolvePermutation<
-      ExpandRepeat<OrMatchers, From, To, Greedy>,
+      ExpandRepeat<RepeatMatchers, From, To, Greedy>,
       ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
     > extends infer Result
     ? Result extends PermutationResult<
@@ -402,11 +420,25 @@ export type ResolvePermutation<
                     Matcher
                   >
                 ? ResultString extends `${string}zero${string}\`${infer RepeatString}\`${string}`
-                  ? `[ repeat \`${RepeatString}\` unlimited times ]`
+                  ? `[ repeat \`${RepeatString}\` ${From} to unlimited times ]`
                   : ResultString
-                : ResultString
+                : [From, To] extends ['0', '']
+                ? ''
+                :
+                    | ResultString
+                    | (string extends To ? `[ repeat \`${ResultString}\` ${From} times ]` : never)
             >,
-            ...Captures
+            ...(true extends
+              | Greedy
+              | TupleItemExtendsType<
+                  [...Matchers, ...OutMostRestMatchers],
+                  [...CurrentIndex, ''],
+                  Matcher
+                >
+              ? Captures
+              : From extends '0'
+              ? CountNumOfCaptureGroupsAs<RepeatMatchers>
+              : Captures)
           ],
           NamedCaptures | NextedNamedCapture,
           [...CurrentIndex, '']
