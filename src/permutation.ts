@@ -139,18 +139,29 @@ export type ResolvePermutation<
   ? ResolvePermutation<
       LookaroundMatchers,
       ConcateRestMatchers<Matchers, OutMostRestMatchers, CurrentIndex>
-    > extends PermutationResult<infer LookaroundResult extends string[], infer NextedNamedCapture>
+    > extends PermutationResult<
+      [infer ResultString extends string, ...infer Captures extends any[]],
+      infer NextedNamedCapture
+    >
     ? ResolvePermutation<
         Matchers,
         OutMostRestMatchers,
-        ConcatToFirstElement<
-          MatchResultArray,
-          | `[${Type extends 'lookahead' ? 'following' : 'previous'} pattern${Positive extends true
-              ? ''
-              : ' not'} contain: [${LookaroundResult[0]}] ]`
-          | ''
-        >,
-        NamedCaptures | NextedNamedCapture,
+        [
+          ...ConcatToFirstElement<
+            MatchResultArray,
+            | `[${Type extends 'lookahead'
+                ? 'following'
+                : 'previous'} pattern${Positive extends true
+                ? ''
+                : ' not'} contain: [${ResultString}] ]`
+            | ''
+          >,
+          ...(Positive extends true ? Captures : CountNumOfCaptureGroupsAs<LookaroundMatchers>)
+        ],
+        | NamedCaptures
+        | (Positive extends true
+            ? NextedNamedCapture
+            : ResolveNamedCaptureUnion<[LookaroundMatchers], NamedCaptures>),
         [...CurrentIndex, '']
       >
     : never
