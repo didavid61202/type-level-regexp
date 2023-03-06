@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { MatchRegExp } from '../src'
-import { ParseRegexp } from '../src/parse'
+import { ParseRegExp } from '../src/parse'
+import { createRegExp } from '../src/regexp'
 
 const matchedResult =
   //     ^?
@@ -18,10 +19,12 @@ const index = matchedResult.index
 //   '1a(b(?<g1>3|6|9)d(?<g2>x|y))\\k<g1>e\\k<g2>f'
 // )
 
-// const password = `aBd3!fEhe2`.match(
-//   //    ^?
-//   '^(?=.*(?<lower>[a-z]))(?=.*(?<upper>[A-Z]))(?=.*(?<digit>\\d))(?=.*(?<special>[!@#$%^&*])).{8,}$'
-// )
+const password = `aBd5!fE#he2`.match(
+  //    ^?
+  createRegExp(
+    '^(?=.*(?<lower>[a-z]))(?=.*(?<upper>[A-Z]))(?=.*(?<digit>\\d))(?=.*(?<special>[!@#$%^&*])).{8,}$'
+  )
+)
 // const estawet = password['index']
 //    ^?
 

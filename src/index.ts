@@ -1,5 +1,5 @@
 import { ExhaustiveMatch, GlobalMatch } from './match'
-import { ParseRegexp } from './parse'
+import { ParseRegExp } from './parse'
 import { PermutationResult, PrependAndUnionToAll, ResolvePermutation } from './permutation'
 import {
   ExtractRegExpParts,
@@ -22,7 +22,7 @@ export type MatchRegExp<
   InputString extends string,
   Regexp extends string,
   Flags extends Flag,
-  ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
+  ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
 > = string extends InputString
   ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
       infer MatchArray,
@@ -85,7 +85,7 @@ export type MatchAllRegExp<
   Flags extends Flag,
   MatchedResultTuple extends any[] = [],
   InitialInputString extends string = InputString,
-  ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
+  ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
 > = string extends InputString
   ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
       infer MatchArray,
@@ -131,7 +131,7 @@ export type ReplaceWithRegExp<
   Regexp extends string,
   ReplaceValue extends string,
   Flags extends Flag,
-  ParsedRegexpAST extends Matcher[] = ParseRegexp<Regexp>
+  ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
 > = 'g' extends Flags
   ? GlobalReplace<InputString, ParsedRegexpAST, ReplaceValue, Flags>
   : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result

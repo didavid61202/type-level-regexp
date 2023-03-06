@@ -8,7 +8,7 @@ type ShorthandMap = {
   b: 'boundary'
 }
 
-export type ParseRegexp<
+export type ParseRegExp<
   InputString extends string,
   ParsedMatchers extends Matcher[] = [],
   ParseOrAsTupleOnly extends boolean = false,
@@ -23,13 +23,13 @@ export type ParseRegexp<
           AccString,
           ParseOrAsTupleOnly
         >
-      : ParseRegexp<
+      : ParseRegExp<
           Rest,
           [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>, { type: 'any' }],
           ParseOrAsTupleOnly
         >
     : FirstChar extends '^'
-    ? ParseRegexp<Rest> extends infer StarOfInnerMatchers
+    ? ParseRegExp<Rest> extends infer StarOfInnerMatchers
       ? [{ type: 'startOf'; value: StarOfInnerMatchers }]
       : never
     : FirstChar extends '$'
@@ -49,7 +49,7 @@ export type ParseRegexp<
             AccString,
             ParseOrAsTupleOnly
           >
-        : ParseRegexp<
+        : ParseRegExp<
             RestAfterBackreference,
             [
               ...ParsedMatchers,
@@ -68,7 +68,7 @@ export type ParseRegexp<
               AccString,
               ParseOrAsTupleOnly
             >
-          : ParseRegexp<
+          : ParseRegExp<
               RestAfterEscapedChar,
               [
                 ...ParsedMatchers,
@@ -77,7 +77,7 @@ export type ParseRegexp<
               ],
               ParseOrAsTupleOnly
             >
-        : ParseRegexp<
+        : ParseRegExp<
             RestAfterEscapedChar,
             ParsedMatchers,
             ParseOrAsTupleOnly,
@@ -86,7 +86,7 @@ export type ParseRegexp<
       : never
     : FirstChar extends '|'
     ? ParseOrAsTupleOnly extends true
-      ? ParseRegexp<Rest, [], true> extends infer RestOrMatchersTuple
+      ? ParseRegExp<Rest, [], true> extends infer RestOrMatchersTuple
         ? [
             [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>],
             ...(RestOrMatchersTuple extends Matcher[][]
@@ -94,7 +94,7 @@ export type ParseRegexp<
               : [RestOrMatchersTuple])
           ]
         : never
-      : ParseRegexp<Rest, [], true> extends infer RestOrMatchersTuple
+      : ParseRegExp<Rest, [], true> extends infer RestOrMatchersTuple
       ? [
           {
             type: 'or'
@@ -127,7 +127,7 @@ export type ParseRegexp<
             AccString,
             ParseOrAsTupleOnly
           >
-        : ParseRegexp<
+        : ParseRegExp<
             Rest,
             [
               ...ParsedMatchers,
@@ -160,8 +160,8 @@ export type ParseRegexp<
           ]
         >
       ]
-      ? ParseRegexp<Inner> extends infer ResovledInner extends Matcher[]
-        ? ParseRegexp<
+      ? ParseRegExp<Inner> extends infer ResovledInner extends Matcher[]
+        ? ParseRegExp<
             Rest,
             [
               ...ParsedMatchers,
@@ -185,7 +185,7 @@ export type ParseRegexp<
         AccString,
         ParseOrAsTupleOnly
       >
-    : ParseRegexp<Rest, ParsedMatchers, ParseOrAsTupleOnly, `${AccString}${FirstChar}`>
+    : ParseRegExp<Rest, ParsedMatchers, ParseOrAsTupleOnly, `${AccString}${FirstChar}`>
   : [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>]
 
 type ResolvesAccStringMatcher<AccString> = AccString extends ''
@@ -199,7 +199,7 @@ type ResolveQuantifierForSingleToken<
   AccString extends string,
   ParseOrAsTupleOnly extends boolean
 > = Rest extends `${infer Quantifier extends '?' | '*' | '+'}${infer RestAfterQuantifier}`
-  ? ParseRegexp<
+  ? ParseRegExp<
       RestAfterQuantifier extends `?${infer RestAfterGreedy}`
         ? RestAfterGreedy
         : RestAfterQuantifier,
@@ -220,7 +220,7 @@ type ResolveQuantifierForSingleToken<
       infer RepeatInner extends string,
       infer RestAfterRepeat extends string
     ]
-    ? ParseRegexp<
+    ? ParseRegExp<
         RestAfterRepeat extends `?${infer RestAfterGreedy}` ? RestAfterGreedy : RestAfterRepeat,
         [
           ...ParsedMatchers,
