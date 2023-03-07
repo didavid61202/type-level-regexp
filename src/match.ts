@@ -95,7 +95,13 @@ export type MatchLast<
 > extends infer Result
   ? Result extends MatchedResult<any, infer RestInput, any>
     ? MatchLast<RestInput, Matchers, Flags, NamedCaptures, SkipedString, EndOf, Result>
-    : LastMatched
+    : Result extends NullResult<infer PartialMatched extends string, any, any>
+    ? PartialMatched extends ''
+      ? LastMatched
+      : InputString extends `${string}${PartialMatched}${infer NextSeg}`
+      ? MatchLast<NextSeg, Matchers, Flags, NamedCaptures, SkipedString, EndOf, LastMatched>
+      : LastMatched
+    : never
   : never
 
 export type EnumerateMatchers<
