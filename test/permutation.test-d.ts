@@ -313,10 +313,3 @@ describe('Generic type `ResolvePermutation<[ParsedRegExp]>` can Permutate all po
     }>()
   })
 })
-
-//TODO: add more complex/edge cases:
-// type RegexAST = ParseRegexp<'1(2)a(b(c)?d(e)*f)gh(?:i){1,3}jk'>
-// type RegexAST = ParseRegexp<'1a(b(?<g1>3|6|9)[^di](?<g2>x|y))\\k<g1>e\\k<g2>f'>
-// type RegexAST = ParseRegexp<'1(?:(?:(x)|y))*2'>
-// type RegexAST = ParseRegexp<'1(?<g1>foo)+?'>
-//    ^?
