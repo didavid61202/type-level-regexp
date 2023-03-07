@@ -1,7 +1,7 @@
 {
   "name": "type-level-regexp",
   "version": "1.0.0",
-  "description": "Type-Safe, Type-Level RegExp interpreter/parser",
+  "description": "Type-Level RegExp parser, matcher and permutation resolver",
   "main": "index.js",
   "keywords": [],
   "author": "David Tai <didavid61202@gmail.com>",
@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "test": "vitest typecheck"
+    "dev": "vitest typecheck"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.36.0",
