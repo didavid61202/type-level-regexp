@@ -9,6 +9,24 @@ type MRE<
   Flags extends Flag = never
 > = ExhaustiveMatch<MatchingString, ParseRegExp<RE>, Flags>
 
+describe('Generic type `ExhaustiveMatch` can accept flags', () => {
+  it('Flag `i`, case insensitive', () => {
+    expectTypeOf<
+      MRE<
+        'bAR-fOo-baR-baz-quX-BAr',
+        '(?<g1>B[a-z]r)\\W\\b(?<g2>Fo[G-Y])(?<=foO)-(?<g3>Beh|bA(?<g4>r|k))-BAZ(?=-(?<g5>Q[O-Z]x-\\k<g3>))',
+        'i'
+      >
+    >().toEqualTypeOf<
+      MatchedResult<
+        ['bAR-fOo-baR-baz', 'bAR', 'fOo', 'baR', 'R', 'quX-BAr'],
+        '-quX-BAr',
+        ['g1', 'bAR'] | ['g2', 'fOo'] | ['g3', 'baR'] | ['g4', 'R'] | ['g5', 'quX-BAr']
+      >
+    >()
+  })
+})
+
 describe('Generic type `ExhaustiveMatch` can match input string with parsed RegExp to RegExp result array and groups', () => {
   it('Exact string', () => {
     expectTypeOf<MRE<'bar-foo-bar-baz-qux', 'bar'>>().toEqualTypeOf<
