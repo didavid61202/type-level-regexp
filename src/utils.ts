@@ -552,3 +552,21 @@ export type ExpandRepeat<
       [...Count, ''],
       [...ExpandedMatchers, { type: 'captureLast'; value: Matchers }]
     >
+
+export type RestMatchersBeforeBackReference<
+  Matchers extends Matcher[],
+  Index extends any[],
+  ResultMatchers extends Matcher[] = []
+> = Index['length'] extends Matchers['length']
+  ? ResultMatchers extends infer R extends Matcher[]
+    ? R
+    : never
+  : DeepMatchersIncludeType<[Matchers[Index['length']]], 'backreference'> extends true
+  ? ResultMatchers extends infer R extends Matcher[]
+    ? R
+    : never
+  : RestMatchersBeforeBackReference<
+      Matchers,
+      [...Index, ''],
+      [...ResultMatchers, Matchers[Index['length']]]
+    >

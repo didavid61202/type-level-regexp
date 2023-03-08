@@ -20,6 +20,7 @@ import type {
   SliceMatchers,
   StepMatch,
   TupleItemExtendsType,
+  RestMatchersBeforeBackReference,
 } from './utils'
 
 export type GlobalMatch<
@@ -696,7 +697,10 @@ type MatchOptionalOrMoreMatcher<
       > extends true
     ? EnumerateMatchers<
         InputString,
-        [...Matchers, ...OutMostRestMatchers],
+        RestMatchersBeforeBackReference<
+          [...Matchers, ...OutMostRestMatchers],
+          [...CurrentMatcherIndex, '']
+        >,
         Flags,
         SkipedString,
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
@@ -704,8 +708,7 @@ type MatchOptionalOrMoreMatcher<
         NamedCaptures,
         true,
         EndOf,
-        false,
-        [...CurrentMatcherIndex, '']
+        false
       > extends NullResult<any, any, any>
       ? // ? backtrak matches to match rest matchers
         BacktrackMatch<
