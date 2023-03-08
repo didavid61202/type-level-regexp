@@ -19,7 +19,7 @@ As the complexity grows, I start working on this separated repo to increase deve
 - Provide generic type `ParseRegExp` to parse and RegExp string to AST.
 - Provide generic type `MatchRegExp` to match giving string with a parsed RegExp.
 - Provide generic type `ResolvePermutation` to permutation all possible matching string of given RegExp if possible (due to TypeScript type-level limitation)
-- More detailS please checkout [Tests](./test/match.test-d.ts)
+- More details please see [Tests](./test) and Playground.
 
 🚧 Work In Progress, PRs and issue are welcome 🚧
 

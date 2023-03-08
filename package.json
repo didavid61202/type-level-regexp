@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "vitest typecheck"
+    "dev": "vitest --run && vitest typecheck"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.36.0",
