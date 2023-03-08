@@ -1,7 +1,3 @@
-export type ToReadonlyTuple<Tuple> = {
-  readonly [P in keyof Tuple]: Tuple[P]
-}
-
 type UppercaseLetterN = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 type LowercaseLetterN = 'abcdefghijklmnopqrstuvwxyz'
 type Digit = '0123456789'

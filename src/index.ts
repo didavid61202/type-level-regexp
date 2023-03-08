@@ -9,14 +9,7 @@ import {
   TypedRegExp,
 } from './regexp'
 import { GlobalReplace, ResolveRepalceValue } from './replace'
-import {
-  LengthOfString,
-  MatchedResult,
-  Matcher,
-  NamedCapturesTuple,
-  NullResult,
-  ToReadonlyTuple,
-} from './utils'
+import { LengthOfString, MatchedResult, Matcher, NamedCapturesTuple, NullResult } from './utils'
 
 export type MatchRegExp<
   InputString extends string,
@@ -64,10 +57,8 @@ export type RegExpMatchResult<
     namedCaptures: [string, any]
     input: string
     restInput: string | undefined
-  }
-> = ToReadonlyTuple<Result['matched']> &
-  Readonly<{
-    [K: number]: undefined
+  },
+  MatchObject = {
     index: Result['restInput'] extends undefined
       ? number
       : Result['input'] extends `${infer Precedes}${Result['matched'][0]}${Result['restInput']}`
@@ -77,7 +68,17 @@ export type RegExpMatchResult<
     groups: (() => Result['namedCaptures']) extends () => never
       ? undefined
       : { [K in Result['namedCaptures'][0]]: Extract<Result['namedCaptures'], [K, any]>[1] }
-  }>
+    keys: () => IterableIterator<Extract<keyof Result['matched'], `${number}`>>
+  }
+> = {
+  [K in
+    | Exclude<keyof Result['matched'], number | string>
+    | keyof MatchObject]: K extends keyof MatchObject
+    ? MatchObject[K]
+    : K extends keyof Result['matched']
+    ? Result['matched'][K]
+    : never
+} & Pick<Result['matched'], Exclude<Extract<keyof Result['matched'], string>, keyof MatchObject>>
 
 export type MatchAllRegExp<
   InputString extends string,
