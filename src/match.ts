@@ -11,7 +11,7 @@ import type {
   LastCharOfOr,
   MatchedResult,
   Matcher,
-  MatchersMatchAny,
+  DeepMatchersIncludeType,
   NameCaptureValue,
   NamedCapturesTuple,
   NullResult,
@@ -279,7 +279,11 @@ type Match<
       greedy: infer Greedy extends boolean
       repeat?: infer Repeat extends [from: any[], to: string]
     }
-  ? [Type, Greedy, MatchersMatchAny<OptionalOrMoreMatchers>] extends ['zeroOrMore', true, true]
+  ? [Type, Greedy, DeepMatchersIncludeType<OptionalOrMoreMatchers, 'any'>] extends [
+      'zeroOrMore',
+      true,
+      true
+    ]
     ? [...RestMatchers, ...OutMostRestMatchers] extends []
       ? MatchLast<
           InputString,

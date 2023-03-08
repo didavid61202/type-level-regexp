@@ -366,18 +366,19 @@ export type ResolveNamedCaptureUnion<
     >
   : never
 
-export type MatchersMatchAny<
+export type DeepMatchersIncludeType<
   Matchers extends Matcher[],
+  Type extends Matcher['type'],
   Count extends any[] = [],
   CurrentMatcher extends Matcher = Matchers[Count['length']]
 > = Count['length'] extends Matchers['length']
   ? false
-  : CurrentMatcher extends { type: 'any' }
+  : CurrentMatcher extends { type: Type }
   ? true
   : CurrentMatcher extends { value: infer NestMatchers extends Matcher[] }
-  ? MatchersMatchAny<NestMatchers>
+  ? DeepMatchersIncludeType<NestMatchers, Type>
   : CurrentMatcher extends { value: infer NestOrMatchers extends Matcher[][] }
-  ? Extract<MatchersMatchAny<NestOrMatchers[number]>, true> extends never
+  ? Extract<DeepMatchersIncludeType<NestOrMatchers[number], Type>, true> extends never
     ? false
     : true
   : false
