@@ -29,6 +29,36 @@ As the complexity grows, I start working on this separated repo to increase deve
 
 🚧 Work In Progress, PRs and issue are welcome 🚧
 
+## RegExp Tokens & Flags
+
+| Tokens | Description | Support |
+| --- | --- | --- |
+|  `.` | Matches any single character. | ✅ |
+|  `*`, `*?` | Matches zero or more occurrences (Greedy/Lazy). | ✅ |
+|  `+`, `*?` | Matches one or more occurrences (Greedy/Lazy). | ✅ |
+|  `?`, `??` | Matches zero or one occurrence (Greedy/Lazy). | ✅ |
+|  `^` | Matches the start of a line. | ✅ |
+|  `$` | Matches the end of a line. | ✅ |
+|  `\d`, `\D` | Matches any digit, non-digit character. | ✅ |
+|  `\w`, `\W` | Matches any word, non-word character. | ✅ |
+|  `\b` | Matches a word boundary. | ✅ |
+|  `[abc]` | Matches any character in the set. | ✅ |
+|  `[^abc]` | Matches any character not in the set. | ✅ |
+|  `()` | Creates a capturing group. | ✅ |
+|  `(?:)` | Creates a non-capturing group. | ✅ |
+|  `(?<name>)` | Creates a named-capturing group. | ✅ |
+|  `\|` | Matches either the expression before or after the vertical bar. | ✅ |
+|  `{n}` | Matches exactly `n` occurrences. | ✅ |
+|  `{n,}` | Matches at least `n` occurrences. | ✅ |
+|  `{n,m}` | Matches between `n` and `m` occurrences. | ✅ |
+|  `(?=)` | Positive lookahead. | ✅ |
+|  `(?<=)` | Positive lookbehind. | ✅ |
+
+| Flags | Description | Support |
+| --- | --- | --- |
+|  `g` | Global matching (matches all occurrences). | ✅ |
+|  `i` | Case-insensitive matching. | ✅ |
+
 ## 💻 Development
 
 - Clone this repository
