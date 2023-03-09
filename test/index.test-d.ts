@@ -228,3 +228,62 @@ describe('<literal-string>.match() show exact same literal value for RegExp matc
     >()
   })
 })
+
+describe('<dynamic-string>.match() show permutation of all possible matching string in RegExp matched array and groups', () => {
+  it('all possible matching website', () => {
+    // eslint-disable-next-line prefer-const
+    let dynamicString = 'https://nuxt.com/'
+
+    const possibleMatchResult = dynamicString.match(
+      createRegExp(
+        '(?<protocol>https?://)(?<subdomain>(?<g1>n)(?:uxt|itro))\\.(?<domain>\\k<g1>ew|com)(?<path>/.*)?'
+      )
+    )
+    expect(possibleMatchResult).toMatchInlineSnapshot(`
+      [
+        "https://nuxt.com/",
+        "https://",
+        "nuxt",
+        "n",
+        "com",
+        "/",
+      ]
+    `)
+
+    expectTypeOf(possibleMatchResult?.index).toEqualTypeOf<number | undefined>()
+
+    expect(possibleMatchResult?.length).toMatchInlineSnapshot('6')
+    expectTypeOf(possibleMatchResult?.length).toEqualTypeOf<6 | undefined>()
+
+    expect(possibleMatchResult?.[2]).toMatchInlineSnapshot('"nuxt"')
+    expectTypeOf(possibleMatchResult?.[2]).toEqualTypeOf<'nitro' | 'nuxt' | undefined>()
+
+    expect(possibleMatchResult?.[4]).toMatchInlineSnapshot('"com"')
+    expectTypeOf(possibleMatchResult?.[4]).toEqualTypeOf<'com' | 'new' | undefined>()
+
+    expect(possibleMatchResult?.groups).toMatchInlineSnapshot(`
+      {
+        "domain": "com",
+        "g1": "n",
+        "path": "/",
+        "protocol": "https://",
+        "subdomain": "nuxt",
+      }
+    `)
+    expectTypeOf(possibleMatchResult?.groups).toEqualTypeOf<
+      | {
+          domain: 'com' | 'new'
+          g1: 'n'
+          path:
+            | '/'
+            | '/[any char]'
+            | `/[any char]${string}[any char]`
+            | '/[ zero or more of `[any char]` ]'
+            | undefined
+          protocol: 'http://' | 'https://'
+          subdomain: 'nitro' | 'nuxt'
+        }
+      | undefined
+    >()
+  })
+})
