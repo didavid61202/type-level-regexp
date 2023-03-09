@@ -2,6 +2,8 @@
 
 > A TypeScript type-level RegExp parser, matcher and permutation resolver.
 
+[![Open in Codeflow](https://developer.stackblitz.com/img/open_in_codeflow.svg)](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp)
+
 ![Snap](https://user-images.githubusercontent.com/29917252/224089216-a3bd410c-5d05-4abb-b1c8-758a1108b9fc.png)
 
 ## Origin & Notice
@@ -21,7 +23,7 @@ As the complexity grows, I start working on this separated repo to increase deve
 - Provide generic type `ParseRegExp` to parse and RegExp string to AST.
 - Provide generic type `MatchRegExp` to match giving string with a parsed RegExp.
 - Provide generic type `ResolvePermutation` to permutation all possible matching string of given RegExp if possible (due to TypeScript type-level limitation)
-- More details please see [Tests](./test) and Playground.
+- More details please see test in [Tests](./test) or test it on [Stackblitz](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp). (examples in index.test-d.ts)
 
 🚧 Work In Progress, PRs and issue are welcome 🚧
 
