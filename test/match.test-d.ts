@@ -67,6 +67,9 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux']
       >
     >()
+    expectTypeOf<MRE<'foo-baaar-baaar-qux', '(?<g2>ba*r)-\\k<g2>'>>().toEqualTypeOf<
+      MatchedResult<['baaar-baaar', 'baaar'], '-qux', ['g2', 'baaar']>
+    >()
     expectTypeOf<
       MRE<'bar-foo-bar-baz-qux-baz-qux-foo', '(?<g1>bar-(?<g2>baz))-(?<g3>qux)-\\k<g1>'>
     >().toEqualTypeOf<NullResult<''>>()
