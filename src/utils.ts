@@ -99,7 +99,7 @@ export type Matcher =
       value: string
     }
   | {
-      type: 'any' | Exclude<keyof CharSetMap, 'charSet' | 'notCharSet'> | 'debug'
+      type: 'any' | Exclude<keyof CharSetMap, 'charSet' | 'notCharSet'> | 'endMark' | 'debug'
     }
   | {
       type: 'capture' | 'startOf' | 'endOf' | 'captureLast'

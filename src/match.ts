@@ -45,8 +45,7 @@ export type ExhaustiveMatch<
   Matchers extends Matcher[],
   Flags extends Flag,
   SkipedString extends string = '',
-  StartOf extends boolean = false,
-  EndOf extends boolean = false
+  StartOf extends boolean = false
 > = EnumerateMatchers<
   InputString,
   Matchers,
@@ -55,8 +54,7 @@ export type ExhaustiveMatch<
   [],
   [''],
   never,
-  StartOf,
-  EndOf
+  StartOf
 > extends infer Result
   ? Result extends MatchedResult<any, any, any>
     ? Result
@@ -67,7 +65,7 @@ export type ExhaustiveMatch<
       ? InputString extends `${infer FirstChar}${infer Rest}`
         ? Rest extends ''
           ? Result
-          : ExhaustiveMatch<Rest, Matchers, Flags, `${SkipedString}${FirstChar}`, StartOf, EndOf>
+          : ExhaustiveMatch<Rest, Matchers, Flags, `${SkipedString}${FirstChar}`, StartOf>
         : Result
       : InputString extends `${infer Prefix}${PartialMatched}${infer NextSection}`
       ? ExhaustiveMatch<
@@ -75,8 +73,7 @@ export type ExhaustiveMatch<
           Matchers,
           Flags,
           `${SkipedString}${Prefix}${PartialMatched}`,
-          StartOf,
-          EndOf
+          StartOf
         >
       : never
     : never
@@ -88,7 +85,6 @@ export type MatchLast<
   Flags extends Flag,
   NamedCaptures extends NamedCapturesTuple,
   SkipedString extends string = '',
-  EndOf extends boolean = false,
   LastMatched extends MatchedResult<any, any, any> | NullResult<''> = NullResult<''>
 > = EnumerateMatchers<
   InputString,
@@ -98,16 +94,15 @@ export type MatchLast<
   [],
   [''],
   NamedCaptures,
-  false,
-  EndOf
+  false
 > extends infer Result
   ? Result extends MatchedResult<any, infer RestInput, any>
-    ? MatchLast<RestInput, Matchers, Flags, NamedCaptures, SkipedString, EndOf, Result>
+    ? MatchLast<RestInput, Matchers, Flags, NamedCaptures, SkipedString, Result>
     : Result extends NullResult<infer PartialMatched extends string, any, any>
     ? PartialMatched extends ''
       ? LastMatched
       : InputString extends `${string}${PartialMatched}${infer NextSeg}`
-      ? MatchLast<NextSeg, Matchers, Flags, NamedCaptures, SkipedString, EndOf, LastMatched>
+      ? MatchLast<NextSeg, Matchers, Flags, NamedCaptures, SkipedString, LastMatched>
       : LastMatched
     : never
   : never
@@ -121,7 +116,6 @@ export type EnumerateMatchers<
   MatchResultArray extends (string | undefined)[] = [''],
   NamedCaptures extends NamedCapturesTuple = never,
   StartOf extends boolean = false,
-  EndOf extends boolean = false,
   Count extends any[] = [],
   CurrentMatcher extends Matcher = Matchers[Count['length']],
   ResolvedNamedCaptures extends NamedCapturesTuple = CurrentMatcher extends {
@@ -138,11 +132,10 @@ export type EnumerateMatchers<
     }
   ? ExhaustiveMatch<
       InputString,
-      StartOrEndMatchers,
+      Type extends 'endOf' ? [...StartOrEndMatchers, { type: 'endMark' }] : StartOrEndMatchers,
       Flags,
       SkipedString,
-      Type extends 'startOf' ? true : StartOf,
-      Type extends 'endOf' ? true : EndOf
+      Type extends 'startOf' ? true : StartOf
     > extends infer Result
     ? Result extends MatchedResult<infer MatchArray, infer RestInputString, any>
       ? '' extends (Type extends 'endOf' ? false : '') | RestInputString
@@ -163,7 +156,6 @@ export type EnumerateMatchers<
       OutMostRestMatchers,
       ResolvedNamedCaptures,
       StartOf,
-      EndOf,
       Count
     > extends infer Result
   ? Result extends MatchedResult<
@@ -207,7 +199,6 @@ export type EnumerateMatchers<
             ? NamedCaptures
             : ResolvedNamedCaptures | NestNamedCaptures),
         true, // ? Allway set startOf to `true` for following matchs
-        EndOf,
         [...Count, '']
       >
     : NullResult<
@@ -226,7 +217,6 @@ type Match<
   OutMostRestMatchers extends Matcher[],
   NamedCaptures extends NamedCapturesTuple,
   StartOf extends boolean,
-  EndOf extends boolean,
   Count extends any[] = [],
   PrefixType extends string = StartOf extends true ? '' : string,
   CurrentMatcher extends Matcher = Matchers[Count['length']],
@@ -286,14 +276,13 @@ type Match<
       true,
       true
     ]
-    ? [...RestMatchers, ...OutMostRestMatchers] extends []
+    ? [...RestMatchers, ...OutMostRestMatchers] extends [] | [{ type: 'endMark' }]
       ? MatchLast<
           InputString,
           OptionalOrMoreMatchers,
           Flags,
           NamedCaptures,
-          SkipedString,
-          EndOf
+          SkipedString
         > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NamedCapture>
         ? MatchedResult<[InputString, ...Captures], '', NamedCapture>
         : never
@@ -303,8 +292,7 @@ type Match<
           SkipedString,
           OptionalOrMoreMatchers,
           [...RestMatchers, ...OutMostRestMatchers],
-          NamedCaptures,
-          EndOf
+          NamedCaptures
         >
     : MatchOptionalOrMoreMatcher<
         InputString,
@@ -321,7 +309,6 @@ type Match<
           : Repeat,
         NamedCaptures,
         StartOf,
-        EndOf,
         Count
       >
   : CurrentMatcher extends {
@@ -337,8 +324,7 @@ type Match<
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
       NamedCaptures,
-      StartOf,
-      EndOf
+      StartOf
     >
   : CurrentMatcher extends {
       type: infer Type extends 'capture' | 'namedCapture' | 'captureLast'
@@ -352,13 +338,7 @@ type Match<
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
       NamedCaptures,
-      StartOf,
-      [Type, GroupMatchers[0]] extends [
-        'captureLast',
-        { type: 'optional'; repeat: [any[], string] }
-      ]
-        ? EndOf
-        : false
+      StartOf
     >
   : CurrentMatcher extends {
       type: 'or'
@@ -388,8 +368,7 @@ type Match<
       [...RestMatchers, ...OutMostRestMatchers],
       [''],
       NamedCaptures,
-      StartOf,
-      EndOf
+      StartOf
     >
   : CurrentMatcher extends {
       type: 'lookahead'
@@ -426,8 +405,7 @@ type Match<
       LookbehindMatchers,
       Flags,
       SkipedString,
-      false,
-      true
+      false
     > extends MatchedResult<
       [any, ...infer Captures extends any[]],
       infer RestInputString,
@@ -451,6 +429,10 @@ type Match<
         InputString,
         ResolveNamedCaptureUnion<[LookbehindMatchers], never>
       >
+  : CurrentMatcher extends {
+      type: 'endMark'
+    }
+  ? MatchedResult<[''], InputString, never>
   : never
 
 type MatchOrMatchers<
@@ -532,15 +514,13 @@ type BacktrackGreedyAnyMatch<
   SkipedString extends string,
   CurrentNestedMatchers extends Matcher[],
   RestMatchers extends Matcher[],
-  NamedCaptures extends NamedCapturesTuple,
-  EndOf extends boolean
+  NamedCaptures extends NamedCapturesTuple
 > = MatchLast<
   GreedyMatchedString,
   RestMatchers,
   Flags,
   NamedCaptures,
-  SkipedString,
-  EndOf
+  SkipedString
 > extends infer Result
   ? Result extends MatchedResult<infer MatchArray extends any[], infer RestInputString, any>
     ? GreedyMatchedString extends `${infer ResolvedGreedyMatched}${MatchArray[0]}${RestInputString}`
@@ -549,8 +529,7 @@ type BacktrackGreedyAnyMatch<
           CurrentNestedMatchers,
           Flags,
           NamedCaptures,
-          SkipedString,
-          EndOf
+          SkipedString
         > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NamedCapture>
         ? MatchedResult<[ResolvedGreedyMatched, ...Captures], MatchArray[0], NamedCapture>
         : never
@@ -569,7 +548,6 @@ type BacktrackMatch<
   CurrentNestedMatchers extends Matcher[],
   RestMatchers extends Matcher[],
   NamedCaptures extends NamedCapturesTuple,
-  EndOf extends boolean,
   CurrentMatcherIndex extends any[] = [],
   Count extends any[] = ['']
 > = Count['length'] extends MatchedResultsTuple['length']
@@ -584,7 +562,6 @@ type BacktrackMatch<
       [''],
       NamedCaptures,
       true,
-      EndOf,
       [...CurrentMatcherIndex, '']
     > extends MatchedResult<[infer Matched extends string, ...any[]], any, any>
     ? LastMatchSeg extends `${infer Prefix}${Matched}${string}` // ? check if zeroOrMore/optional is matching dynamic length ex: {1,3}
@@ -629,7 +606,6 @@ type BacktrackMatch<
         CurrentNestedMatchers,
         RestMatchers,
         NamedCaptures,
-        EndOf,
         CurrentMatcherIndex,
         [...Count, '']
       >
@@ -646,7 +622,6 @@ type MatchOptionalOrMoreMatcher<
   Repeat extends [from: any[], to: string],
   NamedCaptures extends NamedCapturesTuple,
   StartOf extends boolean,
-  EndOf extends boolean,
   CurrentMatcherIndex extends any[] = [],
   MatchedResultsTuple extends {
     matched: string
@@ -665,7 +640,13 @@ type MatchOptionalOrMoreMatcher<
     ...Repeat[0]
   ],
   MaxRepeatReached extends boolean = `${MatchedCount['length']}` extends Repeat[1] ? true : false
-> = true extends Greedy | EndOf
+> = true extends
+  | Greedy
+  | TupleItemExtendsType<
+      [...Matchers, ...OutMostRestMatchers],
+      [...CurrentMatcherIndex, ''],
+      { type: 'endMark' }
+    >
   ? // ? greedy matching
     [
       MaxRepeatReached,
@@ -699,7 +680,6 @@ type MatchOptionalOrMoreMatcher<
         Repeat,
         NamedCaptures,
         StartOf,
-        EndOf,
         CurrentMatcherIndex,
         [
           {
@@ -726,8 +706,7 @@ type MatchOptionalOrMoreMatcher<
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures,
-        true,
-        EndOf
+        true
       > extends NullResult<any, any, any>
       ? // ? backtrak matches to match rest matchers
         BacktrackMatch<
@@ -744,7 +723,6 @@ type MatchOptionalOrMoreMatcher<
           CurrentNestedMatchers,
           [...Matchers, ...OutMostRestMatchers],
           NamedCaptures,
-          EndOf,
           CurrentMatcherIndex
         >
       : MatchedResult<
@@ -775,8 +753,7 @@ type MatchOptionalOrMoreMatcher<
         [], // ! should we combined and pass down rest of matchers and OutMostRestMatchers ??
         [''],
         NamedCaptures, // ? pass in zeroOrMore/optional match named capture?
-        true,
-        EndOf
+        true
       > extends MatchedResult<any, any, any>
       ? MatchedResult<
           [MatchedResultsTuple[0]['matched'], ...MatchedResultsTuple[0]['captures']],
@@ -796,7 +773,6 @@ type MatchOptionalOrMoreMatcher<
           Repeat,
           NamedCaptures,
           StartOf,
-          EndOf,
           CurrentMatcherIndex,
           MatchedResultsTuple,
           false
@@ -826,7 +802,6 @@ type MatchOptionalOrMoreMatcher<
         Repeat,
         NamedCaptures,
         StartOf,
-        EndOf,
         CurrentMatcherIndex,
         [
           {
