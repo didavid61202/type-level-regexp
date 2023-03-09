@@ -186,11 +186,28 @@ declare global {
       InputString extends string,
       RE extends TypedRegExp,
       ReplaceValue extends string,
-      REParts extends RegExpParts = ExtractRegExpParts<RE>
+      REParts extends RegExpParts = ExtractRegExpParts<RE>,
+      MatchResult = MatchRegExp<InputString, REParts['pattern'], REParts['flags']>,
+      Match extends any[] = MatchResult extends RegExpMatchResult<
+        {
+          matched: infer MatchArray extends any[]
+          namedCaptures: [string, any]
+          input: infer Input extends string
+          restInput: string | undefined
+        },
+        {
+          index: infer Index extends number
+          groups: infer Groups
+          input: string
+          keys: (...arg: any) => any
+        }
+      >
+        ? [...MatchArray, Index, Input, Groups]
+        : never
     >(
       this: InputString,
       regexp: RE,
-      replaceValue: ReplaceValue | ((substring: ReplaceValue, ...args: any[]) => string)
+      replaceValue: ReplaceValue | ((...match: Match) => ReplaceValue)
     ): ReplaceWithRegExp<InputString, REParts['pattern'], ReplaceValue, REParts['flags']>
   }
 }

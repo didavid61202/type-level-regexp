@@ -53,6 +53,36 @@ describe('Pass some common / complex examples', () => {
       upper: 'M'
     }>()
   })
+
+  it('replace \\w special replacement patterns', () => {
+    const replaced = '"The day 1991-09-15 is a Sunday"'.replace(
+      createRegExp('(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})'),
+      "$&$', is in ISO 8601 standard date format. Which we can also format it as common date format: $`$<day>/$2/$<year>"
+    )
+    expect(replaced).toMatchInlineSnapshot(
+      '"\\"The day 1991-09-15 is a Sunday\\", is in ISO 8601 standard date format. Which we can also format it as common date format: \\"The day 15/09/1991 is a Sunday\\""'
+    )
+    expectTypeOf(
+      replaced
+    ).toEqualTypeOf<'"The day 1991-09-15 is a Sunday", is in ISO 8601 standard date format. Which we can also format it as common date format: "The day 15/09/1991 is a Sunday"'>()
+  })
+
+  it('replace \\w function', () => {
+    const replaced = 'Note: "The day 1991-09-15 is a Sunday"'.replace(
+      createRegExp(
+        '(?<=Note: )(?<prefix>.*?)(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})(?<suffix>.*)$'
+      ),
+      (match, prefix, year, month, day, suffix, offeset, inputString, groups) =>
+        `In [${inputString}], the text ${match} at index:${offeset} uses ISO 8601 standard date format. Which we can also format it as common date format: ${prefix}${groups.day}/${month}/${groups.year}${suffix}, with the day [${day}] at first place and the year [${year}] at the end`
+    )
+
+    expect(replaced).toMatchInlineSnapshot(
+      '"Note: In [Note: \\"The day 1991-09-15 is a Sunday\\"], the text \\"The day 1991-09-15 is a Sunday\\" at index:6 uses ISO 8601 standard date format. Which we can also format it as common date format: \\"The day 15/09/1991 is a Sunday\\", with the day [15] at first place and the year [1991] at the end"'
+    )
+    expectTypeOf(
+      replaced
+    ).toEqualTypeOf<'Note: In [Note: "The day 1991-09-15 is a Sunday"], the text "The day 1991-09-15 is a Sunday" at index:6 uses ISO 8601 standard date format. Which we can also format it as common date format: "The day 15/09/1991 is a Sunday", with the day [15] at first place and the year [1991] at the end'>()
+  })
 })
 
 describe('<literal-string>.match() show exact same literal value for RegExp matched array, index and group as runtime', () => {
