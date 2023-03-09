@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createRegExp, MatchRegExp, ReplaceWithRegExp, ParseRegExp } from 'type-level-regexp'
+import {
+  createRegExp,
+  spreadRegExpIterator,
+  MatchRegExp,
+  ReplaceWithRegExp,
+  ParseRegExp,
+} from 'type-level-regexp'
 
 /**
  *
@@ -62,3 +68,28 @@ const result = [
 
 type Parsed = ParseRegExp<'(?<g1>foo)_(?<g2>bar_(?<g3>baz))'>
 //     ^?
+
+const matchAllResult = `12av3B8cdWY-B8Cd4599xYxAq3b8CDyZ-b8cD89`.matchAll(
+  //     ^?
+  createRegExp('a[^e-g]3(?<g1>b8cD)([w-z]{2})-\\k<g1>', ['i', 'g'])
+)
+
+const [
+  firstMatch,
+  //^?
+  secondMatch,
+  //^?
+] = spreadRegExpIterator(matchAllResult)
+
+const result2 = [
+  firstMatch.index,
+  //           ^?
+  firstMatch[2],
+  //         ^?
+  firstMatch.length,
+  //           ^?
+  secondMatch.groups.g1,
+  //                ^?
+  secondMatch.index,
+  //           ^?
+]

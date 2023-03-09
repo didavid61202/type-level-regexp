@@ -2,9 +2,11 @@
 
 > A TypeScript type-level RegExp parser, matcher and permutation resolver.
 
+![Snap](https://user-images.githubusercontent.com/29917252/224089216-a3bd410c-5d05-4abb-b1c8-758a1108b9fc.png)
+
 [![Open in Codeflow](https://developer.stackblitz.com/img/open_in_codeflow.svg)](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp)
 
-![Snap](https://user-images.githubusercontent.com/29917252/224089216-a3bd410c-5d05-4abb-b1c8-758a1108b9fc.png)
+Examples in `Playground`, `test`
 
 ## Origin & Notice
 The main purpose of this project is to test and demonstrate the possibility and limitations of writing a RegExp parser/matcher in TypeScript's type-level. Note that this may not be practically useful, but rather an interesting showcase.
