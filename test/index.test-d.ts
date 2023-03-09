@@ -2,7 +2,94 @@ import { RegExpMatchResult } from '../src'
 import { createRegExp } from '../src/regexp'
 
 
-describe('Pass some common / complex examples', () => {
+describe('Common, complex examples', () => {
+  it('Remain type-safe after chain of replace and match', () => {
+    const RE = createRegExp(
+      '(?<=Nuxt )(?<type>.{4,}?) site at (?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
+    )
+
+    const chainedResult =
+      //     ^?
+      `Check out the Nuxt documentation 📖 site at https://nuxt.com/docs 👉 it's the best resource for clear and concise explanations, with excellent examples that make web development a breeze! ❤️`
+        .replace(RE, 'starter templates site at $<protocal>$3$<secondDomain>.new')
+        .replace(
+          createRegExp("it's the BeSt resource f[A-Z]r (.{10,20})explanations", ['i']),
+          "it's the best place to start a new awesome website of any kind ❤️, and it has some $1starter templates 🚀"
+        )
+        .replace(createRegExp('❤️|👉', ['g']), '💚')
+        .match(RE)
+
+    expect(chainedResult).toMatchInlineSnapshot(`
+      [
+        "starter templates site at https://nuxt.new",
+        "starter templates",
+        "https",
+        "://",
+        "nuxt",
+        "new",
+        undefined,
+      ]
+    `)
+    expectTypeOf(chainedResult).toEqualTypeOf<
+      RegExpMatchResult<{
+        matched: [
+          'starter templates site at https://nuxt.new',
+          'starter templates',
+          'https',
+          '://',
+          'nuxt',
+          'new',
+          undefined
+        ]
+        namedCaptures:
+          | ['type', 'starter templates']
+          | ['protocal', 'https']
+          | ['secondDomain', 'nuxt']
+          | ['topDomain', 'new']
+          | ['path', undefined]
+        input: "Check out the Nuxt starter templates site at https://nuxt.new 💚 it's the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚"
+        restInput: " 💚 it's the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚"
+      }>
+    >()
+
+    expect(chainedResult.input).toMatchInlineSnapshot(
+      '"Check out the Nuxt starter templates site at https://nuxt.new 💚 it\'s the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚"'
+    )
+    expectTypeOf(
+      chainedResult.input
+    ).toEqualTypeOf<"Check out the Nuxt starter templates site at https://nuxt.new 💚 it's the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚">()
+
+    expect(chainedResult[4]).toMatchInlineSnapshot('"nuxt"')
+    expectTypeOf(chainedResult[4]).toEqualTypeOf<'nuxt'>()
+
+    // @ts-expect-error out of range index can't be used to index `RegExpMatchResult`
+    expect(match[10]).toMatchInlineSnapshot('undefined')
+
+    expect(chainedResult.length).toMatchInlineSnapshot('7')
+    expectTypeOf(chainedResult.length).toEqualTypeOf<7>()
+
+    expect(chainedResult.index).toMatchInlineSnapshot('19')
+    expectTypeOf(chainedResult.index).toEqualTypeOf<19>()
+
+    expect(chainedResult.groups).toMatchInlineSnapshot(`
+      {
+        "path": undefined,
+        "protocal": "https",
+        "secondDomain": "nuxt",
+        "topDomain": "new",
+        "type": "starter templates",
+      }
+    `)
+
+    expectTypeOf(chainedResult.groups).toEqualTypeOf<{
+      path: undefined
+      protocal: 'https'
+      secondDomain: 'nuxt'
+      topDomain: 'new'
+      type: 'starter templates'
+    }>()
+  })
+
   it('match password RegExp', () => {
     const match = 'ad@3od9Msq'.match(
       createRegExp(
