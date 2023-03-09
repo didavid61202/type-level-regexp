@@ -11,6 +11,11 @@ import {
 import { GlobalReplace, ResolveRepalceValue } from './replace'
 import { LengthOfString, MatchedResult, Matcher, NamedCapturesTuple, NullResult } from './utils'
 
+export { Flag, createRegExp, spreadRegExpIterator } from './regexp'
+export { ParseRegExp } from './parse'
+export { ExhaustiveMatch, GlobalMatch } from './match'
+export { ResolvePermutation } from './permutation'
+
 export type MatchRegExp<
   InputString extends string,
   Regexp extends string,
