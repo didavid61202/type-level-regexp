@@ -7,7 +7,7 @@
 ![Snap](https://user-images.githubusercontent.com/29917252/224089216-a3bd410c-5d05-4abb-b1c8-758a1108b9fc.png)
 
 ## Origin & Notice
-The main purpose of this project is to test and demonstrate the possibility and limitations of writing a RegExp parser/matcher in TypeScript's type-level.
+The main purpose of this project is to test and demonstrate the possibility and limitations of writing a RegExp parser/matcher in TypeScript's type-level. Note that this may not be practically useful, but rather an interesting showcase.
 
 The idea for this project originated while I was working on improving the type hints of string.match and replace in [magic-regexp](https://github.com/danielroe/magic-regexp) (created by the most inspiring, resourceful, and kind [Daniel Roe](https://github.com/danielroe) from [Nuxt](https://nuxt.com), definitely check it out if you are working with RegExp and TypeScript!).
 
