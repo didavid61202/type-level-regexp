@@ -46,6 +46,17 @@ describe('Generic type `ResolvePermutation<[ParsedRegExp]>` can Permutate all po
       resultArray: ['foo_bar_baz_g2:bar_g1:foo_bar_baz', 'foo_bar_baz', 'bar']
       namedCapture: ['g1', 'foo_bar_baz'] | ['g2', 'bar']
     }>()
+    expectTypeOf<
+      PRE<'(?<subdomain>(?<g1>n)(?:uxt|itro))\\.(?<domain>\\k<g1>ew|com)'>
+    >().toEqualTypeOf<{
+      resultArray: [
+        'nuxt.com' | 'nuxt.new' | 'nitro.com' | 'nitro.new',
+        'nuxt' | 'nitro',
+        'n',
+        'com' | 'new'
+      ]
+      namedCapture: ['g1', 'n'] | ['subdomain', 'nitro' | 'nuxt'] | ['domain', 'com' | 'new']
+    }>()
   })
   it('CharSet, not-charSet', () => {
     expectTypeOf<PRE<'(?<charSet>[2-4a-c#β-ε])_(?<nonCharSet>[^A-Z])'>>().toEqualTypeOf<{
