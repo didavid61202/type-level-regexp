@@ -327,7 +327,7 @@ type Match<
       StartOf
     >
   : CurrentMatcher extends {
-      type: infer Type extends 'capture' | 'namedCapture' | 'captureLast'
+      type: 'capture' | 'namedCapture' | 'captureLast'
       value: infer GroupMatchers extends Matcher[]
     }
   ? EnumerateMatchers<

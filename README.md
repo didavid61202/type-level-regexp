@@ -5,7 +5,7 @@
 ## Origin & Notice
 The main purpose of this project is to test and demonstrate the possibility and limitations of writing a RegExp parser/matcher in TypeScript's type-level.
 
-The idea for this project originated while I was working on improving the type hints of string.match and replace in [magic-regexp](https://github.com/danielroe/magic-regexp) (created by the most inspiring, resourceful, and kind [Daniel Roe](https://github.com/danielroe) from Nuxt, definitely check it out if you are working with RegExp and TypeScript!).
+The idea for this project originated while I was working on improving the type hints of string.match and replace in [magic-regexp](https://github.com/danielroe/magic-regexp) (created by the most inspiring, resourceful, and kind [Daniel Roe](https://github.com/danielroe) from [Nuxt](https://nuxt.com), definitely check it out if you are working with RegExp and TypeScript!).
 
 As the complexity grows, I start working on this separated repo to increase development speed and try out different iterations. Hopefully, it can be ported back to [magic-regexp](https://github.com/danielroe/magic-regexp), and even [Gabriel Vergnaud](https://github.com/gvergnaud)'s awesome [hotscript](https://github.com/gvergnaud/hotscript) when it's stable with good performance.
 
