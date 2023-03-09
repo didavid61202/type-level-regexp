@@ -63,7 +63,7 @@ describe('Common, complex examples', () => {
     expectTypeOf(chainedResult[4]).toEqualTypeOf<'nuxt'>()
 
     // @ts-expect-error out of range index can't be used to index `RegExpMatchResult`
-    expect(match[10]).toMatchInlineSnapshot('undefined')
+    expect(chainedResult[10]).toMatchInlineSnapshot('undefined')
 
     expect(chainedResult.length).toMatchInlineSnapshot('7')
     expectTypeOf(chainedResult.length).toEqualTypeOf<7>()
