@@ -51,8 +51,8 @@ As the complexity grows, I start working on this separated repo to increase deve
 |  `{n}` | Matches exactly `n` occurrences. | ✅ |
 |  `{n,}` | Matches at least `n` occurrences. | ✅ |
 |  `{n,m}` | Matches between `n` and `m` occurrences. | ✅ |
-|  `(?=)` | Positive lookahead. | ✅ |
-|  `(?<=)` | Positive lookbehind. | ✅ |
+|  `(?=)`, `(?!)` | Positive/Negative lookahead. | ✅ |
+|  `(?<=)`, `(?<!)` | Positive/Negative lookbehind. | ✅ |
 
 | Flags | Description | Support |
 | --- | --- | --- |
