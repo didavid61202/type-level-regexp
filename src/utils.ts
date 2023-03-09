@@ -195,7 +195,9 @@ export type ConcatParialMatched<
   PartialMatched extends string | undefined,
   NestedNullResult,
   NestedPartialMatched extends string = NestedNullResult extends NullResult<
-    infer Partial extends string
+    infer Partial extends string,
+    any,
+    any
   >
     ? Partial
     : never
