@@ -15,6 +15,9 @@ import {
  *
  */
 
+/**
+ * `MatchRegExp` Generic type can match given input string with RegExp pattern.
+ */
 type MatchResult = MatchRegExp<
   'MypA$3W0rd',
   '^(?=.*(?<lower>[a-z]))(?=.*(?<upper>[A-Z]))(?=.*(?<digit>\\d))(?=.*(?<special>[!@#$%^&*])).{8,}$',
@@ -32,6 +35,10 @@ type Match = [
   //             ^?
 ]
 
+/**
+ * `ReplaceWithRegExp` Generic type can match and replace given input string with RegExp pattern
+ *  and a replace value (may contain special charaters: $&, &~, $', $n or $<groupName>)
+ */
 type ReplaceReulst = ReplaceWithRegExp<
   //    ^?
   'foo-bar-baz',
@@ -40,6 +47,9 @@ type ReplaceReulst = ReplaceWithRegExp<
   'i'
 >
 
+/**
+ * Example of chaining multiple `replace` and `match`
+ */
 const RE = createRegExp(
   '(?<=Nuxt\\s)(?<type>.{4,}?) site at (?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
 )
@@ -66,9 +76,18 @@ const result = [
   //             ^?
 ]
 
+/**
+ * `ParseRegExp` generic type parse the input raw RegExp string to AST,
+ * provide an easily way to work with RegExp at type-level.
+ */
 type Parsed = ParseRegExp<'(?<g1>foo)_(?<g2>bar_(?<g3>baz))'>
 //     ^?
 
+/**
+ * string.matchAll now return as type `RegExpIterableIterator`,
+ * which can be spread by helper function `spreadRegExpIterator`
+ * to get a type-safe tuple if match results
+ */
 const matchAllResult = `12av3B8cdWY-B8Cd 4599xYxAq3b8CDyZ-b8cD 89`.matchAll(
   //     ^?
   createRegExp('a[^e-g]3(?<g1>b8cD)([w-z]{2})-\\k<g1>\\s', ['i', 'g'])
