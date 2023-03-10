@@ -1,3 +1,11 @@
+/**
+ *
+ * Note:
+ * Recommend to install vscode extension `vscode-twoslash-queries` for better DX,
+ * the extenstion will show inline type hints right after a special comment `// ^?`
+ *
+ */
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   createRegExp,
@@ -6,14 +14,7 @@ import {
   ReplaceWithRegExp,
   ParseRegExp,
 } from 'type-level-regexp'
-
-/**
- *
- * Note:
- * Recommend to install vscode extension `vscode-twoslash-queries` for better DX,
- * the extenstion will show inline type hints right after a special comment `// ^?`
- *
- */
+import { Equal, Expect } from '../test/helper'
 
 /**
  * `MatchRegExp` Generic type can match given input string with RegExp pattern.
@@ -24,15 +25,25 @@ type MatchResult = MatchRegExp<
   never
 >
 
-type Match = [
-  MatchResult['2'],
-  //           ^?
-  MatchResult['index'],
-  //             ^?
-  MatchResult['length'],
-  //             ^?
-  MatchResult['groups']
-  //             ^?
+type MatchTest = [
+  Expect<Equal<MatchResult['2'], 'W'>>,
+  //                        ^?
+  Expect<Equal<MatchResult['index'], 0>>,
+  //                        ^?
+  Expect<Equal<MatchResult['length'], 5>>,
+  //                        ^?
+  Expect<
+    Equal<
+      MatchResult['groups'],
+      //            ^?
+      {
+        digit: '0'
+        lower: 'd'
+        upper: 'W'
+        special: '$'
+      }
+    >
+  >
 ]
 
 /**
@@ -46,6 +57,11 @@ type ReplaceReulst = ReplaceWithRegExp<
   'qux-$&-$`d$<g1>o',
   'i'
 >
+
+type ReplaceTest = [
+  Expect<Equal<ReplaceReulst, 'foo-qux-bar-foo-dao-baz'>>
+  //             ^?
+]
 
 /**
  * Example of chaining multiple `replace` and `match`
@@ -65,16 +81,41 @@ const chainedResult =
     .replace(createRegExp('❤️|👉', ['g']), '💚')
     .match(RE)
 
-const result = [
-  chainedResult[4],
-  //            ^?
-  chainedResult.index,
-  //             ^?
-  chainedResult.length,
-  //             ^?
-  chainedResult.input,
-  //             ^?
+type ChainedResultTest = [
+  Expect<Equal<(typeof chainedResult)[4], 'nuxt'>>,
+  //                                  ^?
+  Expect<Equal<typeof chainedResult.index, 19>>,
+  //                                  ^?
+  Expect<Equal<typeof chainedResult.length, 7>>,
+  //                                  ^?
+  Expect<
+    Equal<
+      typeof chainedResult.input,
+      //                    ^?
+      "Check out the Nuxt starter templates site at https://nuxt.new 💚 it's the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚"
+    >
+  >
 ]
+
+/**
+ * string.replace with function as second argument,
+ * the arguments of the function can infer matched result of given string and RegExp
+ */
+const dateString = '"The day 1991-09-15 is a Sunday"'.replace(
+  //    ^?
+  createRegExp(
+    '(?<=\\W)(?<prefix>(?:\\w|\\s)*?)(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})(?<suffix>(?:\\w|\\s)*)\\W'
+  ),
+  (match, prefix, year, month, day, suffix, offeset, input, groups) =>
+    `In [${input}], match ${match} at index: ${offeset} is ISO 8601. can also format as: ${prefix}${groups.day}/${month}/${groups.year}${suffix} (day = ${day} and year = ${year})`
+)
+
+type ReplaceWithFunctionTest = Expect<
+  Equal<
+    typeof dateString,
+    '"In ["The day 1991-09-15 is a Sunday"], match The day 1991-09-15 is a Sunday" at index: 1 is ISO 8601. can also format as: The day 15/09/1991 is a Sunday (day = 15 and year = 1991)'
+  >
+>
 
 /**
  * `ParseRegExp` generic type parse the input raw RegExp string to AST,
@@ -82,6 +123,50 @@ const result = [
  */
 type Parsed = ParseRegExp<'(?<g1>foo)_(?<g2>bar_(?<g3>baz))'>
 //     ^?
+
+type ParsedTest = [
+  Expect<
+    Equal<
+      Parsed,
+      [
+        {
+          type: 'namedCapture'
+          name: 'g1'
+          value: [
+            {
+              type: 'string'
+              value: 'foo'
+            }
+          ]
+        },
+        {
+          type: 'string'
+          value: '_'
+        },
+        {
+          type: 'namedCapture'
+          name: 'g2'
+          value: [
+            {
+              type: 'string'
+              value: 'bar_'
+            },
+            {
+              type: 'namedCapture'
+              name: 'g3'
+              value: [
+                {
+                  type: 'string'
+                  value: 'baz'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    >
+  >
+]
 
 /**
  * string.matchAll now return as type `RegExpIterableIterator`,
@@ -100,17 +185,17 @@ const [
   //^?
 ] = spreadRegExpIterator(matchAllResult)
 
-const result2 = [
-  firstMatch.index,
-  //           ^?
-  firstMatch[2],
-  //         ^?
-  firstMatch.length,
-  //           ^?
-  secondMatch.index,
-  //           ^?
-  secondMatch.groups.g1,
-  //                 ^?
-  secondMatch[1],
-  //          ^?
+type MatchAllRsesultTest = [
+  Expect<Equal<(typeof firstMatch)[2], 'WY'>>,
+  //                               ^?
+  Expect<Equal<typeof firstMatch.index, 2>>,
+  //                               ^?
+  Expect<Equal<typeof firstMatch.length, 3>>,
+  //                               ^?
+  Expect<Equal<(typeof secondMatch)[1], 'b8CD'>>,
+  //                                ^?
+  Expect<Equal<typeof secondMatch.index, 24>>,
+  //                               ^?
+  Expect<Equal<typeof secondMatch.groups.g1, 'b8CD'>>
+  //                                     ^?
 ]
