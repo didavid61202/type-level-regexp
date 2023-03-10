@@ -2,7 +2,8 @@
 
 > TypeScript type-level RegExp parser and matcher implemented using template literals.
 
-![Demo](https://user-images.githubusercontent.com/29917252/224315356-770ae602-aa43-4c60-a199-ba750e377433.png)
+![Demo](https://user-images.githubusercontent.com/29917252/224330392-daeee9a5-d448-4f00-baf2-29365bdfa4b5.png)
+
 
 [![Open in Codeflow](https://developer.stackblitz.com/img/open_in_codeflow.svg)](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp)
 
@@ -28,6 +29,10 @@ As the complexity grows, I start working on this separated repo to increase deve
 - More details please see [playground](./playground/index.ts), or test in [Tests](./test) or [Stackblitz](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp). (examples in index.test-d.ts)
 
 🚧 Work In Progress, PRs and issue are welcome 🚧
+
+## Example - type-safe args for function in `string.replace()`
+![replaceRegexp](https://user-images.githubusercontent.com/29917252/224331214-b3ed8015-2b8d-461d-ab81-ede06df5f13d.JPG)
+
 
 ## RegExp Tokens & Flags
 
