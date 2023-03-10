@@ -94,6 +94,19 @@ type ChainedResultTest = [
       //                    ^?
       "Check out the Nuxt starter templates site at https://nuxt.new 💚 it's the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚"
     >
+  >,
+  Expect<
+    Equal<
+      typeof chainedResult.groups,
+      //                    ^?
+      {
+        type: 'starter templates'
+        protocal: 'https'
+        secondDomain: 'nuxt'
+        topDomain: 'new'
+        path: undefined
+      }
+    >
   >
 ]
 
