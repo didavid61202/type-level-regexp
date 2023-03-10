@@ -1,10 +1,11 @@
-type UppercaseLetterN = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-type LowercaseLetterN = 'abcdefghijklmnopqrstuvwxyz'
+type UppercaseLetter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+type LowercaseLetter = 'abcdefghijklmnopqrstuvwxyz'
 type Digit = '0123456789'
-type AlphanumericN = `_${Digit}${UppercaseLetterN}${LowercaseLetterN}`
+type Alphanumeric = `_${Digit}${UppercaseLetter}${LowercaseLetter}`
+type Whitespace = ` \r\n\t\f\v`
 
 type CommonChar =
-  `!"#$%&'()*+,-./${Digit}:;<=>?@${UppercaseLetterN}[\\]^_\`${LowercaseLetterN}{|}~ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡ΢ΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψω`
+  `!"#$%&'()*+,-./${Digit}:;<=>?@${UppercaseLetter}[\\]^_\`${LowercaseLetter}{|}~ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡ΢ΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψω`
 
 type CaseMap = {
   a: 'A'
@@ -66,8 +67,9 @@ export interface CharSetMap<
   ResolvedCharSet extends string = ResolveCharSet<CharSet>
 > {
   step: CharSet
-  char: AlphanumericN
-  nonChar: AlphanumericN
+  whitespace: Whitespace
+  char: Alphanumeric
+  nonChar: Alphanumeric
   digit: Digit
   nonDigit: Digit
   charSet: ResolvedCharSet

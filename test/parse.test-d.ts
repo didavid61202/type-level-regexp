@@ -162,11 +162,14 @@ describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers
       ]
     >()
   })
-  it('AnyChar, Char, non-char, ditig, non-digit, boundary', () => {
-    expectTypeOf<ParseRegExp<'.\\w\\W\\d\\D\\b'>>().toEqualTypeOf<
+  it('AnyChar, whitespace, char, non-char, ditig, non-digit, boundary', () => {
+    expectTypeOf<ParseRegExp<'.\\s\\w\\W\\d\\D\\b'>>().toEqualTypeOf<
       [
         {
           type: 'any'
+        },
+        {
+          type: 'whitespace'
         },
         {
           type: 'char'

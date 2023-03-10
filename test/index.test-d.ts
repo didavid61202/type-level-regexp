@@ -5,7 +5,7 @@ import { createRegExp } from '../src/regexp'
 describe('Common, complex examples', () => {
   it('Remain type-safe after chain of replace and match', () => {
     const RE = createRegExp(
-      '(?<=Nuxt )(?<type>.{4,}?) site at (?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
+      '(?<=Nuxt\\s)(?<type>.{4,}?) site at (?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
     )
 
     const chainedResult =

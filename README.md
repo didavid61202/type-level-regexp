@@ -39,6 +39,7 @@ As the complexity grows, I start working on this separated repo to increase deve
 |  `?`, `??` | Matches zero or one occurrence (Greedy/Lazy). | ✅ |
 |  `^` | Matches the start of a line. | ✅ |
 |  `$` | Matches the end of a line. | ✅ |
+|  `\s` | Matches any whitespace character. | ✅ |
 |  `\d`, `\D` | Matches any digit, non-digit character. | ✅ |
 |  `\w`, `\W` | Matches any word, non-word character. | ✅ |
 |  `\b` | Matches a word boundary. | ✅ |

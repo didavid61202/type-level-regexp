@@ -41,7 +41,7 @@ type ReplaceReulst = ReplaceWithRegExp<
 >
 
 const RE = createRegExp(
-  '(?<=Nuxt )(?<type>.{4,}?) site at (?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
+  '(?<=Nuxt\\s)(?<type>.{4,}?) site at (?<protocal>https?)(:\\/\\/)(?:www.)?(?<secondDomain>[a-zA-Z0-9@:%._+~#=]{2,40})\\.(?<topDomain>[a-z]{2,6})(?<path>\\/[a-zA-Z0-9@:%._+~#=]{2,20})*'
 )
 
 const chainedResult =
@@ -69,9 +69,9 @@ const result = [
 type Parsed = ParseRegExp<'(?<g1>foo)_(?<g2>bar_(?<g3>baz))'>
 //     ^?
 
-const matchAllResult = `12av3B8cdWY-B8Cd4599xYxAq3b8CDyZ-b8cD89`.matchAll(
+const matchAllResult = `12av3B8cdWY-B8Cd 4599xYxAq3b8CDyZ-b8cD 89`.matchAll(
   //     ^?
-  createRegExp('a[^e-g]3(?<g1>b8cD)([w-z]{2})-\\k<g1>', ['i', 'g'])
+  createRegExp('a[^e-g]3(?<g1>b8cD)([w-z]{2})-\\k<g1>\\s', ['i', 'g'])
 )
 
 const [
@@ -88,8 +88,10 @@ const result2 = [
   //         ^?
   firstMatch.length,
   //           ^?
-  secondMatch.groups.g1,
-  //                ^?
   secondMatch.index,
   //           ^?
+  secondMatch.groups.g1,
+  //                 ^?
+  secondMatch[1],
+  //          ^?
 ]

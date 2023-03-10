@@ -56,6 +56,7 @@ interface LiteralCharSetMap<
   CharSet extends string = string,
   ResolvedCharSet extends string = ResolveCharSet<CharSet>
 > {
+  whitespace: ' '
   any: '[any char]'
   char: '[any word char]'
   nonChar: '[any non-char]'
