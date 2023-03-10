@@ -2,7 +2,7 @@
 
 > TypeScript type-level RegExp parser and matcher implemented using template literals.
 
-![Snap](https://user-images.githubusercontent.com/29917252/224089216-a3bd410c-5d05-4abb-b1c8-758a1108b9fc.png)
+![Demo](https://user-images.githubusercontent.com/29917252/224315356-770ae602-aa43-4c60-a199-ba750e377433.png)
 
 [![Open in Codeflow](https://developer.stackblitz.com/img/open_in_codeflow.svg)](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp)
 
