@@ -1,6 +1,6 @@
 # 🔤🔍 Type-Level RegExp (WIP)
 
-> A TypeScript type-level RegExp, parser, match and permutate string with RegExp right inside TypeScript type system!
+> TypeScript type-level RegExp parser and matcher implemented using template literals.
 
 ![Snap](https://user-images.githubusercontent.com/29917252/224089216-a3bd410c-5d05-4abb-b1c8-758a1108b9fc.png)
 
