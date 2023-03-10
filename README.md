@@ -47,7 +47,7 @@ As the complexity grows, I start working on this separated repo to increase deve
 |  `\s`, `\S` | Matches any whitespace, non-whitespace character. | ✅ |
 |  `\d`, `\D` | Matches any digit, non-digit character. | ✅ |
 |  `\w`, `\W` | Matches any word, non-word character. | ✅ |
-|  `\b` | Matches a word boundary. | ✅ |
+|  `\b`, `\B` | Matches a word-boundary, non-word-boundary. | ✅ |
 |  `[abc]` | Matches any character in the set. | ✅ |
 |  `[^abc]` | Matches any character not in the set. | ✅ |
 |  `()` | Creates a capturing group. | ✅ |
