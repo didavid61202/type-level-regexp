@@ -141,7 +141,7 @@ describe('Common, complex examples', () => {
     }>()
   })
 
-  it('replace \\w special replacement patterns', () => {
+  it('string.replace with special replacement patterns', () => {
     const replaced = '"The day 1991-09-15 is a Sunday"'.replace(
       createRegExp('(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})'),
       "$&$', is in ISO 8601 standard date format. Which we can also format it as common date format: $`$<day>/$2/$<year>"
@@ -154,7 +154,7 @@ describe('Common, complex examples', () => {
     ).toEqualTypeOf<'"The day 1991-09-15 is a Sunday", is in ISO 8601 standard date format. Which we can also format it as common date format: "The day 15/09/1991 is a Sunday"'>()
   })
 
-  it('replace \\w function', () => {
+  it('string.replace with function', () => {
     const replaced = 'Note: "The day 1991-09-15 is a Sunday"'.replace(
       createRegExp(
         '(?<=Note: )(?<prefix>.*?)(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})(?<suffix>.*)$'
@@ -169,6 +169,21 @@ describe('Common, complex examples', () => {
     expectTypeOf(
       replaced
     ).toEqualTypeOf<'Note: In [Note: "The day 1991-09-15 is a Sunday"], the text "The day 1991-09-15 is a Sunday" at index:6 uses ISO 8601 standard date format. Which we can also format it as common date format: "The day 15/09/1991 is a Sunday", with the day [15] at first place and the year [1991] at the end'>()
+  })
+
+  it('string.replace with global (g) flag', () => {
+    const globalReplace =
+      'Here are the contacts for our agents: John Doe (123) 456-7890, jane Smith (555) 5275-5275, Alex Johnson (999) 123-4567, Sara Lee (234) 567-8901, and Mike Davis (111) 242-3683.'.replace(
+        createRegExp('\\((?<area>\\d{3})\\)\\s(?<exchange>\\d{3,4})-(?<subscriber>\\d{4})', ['g']),
+        ', tel: (xxx)-$2-$<subscriber>'
+      )
+
+    expect(globalReplace).toMatchInlineSnapshot(
+      '"Here are the contacts for our agents: John Doe , tel: (xxx)-456-7890, jane Smith , tel: (xxx)-5275-5275, Alex Johnson , tel: (xxx)-123-4567, Sara Lee , tel: (xxx)-567-8901, and Mike Davis , tel: (xxx)-242-3683."'
+    )
+    expectTypeOf(
+      globalReplace
+    ).toEqualTypeOf<'Here are the contacts for our agents: John Doe , tel: (xxx)-456-7890, jane Smith , tel: (xxx)-5275-5275, Alex Johnson , tel: (xxx)-123-4567, Sara Lee , tel: (xxx)-567-8901, and Mike Davis , tel: (xxx)-242-3683.'>()
   })
 })
 
