@@ -30,8 +30,8 @@ As the complexity grows, I start working on this separated repo to increase deve
 
 🚧 Work In Progress, PRs and issue are welcome 🚧
 
-## Example - type-safe args for function in `string.replace()`
-![replaceRegexp](https://user-images.githubusercontent.com/29917252/224331214-b3ed8015-2b8d-461d-ab81-ede06df5f13d.JPG)
+## Example - type-safe args in replacing function of `string.replace()`
+![replaceRegexp](https://user-images.githubusercontent.com/29917252/224333879-50d51207-f63c-4ac6-b561-34ace9ebb7d4.JPG)
 
 
 ## RegExp Tokens & Flags
