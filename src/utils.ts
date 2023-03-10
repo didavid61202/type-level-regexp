@@ -68,6 +68,7 @@ export interface CharSetMap<
 > {
   step: CharSet
   whitespace: Whitespace
+  nonWhitespace: Whitespace
   char: Alphanumeric
   nonChar: Alphanumeric
   digit: Digit
@@ -459,12 +460,12 @@ export type StepMatch<
             ? CaseMap[FirstChar]
             : never
           : never)}${string}`
-    ? MatchingType extends 'notCharSet' | 'nonChar' | 'nonDigit'
+    ? MatchingType extends 'notCharSet' | 'nonChar' | 'nonDigit' | 'nonWhitespace'
       ? StartOf extends true
         ? NullResult<''>
         : StepMatch<Rest, MatchingString, StartOf, MatchingType, CaseInsensitive>
       : MatchedResult<[FirstChar], Rest>
-    : MatchingType extends 'notCharSet' | 'nonChar' | 'nonDigit'
+    : MatchingType extends 'notCharSet' | 'nonChar' | 'nonDigit' | 'nonWhitespace'
     ? MatchedResult<[FirstChar], Rest>
     : StartOf extends true
     ? NullResult<''>

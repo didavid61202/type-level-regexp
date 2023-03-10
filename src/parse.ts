@@ -2,6 +2,7 @@ import { Matcher } from './utils'
 
 type ShorthandMap = {
   s: 'whitespace'
+  S: 'nonWhitespace'
   w: 'char'
   W: 'nonChar'
   d: 'digit'

@@ -82,30 +82,34 @@ describe('Generic type `ResolvePermutation<[ParsedRegExp]>` can Permutate all po
         | ['nonCharSet', '[any char NOT in [A-Z]]']
     }>()
   })
-  it('AnyChar, whitespace, char, non-char, ditig, non-digit, boundary', () => {
+  it('Whitespace, non-whitespace', () => {
+    expectTypeOf<PRE<'(?<whitespace>\\s)_(?<nonWhitespace>\\S)'>>().toEqualTypeOf<{
+      resultArray: [` _[non-whitespace]`, ' ', '[non-whitespace]']
+      namedCapture: ['whitespace', ' '] | ['nonWhitespace', '[non-whitespace]']
+    }>()
+  })
+  it('AnyChar, char, non-char, ditig, non-digit, boundary', () => {
     expectTypeOf<
-      PRE<'(?<any>.)_(?<whitespace>\\s)_(?<char>\\w)_(?<nonChar>\\W)_(?<digit>\\d)_(?<nonDigit>\\D)_(?<boundary>\\b)'>
+      PRE<'(?<any>.)_(?<char>\\w)_(?<nonChar>\\W)_(?<digit>\\d)_(?<nonDigit>\\D)_(?<boundary>\\b)'>
     >().toEqualTypeOf<{
       resultArray: [
         (
-          | `[any char]_ _[any word char]_[any non-char]_${number}_[any non-digit]_[boundary]`
-          | '[any char]_ _[any word char]_[any non-char]_[any digit]_[any non-digit]_[boundary]'
+          | `[any char]_[any word char]_[any non-char]_${number}_[non-digit]_[boundary]`
+          | '[any char]_[any word char]_[any non-char]_[any digit]_[non-digit]_[boundary]'
         ),
         '[any char]',
-        ' ',
         '[any word char]',
         '[any non-char]',
         `${number}` | '[any digit]',
-        '[any non-digit]',
+        '[non-digit]',
         '[boundary]'
       ]
       namedCapture:
         | ['any', '[any char]']
-        | ['whitespace', ' ']
         | ['char', '[any word char]']
         | ['nonChar', '[any non-char]']
         | ['digit', '[any digit]' | `${number}`]
-        | ['nonDigit', '[any non-digit]']
+        | ['nonDigit', '[non-digit]']
         | ['boundary', '[boundary]']
     }>()
   })

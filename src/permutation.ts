@@ -57,11 +57,12 @@ interface LiteralCharSetMap<
   ResolvedCharSet extends string = ResolveCharSet<CharSet>
 > {
   whitespace: ' '
+  nonWhitespace: '[non-whitespace]'
   any: '[any char]'
   char: '[any word char]'
   nonChar: '[any non-char]'
   digit: `${number}` | '[any digit]'
-  nonDigit: '[any non-digit]'
+  nonDigit: '[non-digit]'
   charSet: StrintToUnion<ResolvedCharSet>
   notCharSet: `[any char NOT in [${CharSet}]]`
   boundary: '[boundary]'

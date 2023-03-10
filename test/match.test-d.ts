@@ -90,16 +90,17 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     expectTypeOf<MRE<'foo-bar-baz-qux', 'b[A-Z]r'>>().toEqualTypeOf<NullResult<''>>()
     expectTypeOf<MRE<'foo-bar-baz-qux', 'b[abc][^r-z]'>>().toEqualTypeOf<NullResult<''>>()
   })
-  it('Whitespace', () => {
+  it('Whitespace, non-whitespace', () => {
     expectTypeOf<
       MRE<
-        'foo- \f\n\r\t\v    \u2028\u2029  　﻿-bar',
-        '\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'
+        'foo- \f\n\r\t\v    \u2028\u2029  　﻿-bar-qux',
+        '\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\Sbar\\S'
       >
-    >().toEqualTypeOf<MatchedResult<[' \f\n\r\t\v    \u2028\u2029  　﻿'], '-bar', never>>()
-    expectTypeOf<MRE<'b_r', 'b\\sr'>>().toEqualTypeOf<NullResult<''>>()
+    >().toEqualTypeOf<MatchedResult<[' \f\n\r\t\v    \u2028\u2029  　﻿-bar-'], 'qux', never>>()
+    expectTypeOf<MRE<'bar', 'b\\sr'>>().toEqualTypeOf<NullResult<''>>()
+    expectTypeOf<MRE<'bar baz', 'bar\\Sbaz'>>().toEqualTypeOf<NullResult<''>>()
   })
-  it('AnyChar, whitespace, char, non-char, ditig, non-digit, boundary', () => {
+  it('AnyChar, char, non-char, ditig, non-digit, boundary', () => {
     expectTypeOf<
       MRE<
         'bar-foo-bar-baz-\t-qu x-123-foo',
