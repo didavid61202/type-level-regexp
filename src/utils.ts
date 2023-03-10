@@ -2,7 +2,7 @@ type UppercaseLetter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 type LowercaseLetter = 'abcdefghijklmnopqrstuvwxyz'
 type Digit = '0123456789'
 type Alphanumeric = `_${Digit}${UppercaseLetter}${LowercaseLetter}`
-type Whitespace = ` \r\n\t\f\v`
+type Whitespace = ` \f\n\r\t\v\u00a0\u1680\u2000\u200a\u2028\u2029\u202f\u205f\u3000\ufeff`
 
 type CommonChar =
   `!"#$%&'()*+,-./${Digit}:;<=>?@${UppercaseLetter}[\\]^_\`${LowercaseLetter}{|}~ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡ΢ΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψω`
