@@ -66,6 +66,7 @@ interface LiteralCharSetMap<
   charSet: StrintToUnion<ResolvedCharSet>
   notCharSet: `[any char NOT in [${CharSet}]]`
   boundary: '[boundary]'
+  nonBoundary: '[non-boundary]'
 }
 
 type ConcateRestMatchers<

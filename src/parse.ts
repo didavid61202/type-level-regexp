@@ -8,6 +8,7 @@ type ShorthandMap = {
   d: 'digit'
   D: 'nonDigit'
   b: 'boundary'
+  B: 'nonBoundary'
 }
 
 export type ParseRegExp<

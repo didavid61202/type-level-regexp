@@ -100,17 +100,17 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     expectTypeOf<MRE<'bar', 'b\\sr'>>().toEqualTypeOf<NullResult<''>>()
     expectTypeOf<MRE<'bar baz', 'bar\\Sbaz'>>().toEqualTypeOf<NullResult<''>>()
   })
-  it('AnyChar, char, non-char, ditig, non-digit, boundary', () => {
+  it('AnyChar, char, non-char, ditig, non-digit, boundary, non-boundary', () => {
     expectTypeOf<
       MRE<
-        'bar-foo-bar-baz-\t-qu x-123-foo',
-        '(?<g1>ba.\\b-\\b(?<g2>\\waz))\\W\\s\\W(?<g3>q\\D\\sx)-\\b\\d.(?<g4>\\d)'
+        'bar-foo-bar-baz-qux--123-foo',
+        '(?<g1>ba.\\b-\\b(?<g2>b\\wz))\\W(?<g3>q\\Dx)\\b-\\B.\\d.(?<g4>\\d)'
       >
     >().toEqualTypeOf<
       MatchedResult<
-        ['bar-baz-\t-qu x-123', 'bar-baz', 'baz', 'qu x', '3'],
+        ['bar-baz-qux--123', 'bar-baz', 'baz', 'qux', '3'],
         '-foo',
-        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qu x'] | ['g4', '3']
+        ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', '3']
       >
     >()
     expectTypeOf<MRE<'bar', '....'>>().toEqualTypeOf<NullResult<''>>()

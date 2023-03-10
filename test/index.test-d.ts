@@ -1,6 +1,12 @@
 import { RegExpMatchResult } from '../src'
 import { createRegExp } from '../src/regexp'
 
+const result = 'bAR-fOo-baR-baz-quX-BAr-duck-BAaER-For-bEH-baz-qtX-Beh'.match(
+  createRegExp(
+    '(?<g1>B[a-z]{1,3}r)\\W\\b(?<g2>Fo[G-Y])(?<=fo[g-y])-(?<g3>Beh|bA(?<g4>r|k))-BAZ(?=-(?<g5>Q[O-Z]x-\\k<g3>))',
+    ['i']
+  )
+)
 
 describe('Common, complex examples', () => {
   it('Remain type-safe after chain of replace and match', () => {
@@ -9,7 +15,6 @@ describe('Common, complex examples', () => {
     )
 
     const chainedResult =
-      //     ^?
       `Check out the Nuxt documentation 📖 site at https://nuxt.com/docs 👉 it's the best resource for clear and concise explanations, with excellent examples that make web development a breeze! ❤️`
         .replace(RE, 'starter templates site at $<protocal>$3$<secondDomain>.new')
         .replace(

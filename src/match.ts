@@ -146,7 +146,7 @@ export type EnumerateMatchers<
       : never
     : never
   : Match<
-      CurrentMatcher['type'] extends 'boundary'
+      CurrentMatcher['type'] extends 'boundary' | 'nonBoundary'
         ? `${LastCharOfOr<MatchResultArray[0], ' '>}${InputString}`
         : InputString,
       Flags,

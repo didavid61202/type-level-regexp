@@ -76,6 +76,7 @@ export interface CharSetMap<
   charSet: ResolvedCharSet
   notCharSet: ResolvedCharSet
   boundary: string
+  nonBoundary: string
 }
 
 export type ResolveCharSet<
@@ -438,7 +439,7 @@ export type StepMatch<
     : InputString extends `${string}${infer Rest}`
     ? StepMatch<Rest, MatchingString, StartOf, MatchingType, CaseInsensitive>
     : NullResult<''>
-  : MatchingType extends 'boundary'
+  : MatchingType extends 'boundary' | 'nonBoundary'
   ? InputString extends `${infer First}${infer Second}${infer Rest}`
     ? {
         o: NullResult<''>
@@ -447,6 +448,8 @@ export type StepMatch<
         o: StepMatch<First | Second, CharSetMap['char'], true, 'char', CaseInsensitive>
         r: StepMatch<Second | First, CharSetMap['nonChar'], true, 'nonChar', CaseInsensitive>
       }
+      ? MatchedResult<[''], `${Second}${Rest}`>
+      : MatchingType extends 'nonBoundary'
       ? MatchedResult<[''], `${Second}${Rest}`>
       : StartOf extends true
       ? NullResult<''>
