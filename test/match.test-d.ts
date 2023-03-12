@@ -27,6 +27,20 @@ describe('Generic type `ExhaustiveMatch` can accept flags', () => {
   })
 })
 
+describe('Generic type `ExhaustiveMatch` accept union input and return union`', () => {
+  it('Give union of parsedRegExp matchers and return union of `MatchedResult', () => {
+    type DigitOrNonChar = '(?<digit>\\d)' | '(?<nonChar>\\W)'
+    type AtoGOrBackref = '(?<aTog>[a-g])' | '(?:c|\\k<nonChar>)'
+
+    expectTypeOf<MRE<'123c1$3$', `1${DigitOrNonChar}3${AtoGOrBackref}`>>().toEqualTypeOf<
+      | MatchedResult<['123c', '2', 'c'], '1$3$', ['digit', '2'] | ['aTog', 'c']>
+      | MatchedResult<['123c', '2'], '1$3$', ['digit', '2']>
+      | MatchedResult<['1$3$', '$'], '', ['nonChar', '$']>
+      | NullResult<'', unknown, false>
+    >()
+  })
+})
+
 describe('Generic type `ExhaustiveMatch` can match input string with parsed RegExp to RegExp result array and groups', () => {
   it('Exact string', () => {
     expectTypeOf<MRE<'bar-foo-bar-baz-qux', 'bar'>>().toEqualTypeOf<

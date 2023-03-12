@@ -46,35 +46,37 @@ export type ExhaustiveMatch<
   Flags extends Flag,
   SkipedString extends string = '',
   StartOf extends boolean = false
-> = EnumerateMatchers<
-  InputString,
-  Matchers,
-  Flags,
-  SkipedString,
-  [],
-  [''],
-  never,
-  StartOf
-> extends infer Result
-  ? Result extends MatchedResult<any, any, any>
-    ? Result
-    : Result extends NullResult<infer PartialMatched extends string, any, infer Abort>
-    ? true extends Abort | StartOf
+> = Matchers extends Matchers
+  ? EnumerateMatchers<
+      InputString,
+      Matchers,
+      Flags,
+      SkipedString,
+      [],
+      [''],
+      never,
+      StartOf
+    > extends infer Result
+    ? Result extends MatchedResult<any, any, any>
       ? Result
-      : PartialMatched extends ''
-      ? InputString extends `${infer FirstChar}${infer Rest}`
-        ? Rest extends ''
-          ? Result
-          : ExhaustiveMatch<Rest, Matchers, Flags, `${SkipedString}${FirstChar}`, StartOf>
-        : Result
-      : InputString extends `${infer Prefix}${PartialMatched}${infer NextSection}`
-      ? ExhaustiveMatch<
-          NextSection,
-          Matchers,
-          Flags,
-          `${SkipedString}${Prefix}${PartialMatched}`,
-          StartOf
-        >
+      : Result extends NullResult<infer PartialMatched extends string, any, infer Abort>
+      ? true extends Abort | StartOf
+        ? Result
+        : PartialMatched extends ''
+        ? InputString extends `${infer FirstChar}${infer Rest}`
+          ? Rest extends ''
+            ? Result
+            : ExhaustiveMatch<Rest, Matchers, Flags, `${SkipedString}${FirstChar}`, StartOf>
+          : Result
+        : InputString extends `${infer Prefix}${PartialMatched}${infer NextSection}`
+        ? ExhaustiveMatch<
+            NextSection,
+            Matchers,
+            Flags,
+            `${SkipedString}${Prefix}${PartialMatched}`,
+            StartOf
+          >
+        : never
       : never
     : never
   : never
