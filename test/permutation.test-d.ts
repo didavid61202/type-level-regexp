@@ -115,6 +115,12 @@ describe('Generic type `ResolvePermutation<[ParsedRegExp]>` can Permutate all po
         | ['nonBoundary', '[non-boundary]']
     }>()
   })
+  it('NUL, horizontal/vertical  tab, carriage return. linefeed, form-feed', () => {
+    expectTypeOf<PRE<`\0\t\v\r\n\f\0\t\v\r\n\f`>>().toEqualTypeOf<{
+      resultArray: ['\0\t\v\r\n\f\0\t\v\r\n\f']
+      namedCapture: never
+    }>()
+  })
   it('Optional (Greedy)', () => {
     expectTypeOf<PRE<'(?<g1>fo?o_(?<g2>bar_)?)baz'>>().toEqualTypeOf<{
       resultArray: [

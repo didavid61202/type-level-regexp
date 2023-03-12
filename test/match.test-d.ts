@@ -120,6 +120,11 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     expectTypeOf<MRE<'foo-bar-123', 'bar-\\D'>>().toEqualTypeOf<NullResult<''>>()
     expectTypeOf<MRE<'foo-bar-baz-qux', 'ba\\b'>>().toEqualTypeOf<NullResult<''>>()
   })
+  it('NUL, horizontal/vertical  tab, carriage return. linefeed, form-feed', () => {
+    expectTypeOf<
+      MRE<`\x00\t\x0B\r\n\f\x00\t\x0B\r\n\f`, '\0\t\v\r\n\f\\0\\t\\v\\r\\n\\f'>
+    >().toEqualTypeOf<MatchedResult<['\0\t\v\r\n\f\0\t\v\r\n\f'], '', never>>()
+  })
   it('Optional (Greedy)', () => {
     expectTypeOf<
       MRE<'bar-foo-bar--qx-foo', '(?<g1>ba?r-(?<g2>baz)?)-(?<g3>qu?x)?-(?<g4>qux)?'>

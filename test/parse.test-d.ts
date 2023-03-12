@@ -207,6 +207,11 @@ describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers
       ]
     >()
   })
+  it('NUL, horizontal/vertical  tab, carriage return. linefeed, form-feed', () => {
+    expectTypeOf<ParseRegExp<'\0\t\v\r\n\f\\0\\t\\v\\r\\n\\f'>>().toEqualTypeOf<
+      [{ type: 'string'; value: '\0\t\v\r\n\f\0\t\v\r\n\f' }]
+    >()
+  })
   it('Optional (Greedy)', () => {
     expectTypeOf<ParseRegExp<'(fo?o)_(bar)?'>>().toEqualTypeOf<
       [

@@ -11,6 +11,15 @@ type ShorthandMap = {
   B: 'nonBoundary'
 }
 
+type IgnoreEscapedChar = {
+  '0': '\0'
+  t: '\t'
+  v: '\v'
+  r: '\r'
+  n: '\n'
+  f: '\f'
+}
+
 export type ParseRegExp<
   InputString extends string,
   ParsedMatchers extends Matcher[] = [],
@@ -62,7 +71,14 @@ export type ParseRegExp<
             ParseOrAsTupleOnly
           >
       : Rest extends `${infer EscapedChar}${infer RestAfterEscapedChar}`
-      ? EscapedChar extends keyof ShorthandMap
+      ? EscapedChar extends keyof IgnoreEscapedChar
+        ? ParseRegExp<
+            RestAfterEscapedChar,
+            ParsedMatchers,
+            ParseOrAsTupleOnly,
+            `${AccString}${IgnoreEscapedChar[EscapedChar]}`
+          >
+        : EscapedChar extends keyof ShorthandMap
         ? RestAfterEscapedChar extends `${'?' | '*' | '+' | '{'}${string}`
           ? ResolveQuantifierForSingleToken<
               [{ type: ShorthandMap[EscapedChar] }],
