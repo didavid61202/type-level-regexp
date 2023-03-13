@@ -35,6 +35,24 @@ export function createRegExp<Pattern extends string, Flags extends Flag = never>
   return new RegExp(pattern, [...(flags || '')].join('')) as TypedRegExp<Pattern, Flags>
 }
 
-export function spreadRegExpIterator<T extends any[]>(t: Iterable<any> & { _matchedTuple: T }) {
-  return [...t] as T
+export function spreadRegExpMatchArray<
+  MatchArray extends
+    | {
+        [Symbol.iterator]: () => IterableIterator<any>
+        _matchArray: any[]
+      }
+    | undefined
+>(matchArray: MatchArray) {
+  return (matchArray ? [...matchArray] : null) as MatchArray extends {
+    [Symbol.iterator]: () => IterableIterator<any>
+    _matchArray: any[]
+  }
+    ? MatchArray['_matchArray']
+    : null
+}
+
+export function spreadRegExpIterator<Iter extends Iterable<any> & { _matchedTuple: any }>(
+  iterableIterator: Iter
+) {
+  return [...iterableIterator] as Iter extends { _matchedTuple: infer Tuple } ? Tuple : never
 }

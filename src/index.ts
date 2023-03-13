@@ -11,7 +11,7 @@ import {
 import { GlobalReplace, ResolveRepalceValue } from './replace'
 import { LengthOfString, MatchedResult, Matcher, NamedCapturesTuple, NullResult } from './utils'
 
-export { Flag, createRegExp, spreadRegExpIterator } from './regexp'
+export { Flag, createRegExp, spreadRegExpIterator, spreadRegExpMatchArray } from './regexp'
 export { ParseRegExp } from './parse'
 export { ExhaustiveMatch, GlobalMatch } from './match'
 export { ResolvePermutation } from './permutation'
@@ -74,6 +74,7 @@ export type RegExpMatchResult<
       ? undefined
       : { [K in Result['namedCaptures'][0]]: Extract<Result['namedCaptures'], [K, any]>[1] }
     keys: () => IterableIterator<Extract<keyof Result['matched'], `${number}`>>
+    _matchArray: Result['matched']
   }
 > = {
   [K in
