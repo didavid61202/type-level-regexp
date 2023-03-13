@@ -20,9 +20,10 @@ As the complexity grows, I start working on this separated repo to increase deve
  
 ## Features
 
-- Enhance types of RegExp related `String` functions for literal or dynamic typed string.
+- Enhance types of RegExp related `String` functions (`.match`, `matchAll`, `.replace`...) for literal or dynamic typed string.
 - Result of `String` functions matched exactly as runtime result.
 - Support all common RegExp tokens (incl. Lookarounds, Backreferences...etc), quantifiers (incl. greedy/lazy) and (`g`,`i`) flags.
+- Export helper functions `spreadRegExpMatchArray` and `spreadRegExpIterator` to get tuple type of match results and iterators.
 - Provide generic type `ParseRegExp` to parse and RegExp string to AST.
 - Provide generic type `MatchRegExp` to match giving string with a parsed RegExp.
 - Provide generic type `ResolvePermutation` to permutation all possible matching string of given RegExp if possible (due to TypeScript type-level limitation)
