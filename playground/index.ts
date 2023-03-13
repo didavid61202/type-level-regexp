@@ -255,6 +255,26 @@ type UnionOfMatchAllRsesultTest = [
   Expect<Equal<NonNullable<(typeof spreadedMatchedFile)[0]>['length'], 4>>,
   Expect<
     Equal<
+      NonNullable<(typeof spreadedMatchedFile)[0]>['groups'],
+      | {
+          date: '2023-03-12'
+          filename: 'report'
+          ext: '.pdf'
+        }
+      | {
+          id: 'MO001234'
+          filename: 'memo'
+          ext: '.docx'
+        }
+      | {
+          id: 'PO033543'
+          filename: 'document'
+          ext: '.txt'
+        }
+    >
+  >,
+  Expect<
+    Equal<
       NonNullable<(typeof spreadedMatchedFile)[1]>['groups'],
       { date: '2019-09-21'; filename: 'receipt'; ext: '.pdf' }
     >
