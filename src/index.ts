@@ -93,44 +93,47 @@ export type MatchAllRegExp<
   MatchedResultTuple extends any[] = [],
   InitialInputString extends string = InputString,
   ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
-> = string extends InputString
-  ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
-      infer MatchArray,
-      infer NamedCaptures extends NamedCapturesTuple
-    >
-    ? RegExpIterableIterator<
-        (RegExpMatchResult<{
-          matched: 'i' extends Flags
-            ? PrependAndUnionToAll<MatchArray, '[Case Insensitive] ', string & { all: true }>
-            : MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
-          namedCaptures: NamedCaptures //TODO: add '[Case Insensitive] ' prefix to named captures values
-          input: InputString
-          restInput: undefined
-        }> | null)[]
+> = ParsedRegexpAST extends ParsedRegexpAST
+  ? string extends InputString
+    ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
+        infer MatchArray,
+        infer NamedCaptures extends NamedCapturesTuple
       >
+      ? RegExpIterableIterator<
+          (RegExpMatchResult<{
+            matched: 'i' extends Flags
+              ? PrependAndUnionToAll<MatchArray, '[Case Insensitive] ', string & { all: true }>
+              : MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
+            namedCaptures: NamedCaptures //TODO: add '[Case Insensitive] ' prefix to named captures values
+            input: InputString
+            restInput: undefined
+          }> | null)[]
+        >
+      : never
+    : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
+    ? Result extends MatchedResult<
+        infer MatchArray extends any[],
+        infer RestInputString extends string,
+        infer NamedCaptures extends NamedCapturesTuple
+      >
+      ? MatchAllRegExp<
+          RestInputString,
+          'Distributed',
+          Flags,
+          [
+            ...MatchedResultTuple,
+            RegExpMatchResult<{
+              matched: MatchArray
+              namedCaptures: NamedCaptures
+              input: InitialInputString
+              restInput: RestInputString
+            }>
+          ],
+          InitialInputString,
+          ParsedRegexpAST
+        >
+      : RegExpIterableIterator<MatchedResultTuple>
     : never
-  : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
-  ? Result extends MatchedResult<
-      infer MatchArray extends any[],
-      infer RestInputString extends string,
-      infer NamedCaptures extends NamedCapturesTuple
-    >
-    ? MatchAllRegExp<
-        RestInputString,
-        Regexp,
-        Flags,
-        [
-          ...MatchedResultTuple,
-          RegExpMatchResult<{
-            matched: MatchArray
-            namedCaptures: NamedCaptures
-            input: InitialInputString
-            restInput: RestInputString
-          }>
-        ],
-        InitialInputString
-      >
-    : RegExpIterableIterator<MatchedResultTuple>
   : never
 
 export type ReplaceWithRegExp<
