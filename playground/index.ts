@@ -219,12 +219,10 @@ type MatchAllRsesultTest = [
  * which can be spread with helper function `spreadRegExpIterator` to obtain an array of
  * `RegExpMatchResult`, which can then be spread again with helper function `spreadRegExpMatchArray`.
  */
-const random = Math.random()
-const fileTypes = random > 0.6 ? 'pdf' : random > 0.3 ? 'docx' : 'txt'
-const prefix = random > 0.5 ? '(?<date>\\d{4}-\\d{2}-\\d{2})' : '(?<id>[A-Z]{2}\\d{6})'
+declare const fileTypes: 'pdf' | 'docx' | 'txt'
+declare const prefix: '(?<date>\\d{4}-\\d{2}-\\d{2})' | '(?<id>[A-Z]{2}\\d{6})'
 
 const IterOfMatchedFiles =
-  //     ^?
   `PO033543-document.txt, 2023-03-12-report.pdf, MO001234-memo.docx, 2020-01-02-notes.doc, 2019-09-21-receipt.pdf,`.matchAll(
     createRegExp(`\\b${prefix}-(?<filename>\\w+)(?<ext>\\.${fileTypes})`, ['g'])
   )
