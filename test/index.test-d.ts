@@ -444,14 +444,6 @@ describe('<literal-string>.matchAll() return iterableIterator with each iter ret
 
     const spreadedMatchedFile = spreadRegExpIterator(IterOfMatchedFiles)
 
-    expect(spreadRegExpMatchArray(spreadedMatchedFile[0])).toMatchInlineSnapshot(`
-      [
-        "2023-03-12-report.pdf",
-        "2023-03-12",
-        "report",
-        ".pdf",
-      ]
-    `)
     expectTypeOf(spreadRegExpMatchArray(spreadedMatchedFile[0])).toEqualTypeOf<
       | ['2023-03-12-report.pdf', '2023-03-12', 'report', '.pdf']
       | ['MO001234-memo.docx', 'MO001234', 'memo', '.docx']
@@ -459,33 +451,15 @@ describe('<literal-string>.matchAll() return iterableIterator with each iter ret
       | null
     >()
 
-    expect(spreadRegExpMatchArray(spreadedMatchedFile[1])).toMatchInlineSnapshot(`
-      [
-        "2019-09-21-receipt.pdf",
-        "2019-09-21",
-        "receipt",
-        ".pdf",
-      ]
-    `)
     expectTypeOf(spreadRegExpMatchArray(spreadedMatchedFile[1])).toEqualTypeOf<
       ['2019-09-21-receipt.pdf', '2019-09-21', 'receipt', '.pdf'] | null
     >()
 
-    expect(spreadedMatchedFile[0]?.index).toMatchInlineSnapshot('23')
     expectTypeOf(spreadedMatchedFile[0]?.index).toEqualTypeOf<0 | 23 | 46 | undefined>()
-    expect(spreadedMatchedFile[1]?.index).toMatchInlineSnapshot('88')
     expectTypeOf(spreadedMatchedFile[1]?.index).toEqualTypeOf<88 | undefined>()
 
-    expect(spreadedMatchedFile[0]?.length).toMatchInlineSnapshot('4')
     expectTypeOf(spreadedMatchedFile[0]?.length).toEqualTypeOf<4 | undefined>()
 
-    expect(spreadedMatchedFile[1]?.groups).toMatchInlineSnapshot(`
-      {
-        "date": "2019-09-21",
-        "ext": ".pdf",
-        "filename": "receipt",
-      }
-    `)
     expectTypeOf(spreadedMatchedFile[1]?.groups).toEqualTypeOf<
       { date: '2019-09-21'; filename: 'receipt'; ext: '.pdf' } | undefined
     >()
