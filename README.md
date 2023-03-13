@@ -34,11 +34,11 @@ As the complexity grows, I start working on this separated repo to increase deve
 ## Example - type-safe args in replacing function of `string.replace()`
 ![replaceRegexp](https://user-images.githubusercontent.com/29917252/224333879-50d51207-f63c-4ac6-b561-34ace9ebb7d4.JPG)
 
-## Example - spreaded `string.matchAll()` with union of RegExp pattern remain as tuple
+### Example - spreaded `string.matchAll()` with union of RegExp pattern remain as tuple
 ![type-level-matchAll-with-union](https://user-images.githubusercontent.com/29917252/224666590-0bfdc22b-ac5d-4b8e-94e3-545fd57a8233.png)
 
 
-## RegExp Tokens & Flags
+### RegExp Tokens & Flags
 
 | Tokens | Description | Support |
 | --- | --- | --- |
