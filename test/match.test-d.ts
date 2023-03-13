@@ -28,7 +28,7 @@ describe('Generic type `ExhaustiveMatch` can accept flags', () => {
 })
 
 describe('Generic type `ExhaustiveMatch` accept union input and return union`', () => {
-  it('Give union of parsedRegExp matchers and return union of `MatchedResult', () => {
+  it('accept union of parsedRegExp matchers and return union of `MatchedResult`', () => {
     type DigitOrNonChar = '(?<digit>\\d)' | '(?<nonChar>\\W)'
     type AtoGOrBackref = '(?<aTog>[a-g])' | '(?:c|\\k<nonChar>)'
 
