@@ -10,6 +10,7 @@
 import {
   createRegExp,
   spreadRegExpIterator,
+  spreadRegExpMatchArray,
   MatchRegExp,
   ReplaceWithRegExp,
   ParseRegExp,
@@ -211,4 +212,53 @@ type MatchAllRsesultTest = [
   //                               ^?
   Expect<Equal<typeof secondMatch.groups.g1, 'b8CD'>>
   //                                     ^?
+]
+
+/**
+ * string.matchAll accept union of RegExp pattern and retrun union of `RegExpIterableIterator`,
+ * which can be spread with helper function `spreadRegExpIterator` to obtain an array of
+ * `RegExpMatchResult`, which can then be spread again with helper function `spreadRegExpMatchArray`.
+ */
+const random = Math.random()
+const fileTypes = random > 0.6 ? 'pdf' : random > 0.3 ? 'docx' : 'txt'
+const prefix = random > 0.5 ? '(?<date>\\d{4}-\\d{2}-\\d{2})' : '(?<id>[A-Z]{2}\\d{6})'
+
+const IterOfMatchedFiles =
+  //     ^?
+  `PO033543-document.txt, 2023-03-12-report.pdf, MO001234-memo.docx, 2020-01-02-notes.doc, 2019-09-21-receipt.pdf,`.matchAll(
+    createRegExp(`\\b${prefix}-(?<filename>\\w+)(?<ext>\\.${fileTypes})`, ['g'])
+  )
+
+const spreadedMatchedFile = spreadRegExpIterator(IterOfMatchedFiles)
+
+const [firstSpreadedMatched, secondSpreadedMatched] = [
+  spreadRegExpMatchArray(spreadedMatchedFile[0]),
+  spreadRegExpMatchArray(spreadedMatchedFile[1]),
+]
+
+type UnionOfMatchAllRsesultTest = [
+  Expect<
+    Equal<
+      typeof firstSpreadedMatched,
+      | ['2023-03-12-report.pdf', '2023-03-12', 'report', '.pdf']
+      | ['MO001234-memo.docx', 'MO001234', 'memo', '.docx']
+      | ['PO033543-document.txt', 'PO033543', 'document', '.txt']
+      | null
+    >
+  >,
+  Expect<
+    Equal<
+      typeof secondSpreadedMatched,
+      ['2019-09-21-receipt.pdf', '2019-09-21', 'receipt', '.pdf'] | null
+    >
+  >,
+  Expect<Equal<NonNullable<(typeof spreadedMatchedFile)[0]>['index'], 0 | 23 | 46>>,
+  Expect<Equal<NonNullable<(typeof spreadedMatchedFile)[1]>['index'], 88>>,
+  Expect<Equal<NonNullable<(typeof spreadedMatchedFile)[0]>['length'], 4>>,
+  Expect<
+    Equal<
+      NonNullable<(typeof spreadedMatchedFile)[1]>['groups'],
+      { date: '2019-09-21'; filename: 'receipt'; ext: '.pdf' }
+    >
+  >
 ]
