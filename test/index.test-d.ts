@@ -242,6 +242,41 @@ describe('<literal-string>.match() show exact same literal value for RegExp matc
     }>()
   })
 
+  it('accept union of RegExp pattern', () => {
+    const random = Math.random()
+    const fileTypes = random > 0.6 ? 'pdf' : random > 0.3 ? 'docx' : 'txt'
+    const prefix = random > 0.5 ? '(?<date>\\d{4}-\\d{2}-\\d{2})' : '(?<id>[A-Z]{2}\\d{6})'
+
+    const matchedFiles =
+      //     ^?
+      `PO033543-document.txt, 2023-03-12-report.pdf, MO001234-memo.docx, 2020-01-02-notes.doc`.match(
+        createRegExp(`\\b${prefix}-(?<filename>\\w+)(?<ext>\\.${fileTypes})`)
+      )
+
+    expect(matchedFiles?.[2]).toMatchInlineSnapshot('"document"')
+    expectTypeOf(matchedFiles?.[2]).toEqualTypeOf<'report' | 'memo' | 'document' | undefined>()
+
+    expect(matchedFiles?.index).toMatchInlineSnapshot('0')
+    expectTypeOf(matchedFiles?.index).toEqualTypeOf<0 | 23 | 46 | undefined>()
+
+    expect(matchedFiles?.length).toMatchInlineSnapshot('4')
+    expectTypeOf(matchedFiles?.length).toEqualTypeOf<4 | undefined>()
+
+    expect(matchedFiles?.groups).toMatchInlineSnapshot(`
+      {
+        "ext": ".txt",
+        "filename": "document",
+        "id": "PO033543",
+      }
+    `)
+    expectTypeOf(matchedFiles?.groups).toEqualTypeOf<
+      | { date: '2023-03-12'; filename: 'report'; ext: '.pdf' }
+      | { filename: 'memo'; ext: '.docx'; id: 'MO001234' }
+      | { filename: 'document'; ext: '.txt'; id: 'PO033543' }
+      | undefined
+    >()
+  })
+
   it('support global `g` flag', () => {
     const matchGlobal = 'foo_bar_baz_qux_ber_foo_boir_boz'.match(
       createRegExp('b[a-z]{1,4}r', ['g'])
