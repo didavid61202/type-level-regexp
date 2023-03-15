@@ -12,7 +12,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "vitest --run && vitest typecheck"
+    "dev": "vitest --run && vitest typecheck",
+    "bench": "tsx --watch test/benchmark.ts"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.36.0",
@@ -20,9 +21,11 @@
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.4",
+    "tinybench": "^2.4.0",
+    "ts-morph": "^17.0.1",
+    "tsx": "^3.12.5",
     "typescript": "^4.9.5",
     "vite": "^4.1.4",
     "vitest": "^0.28.5"
   }
-
 }
