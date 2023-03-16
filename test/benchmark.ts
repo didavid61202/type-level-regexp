@@ -16,26 +16,26 @@ logTypeInferenceText(
 )
 
 runTypeInferenceBenchmark(
-  { project, benchOptions: { time: 800, warmupIterations: 100 } },
+  { project, benchOptions: { iterations: 800, warmupIterations: 100 } },
   file => file.getTypeAliasOrThrow('Result'),
   {
-    'test1.ts': `
+    'parse-baseline.ts': `
     import { ParseRegExp } from 'type-level-regexp'
 
-    type Result = ParseRegExp<'a(b)c'>
+    type Result = ParseRegExp<'a'>
     `,
-    'test2.ts': `
+    'parse-password.ts': `
     import { ParseRegExp } from 'type-level-regexp'
     
     type Result = ParseRegExp<\`^(?=.*(?<lower>[a-z]))(?=.*(?<upper>[A-Z]))(?=.*(?<digit>\\\\d))(?=.*(?<special>[!@#$%^&*])).{8,}$\`>`,
-    'test3.ts': `
+    'match-complex.ts': `
     import { MatchRegExp } from 'type-level-regexp'
     
     type Result = MatchRegExp<
     'bAR-fOo-baR-baz-quX-BAr',
     \`(?<g1>B[a-z]r)\\\\W\\\\b(?<g2>Fo[G-Y])(?<=foO)-(?<g3>Beh|bA(?<g4>r|k))-BAZ(?=-(?<g5>Q[O-Z]x-\\\\k<g3>))\`,
     'i'>`,
-    'test4.ts': `
+    'match-password.ts': `
     import { MatchRegExp } from 'type-level-regexp'
     
     type Result = MatchRegExp<

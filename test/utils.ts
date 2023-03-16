@@ -58,22 +58,38 @@ export async function runTypeInferenceBenchmark(
   await bench.run()
 
   const minMean = Math.min(...bench.tasks.map(task => task.result?.mean || 0))
-
+  console.log(
+    `Benchmark ran with ${bench.iterations} iterations, with ${bench.warmupIterations} iterations of warmup.`
+  )
   console.table(
-    bench.tasks.map(({ name, result }) => ({
-      'Task Name': name,
-      'Average Time (µs)': toThousandFraction(result?.mean),
-      Ratio: `${roundTo((result?.mean || 0) / minMean + Number.EPSILON, 2)}x`,
-      'Variance (µs)': toThousandFraction(result?.variance),
-      'Min (µs)': toThousandFraction(result?.min),
-      'Max (µs)': toThousandFraction(result?.max),
-    }))
+    bench.tasks
+      .sort((a, b) => (a.result?.mean || 0) - (b.result?.mean || 0))
+      .map(({ name, result }) => {
+        if (result?.mean === undefined) {
+          return {
+            'Task Name': name.replace(/\.(?:ts|js)/, ''),
+            'Average Time (µs)': NaN,
+            Ratio: NaN,
+            'Variance (%)': NaN,
+            'Min (µs)': NaN,
+            'Max (µs)': NaN,
+          }
+        }
+        return {
+          'Task Name': name.replace(/\.(?:ts|js)/, ''),
+          'Average Time (µs)': toThousandFraction(result.mean),
+          Ratio: result.mean == minMean ? '1.00x' : `${roundTo(result.mean / minMean, 2)}x`,
+          'Variance (%)': `${roundTo((result.variance / result.mean) * 100, 2)}%`,
+          'Min (µs)': toThousandFraction(result.min),
+          'Max (µs)': toThousandFraction(result.max),
+        }
+      })
   )
 }
 
 const roundTo = (num: number, precision: number) => {
   const factor = Math.pow(10, precision)
-  return Math.round(num * factor) / factor
+  return Math.round(num * factor) / (factor + Number.EPSILON)
 }
 
 const toThousandFraction = (second: number | undefined) =>
