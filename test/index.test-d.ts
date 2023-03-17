@@ -1,13 +1,6 @@
 import { RegExpMatchResult } from '../src'
 import { createRegExp, spreadRegExpIterator, spreadRegExpMatchArray } from '../src/regexp'
 
-const result = 'bAR-fOo-baR-baz-quX-BAr-duck-BAaER-For-bEH-baz-qtX-Beh'.match(
-  createRegExp(
-    '(?<g1>B[a-z]{1,3}r)\\W\\b(?<g2>Fo[G-Y])(?<=fo[g-y])-(?<g3>Beh|bA(?<g4>r|k))-BAZ(?=-(?<g5>Q[O-Z]x-\\k<g3>))',
-    ['i']
-  )
-)
-
 describe('Common, complex examples', () => {
   it('Remain type-safe after chain of replace and match', () => {
     const RE = createRegExp(
