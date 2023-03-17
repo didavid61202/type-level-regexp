@@ -287,7 +287,7 @@ type Match<
           SkippedString
         > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NamedCapture>
         ? MatchedResult<[InputString, ...Captures], '', NamedCapture>
-        : never
+        : MatchedResult<[''], InputString, never>
       : BacktrackGreedyAnyMatch<
           InputString,
           Flags,
@@ -534,7 +534,7 @@ type BacktrackGreedyAnyMatch<
           SkippedString
         > extends MatchedResult<[any, ...infer Captures extends any[]], any, infer NamedCapture>
         ? MatchedResult<[ResolvedGreedyMatched, ...Captures], MatchArray[0], NamedCapture>
-        : never
+        : MatchedResult<[''], GreedyMatchedString, never>
       : never
     : NullResult<''>
   : never
