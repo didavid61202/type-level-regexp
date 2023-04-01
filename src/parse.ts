@@ -173,7 +173,12 @@ export type ParseRegExp<
         RestResult<
           infer Rest extends string,
           [
-            matcherType: infer Quantifier extends Matcher['type'] | undefined,
+            matcherType: infer Quantifier extends
+              | 'optional'
+              | 'zeroOrMore'
+              | 'oneOrMore'
+              | 'repeat'
+              | undefined,
             greedy: infer Greedy extends boolean,
             repeat: infer Repeat extends [`${number}`, `${number}` | '' | string] | undefined
           ]
