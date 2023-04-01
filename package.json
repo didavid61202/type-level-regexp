@@ -2,15 +2,30 @@
   "name": "type-level-regexp",
   "version": "1.0.0",
   "description": "Type-Level RegExp parser, matcher and permutation resolver",
-  "main": "index.js",
-  "keywords": [],
+  "keywords": [
+    "RegExp",
+    "regex",
+    "TypeScript",
+    "type-level",
+    "type-level-programming"
+  ],
+  "repository": "https://github.com/didavid61202/type-level-regexp.git",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "author": "David Tai <didavid61202@gmail.com>",
   "homepage": "https://github.com/didavid61202/type-level-regexp#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/didavid61202/type-level-regexp.git"
-  },
-  "license": "MIT",
   "scripts": {
     "dev": "vitest --run && vitest typecheck"
   },
@@ -23,6 +38,8 @@
     "typescript": "^4.9.5",
     "vite": "^4.1.4",
     "vitest": "^0.28.5"
+  },
+  "resolutions": {
+    "type-level-regexp": "link:."
   }
-
 }
