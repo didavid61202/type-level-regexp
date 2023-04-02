@@ -1,6 +1,6 @@
 {
   "name": "type-level-regexp",
-  "version": "1.0.1",
+  "version": "0.1.0",
   "description": "Type-Level RegExp parser, matcher and permutation resolver",
   "keywords": [
     "RegExp",
@@ -29,8 +29,6 @@
   "scripts": {
     "dev": "vitest --run && vitest typecheck",
     "build": "unbuild",
-    "test": "vitest --run && vitest typecheck",
-    "prepublishOnly": "pnpm test",
     "release": "bumpp && npm publish"
   },
   "devDependencies": {
