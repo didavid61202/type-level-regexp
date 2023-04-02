@@ -1,4 +1,5 @@
 # 🔤🔍 Type-Level RegExp (WIP)
+[![npm version][npm-version-src]][npm-version-href]
 
 > TypeScript type-level RegExp parser and matcher implemented using template literals.
 
@@ -8,6 +9,76 @@
 [![Open in Codeflow](https://developer.stackblitz.com/img/open_in_codeflow.svg)](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp)
 
 Examples in `Playground`, `test`
+
+🚧 🚧 Work In Progress, PRs and issues are welcome 🚧 🚧
+
+## Quick Setup
+
+1. Add `type-level-regexp` dependency to your project
+
+```bash
+# Using pnpm
+pnpm i -D type-level-regexp
+
+# Using npm
+npm i -D type-level-regexp
+```
+
+2. Import `createRegExp` from `type-level-regexp`, create a `TypedRegExp` and pass it to `String.match` or `String.replace` functions.
+
+## Basic Usage
+match result will be fully typed if match against a literal stirng, or shows emumerated results if match against a dynamic string.
+```ts
+import { createRegExp, spreadRegExpIterator } from 'type-level-regexp'
+
+/** string.match() */
+const regExp = createRegExp('foO(?<g1>b[a-g]r)(?:BAz|(?<g2>qux))', ['i'])
+const matchResult = 'prefix foobarbaz suffix'.match(regExp) // matching literal string
+matchResult[0] // 'foobarbaz'
+matchResult[1] // 'bar'
+matchResult[3] // show type error `type '3' can't be used to index type 'RegExpMatchResult<...>`
+matchResult.length // 3
+matchResult.index // 7
+matchResult.groups // { g1: "bar"; g2: undefined; }
+
+/** string.replace() */
+const regExp2 = createRegExp('(\\d{4})[-.](?<month>\\w{3,4})[-.](\\d{1,2})')
+const replaceResult = '1991-Sept-15'.replace(regExp2, '$<month> $3, $1')
+replaceResult // 'Sept 15, 1991'
+
+/** string.matchAll() */
+const regExp3 = createRegExp('c[a-z]{2}', ['g'])
+const matchALlIterator = 'cat car caw cay caw cay'.matchAll(regExp3)
+const spreadedResult = spreadRegExpIterator(matchALlIterator)
+spreadedResult[2][0] // 'caw'
+spreadedResult[3].index // 12
+```
+
+For TypeScript library authors, you can also import individual generic types to parse and match RegExp string at type-level and combine with your library's type-level features.
+
+```ts
+import { ParseRegExp, MatchRegExp } from 'type-level-regexp'
+
+type MatchResult = MatchRegExp<'fooBAR42', 'Fo[a-z](Bar)\\d{2}', 'i'>
+
+type Matched = MatchResult[0] // 'fooBAR42'
+type First = MatchResult[1] // 'BAR'
+
+type RegExpAST = ParseRegExp<'foo(?<g1>bar)'>
+// [{
+//     type: "string";
+//     value: "foo";
+// }, {
+//     type: "namedCapture";
+//     name: "g1";
+//     value: [{
+//         type: "string";
+//         value: "bar";
+//     }];
+// }]
+
+```
+
 
 ## Origin & Notice
 The main purpose of this project is to test and demonstrate the possibility and limitations of writing a RegExp parser/matcher in TypeScript's type-level. Note that this may not be practically useful, but rather an interesting showcase.
@@ -20,6 +91,7 @@ As the complexity grows, I start working on this separated repo to increase deve
  
 ## Features
 
+- Export `createRegExp` function to create a `TypedRegExp` that can be pass to `String` match and replace functions and gets fully typed match result.
 - Enhance types of RegExp related `String` functions (`.match`, `matchAll`, `.replace`...) for literal or dynamic typed string.
 - Result of `String` functions matched exactly as runtime result.
 - Support all common RegExp tokens (incl. Lookarounds, Backreferences...etc), quantifiers (incl. greedy/lazy) and (`g`,`i`) flags.
@@ -29,7 +101,8 @@ As the complexity grows, I start working on this separated repo to increase deve
 - Provide generic type `ResolvePermutation` to permutation all possible matching string of given RegExp if possible (due to TypeScript type-level limitation)
 - More details please see [playground](./playground/index.ts), or test in [Tests](./test) or [Stackblitz](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp). (examples in index.test-d.ts)
 
-🚧 Work In Progress, PRs and issue are welcome 🚧
+
+That's it! You can now use Tailwind classes in your Nuxt app ✨
 
 #### Example - type-safe args in replacing function of `string.replace()`
 ![replaceRegexp](https://user-images.githubusercontent.com/29917252/224333879-50d51207-f63c-4ac6-b561-34ace9ebb7d4.JPG)
@@ -81,3 +154,8 @@ As the complexity grows, I start working on this separated repo to increase deve
 Made with 🔥 and ❤️
 
 Published under [MIT License](./LICENCE).
+
+!-- Badges -->
+
+[npm-version-src]: https://img.shields.io/npm/v/type-level-regexp?style=flat-square
+[npm-version-href]: https://npmjs.com/package/type-level-regexp
