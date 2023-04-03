@@ -1,6 +1,6 @@
-import { ParseRegExp } from '../src/parse'
-import { PermutationResult, ResolvePermutation } from '../src/permutation'
-import { MergeUnion } from './helper'
+import type { ParseRegExp } from '../src/parse'
+import type { PermutationResult, ResolvePermutation } from '../src/permutation'
+import type { MergeUnion } from './helper'
 
 type PRE<RegExp extends string> = ResolvePermutation<ParseRegExp<RegExp>> extends PermutationResult<
   infer ResultArray,

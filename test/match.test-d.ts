@@ -1,7 +1,7 @@
-import { ParseRegExp } from '../src/parse'
-import { ExhaustiveMatch } from '../src/match'
-import { MatchedResult, NullResult } from '../src/utils'
-import { Flag } from '../src/regexp'
+import type { ParseRegExp } from '../src/parse'
+import type { ExhaustiveMatch } from '../src/match'
+import type { MatchedResult, NullResult } from '../src/utils'
+import type { Flag } from '../src/regexp'
 
 type MRE<
   MatchingString extends string,

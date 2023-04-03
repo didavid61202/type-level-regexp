@@ -1,4 +1,4 @@
-import { RegExpMatchResult } from '../src'
+import type { RegExpMatchResult } from '../src'
 import { createRegExp, spreadRegExpIterator, spreadRegExpMatchArray } from '../src/regexp'
 
 describe('Common, complex examples', () => {

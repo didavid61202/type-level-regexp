@@ -1,6 +1,6 @@
-import { ExhaustiveMatch } from './match'
-import { Flag } from './regexp'
-import { NamedCapturesTuple, Matcher, MatchedResult } from './utils'
+import type { ExhaustiveMatch } from './match'
+import type { Flag } from './regexp'
+import type { NamedCapturesTuple, Matcher, MatchedResult } from './utils'
 
 export type ResolveRepalceValue<
   ReplaceValue extends string,

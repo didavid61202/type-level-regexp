@@ -1,4 +1,4 @@
-import { ParseRegExp } from '../src/parse'
+import type { ParseRegExp } from '../src/parse'
 
 describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers', () => {
   it('Exact string', () => {

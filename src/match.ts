@@ -1,4 +1,4 @@
-import { Flag } from './regexp'
+import type { Flag } from './regexp'
 import type {
   CharSetMap,
   CollectCaptureNames,

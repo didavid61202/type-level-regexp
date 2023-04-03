@@ -1,21 +1,27 @@
-import { ExhaustiveMatch, GlobalMatch } from './match'
-import { ParseRegExp } from './parse'
-import { PermutationResult, PrependAndUnionToAll, ResolvePermutation } from './permutation'
-import {
+import type { ExhaustiveMatch, GlobalMatch } from './match'
+import type { ParseRegExp } from './parse'
+import type { PermutationResult, PrependAndUnionToAll, ResolvePermutation } from './permutation'
+import type {
   ExtractRegExpParts,
   Flag,
   RegExpIterableIterator,
   RegExpParts,
   TypedRegExp,
 } from './regexp'
-import { GlobalReplace, ResolveRepalceValue } from './replace'
-import { LengthOfString, MatchedResult, Matcher, NamedCapturesTuple, NullResult } from './utils'
+import type { GlobalReplace, ResolveRepalceValue } from './replace'
+import type {
+  LengthOfString,
+  MatchedResult,
+  Matcher,
+  NamedCapturesTuple,
+  NullResult,
+} from './utils'
 
-export { createRegExp, spreadRegExpIterator, spreadRegExpMatchArray } from './regexp'
 export type { Flag } from './regexp'
 export type { ParseRegExp } from './parse'
 export type { ExhaustiveMatch, GlobalMatch } from './match'
 export type { ResolvePermutation } from './permutation'
+export { createRegExp, spreadRegExpIterator, spreadRegExpMatchArray } from './regexp'
 
 export type MatchRegExp<
   InputString extends string,
