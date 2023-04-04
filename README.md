@@ -102,8 +102,6 @@ As the complexity grows, I start working on this separated repo to increase deve
 - More details please see [playground](./playground/index.ts), or test in [Tests](./test) or [Stackblitz](https://stackblitz.com/~/github.com/didavid61202/type-level-regexp). (examples in index.test-d.ts)
 
 
-That's it! You can now use Tailwind classes in your Nuxt app ✨
-
 #### Example - type-safe args in replacing function of `string.replace()`
 ![replaceRegexp](https://user-images.githubusercontent.com/29917252/224333879-50d51207-f63c-4ac6-b561-34ace9ebb7d4.JPG)
 
