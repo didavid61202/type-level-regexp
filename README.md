@@ -62,7 +62,7 @@ For TypeScript library authors, you can also import individual generic types to 
 ```ts
 import { ParseRegExp, MatchRegExp } from 'type-level-regexp'
 
-type MatchResult = MatchRegExp<'fooBAR42', 'Fo[a-z](Bar)\\d{2}', 'i'>
+type MatchResult = MatchRegExp<'fooBAR42', ParseRegExp<'Fo[a-z](Bar)\\d{2}'>, 'i'>
 
 type Matched = MatchResult[0] // 'fooBAR42'
 type First = MatchResult[1] // 'BAR'
