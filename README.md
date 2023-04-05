@@ -157,7 +157,6 @@ Made with 🔥 and ❤️
 
 Published under [MIT License](./LICENCE).
 
-!-- Badges -->
-
+<!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/type-level-regexp?style=flat-square
 [npm-version-href]: https://npmjs.com/package/type-level-regexp
