@@ -24,7 +24,9 @@ pnpm i -D type-level-regexp
 npm i -D type-level-regexp
 ```
 
-2. Import `createRegExp` from `type-level-regexp`, create a `TypedRegExp` and pass it to `String.match` or `String.replace` functions.
+2. Import `createRegExp` function from `type-level-regexp`, pass in a RegExp pattern to it creates a `TypedRegExp`, passing this `TypedRegExp` to `String.match` or `String.replace` functions to get fully typed match result.
+
+```ts
 
 ## Basic Usage
 match result will be fully typed if match against a literal stirng, or shows emumerated results if match against a dynamic string.
@@ -52,6 +54,9 @@ const matchALlIterator = 'cat car caw cay caw cay'.matchAll(regExp3)
 const spreadedResult = spreadRegExpIterator(matchALlIterator)
 spreadedResult[2][0] // 'caw'
 spreadedResult[3].index // 12
+
+const InvalidRegExp = createRegExp('foo(bar')
+// TypeScript error: Argument of type 'string' is not assignable to parameter of type 'RegExpSyntaxError<"Invalid regular expression, missing closing \`)\`">'
 ```
 
 For TypeScript library authors, you can also import individual generic types to parse and match RegExp string at type-level and combine with your library's type-level features.
@@ -91,7 +96,8 @@ As the complexity grows, I start working on this separated repo to increase deve
  
 ## Features
 
-- Export `createRegExp` function to create a `TypedRegExp` that can be pass to `String` match and replace functions and gets fully typed match result.
+- Export `createRegExp` function to create a`TypedRegExp` that replace your original `/regex_pattern/` regex object, which can be pass to  `String.match()`, `String.matchAll()` and `String.replace()` functions and gets fully typed result.
+- Shows `RegExpSyntaxError` if the provided RegExp pattern is invalid.
 - Enhance types of RegExp related `String` functions (`.match`, `matchAll`, `.replace`...) for literal or dynamic typed string.
 - Result of `String` functions matched exactly as runtime result.
 - Support all common RegExp tokens (incl. Lookarounds, Backreferences...etc), quantifiers (incl. greedy/lazy) and (`g`,`i`) flags.

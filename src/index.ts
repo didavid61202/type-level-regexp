@@ -1,13 +1,6 @@
 import type { ExhaustiveMatch, GlobalMatch } from './match'
-import type { ParseRegExp } from './parse'
 import type { PermutationResult, PrependAndUnionToAll, ResolvePermutation } from './permutation'
-import type {
-  ExtractRegExpParts,
-  Flag,
-  RegExpIterableIterator,
-  RegExpParts,
-  TypedRegExp,
-} from './regexp'
+import type { Flag, RegExpIterableIterator, TypedRegExp } from './regexp'
 import type { GlobalReplace, ResolveRepalceValue } from './replace'
 import type {
   LengthOfString,
@@ -25,11 +18,10 @@ export { createRegExp, spreadRegExpIterator, spreadRegExpMatchArray } from './re
 
 export type MatchRegExp<
   InputString extends string,
-  Regexp extends string,
-  Flags extends Flag,
-  ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
+  ParsedRegExpAST extends Matcher[],
+  Flags extends Flag
 > = string extends InputString
-  ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
+  ? ResolvePermutation<ParsedRegExpAST> extends PermutationResult<
       infer MatchArray,
       infer NamedCaptures extends NamedCapturesTuple
     >
@@ -45,8 +37,8 @@ export type MatchRegExp<
         }> | null
     : never
   : 'g' extends Flags
-  ? GlobalMatch<InputString, ParsedRegexpAST, Flags>
-  : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
+  ? GlobalMatch<InputString, ParsedRegExpAST, Flags>
+  : ExhaustiveMatch<InputString, ParsedRegExpAST, Flags> extends infer Result
   ? Result extends MatchedResult<
       infer MatchArray extends any[],
       infer RestInputString extends string,
@@ -95,14 +87,13 @@ export type RegExpMatchResult<
 
 export type MatchAllRegExp<
   InputString extends string,
-  Regexp extends string,
+  ParsedRegExpAST extends Matcher[],
   Flags extends Flag,
   MatchedResultTuple extends any[] = [],
-  InitialInputString extends string = InputString,
-  ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
-> = ParsedRegexpAST extends ParsedRegexpAST
+  InitialInputString extends string = InputString
+> = ParsedRegExpAST extends ParsedRegExpAST
   ? string extends InputString
-    ? ResolvePermutation<ParsedRegexpAST> extends PermutationResult<
+    ? ResolvePermutation<ParsedRegExpAST> extends PermutationResult<
         infer MatchArray,
         infer NamedCaptures extends NamedCapturesTuple
       >
@@ -117,7 +108,7 @@ export type MatchAllRegExp<
           }> | null)[]
         >
       : never
-    : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
+    : ExhaustiveMatch<InputString, ParsedRegExpAST, Flags> extends infer Result
     ? Result extends MatchedResult<
         infer MatchArray extends any[],
         infer RestInputString extends string,
@@ -125,7 +116,7 @@ export type MatchAllRegExp<
       >
       ? MatchAllRegExp<
           RestInputString,
-          'Distributed',
+          ParsedRegExpAST,
           Flags,
           [
             ...MatchedResultTuple,
@@ -136,8 +127,7 @@ export type MatchAllRegExp<
               restInput: RestInputString
             }>
           ],
-          InitialInputString,
-          ParsedRegexpAST
+          InitialInputString
         >
       : RegExpIterableIterator<MatchedResultTuple>
     : never
@@ -145,13 +135,12 @@ export type MatchAllRegExp<
 
 export type ReplaceWithRegExp<
   InputString extends string,
-  Regexp extends string,
+  ParsedRegExpAST extends Matcher[],
   ReplaceValue extends string,
-  Flags extends Flag,
-  ParsedRegexpAST extends Matcher[] = ParseRegExp<Regexp>
+  Flags extends Flag
 > = 'g' extends Flags
-  ? GlobalReplace<InputString, ParsedRegexpAST, ReplaceValue, Flags>
-  : ExhaustiveMatch<InputString, ParsedRegexpAST, Flags> extends infer Result
+  ? GlobalReplace<InputString, ParsedRegExpAST, ReplaceValue, Flags>
+  : ExhaustiveMatch<InputString, ParsedRegExpAST, Flags> extends infer Result
   ? Result extends MatchedResult<
       infer MatchArray extends any[],
       infer RestInputString extends string,
@@ -171,39 +160,37 @@ export type ReplaceWithRegExp<
 
 declare global {
   interface String {
-    match<
-      InputString extends string,
-      RE extends TypedRegExp,
-      REParts extends RegExpParts = ExtractRegExpParts<RE>
-    >(
+    match<InputString extends string, RegExpParsedAST extends Matcher[], Flags extends Flag>(
       this: InputString,
-      regexp: RE
-    ): MatchRegExp<InputString, REParts['pattern'], REParts['flags']>
+      regexp: TypedRegExp<string, Flags, RegExpParsedAST>
+    ): Matcher[] extends RegExpParsedAST ? never : MatchRegExp<InputString, RegExpParsedAST, Flags>
 
     /** @deprecated String.matchAll requires global flag to be set. */
-    matchAll<InputString extends string, RE extends TypedRegExp<string, Exclude<Flag, 'g'>>>(
-      this: InputString,
-      regexp: RE
-    ): never
-
     matchAll<
       InputString extends string,
-      RE extends TypedRegExp,
-      REParts extends RegExpParts = ExtractRegExpParts<RE>
+      RegExpParsedAST extends Matcher[],
+      Flags extends Exclude<Flag, 'g'>
     >(
       this: InputString,
-      regexp: RE
-    ): MatchAllRegExp<InputString, REParts['pattern'], REParts['flags']>
+      regexp: TypedRegExp<string, Flags, RegExpParsedAST>
+    ): never
+
+    matchAll<InputString extends string, RegExpParsedAST extends Matcher[], Flags extends Flag>(
+      this: InputString,
+      regexp: TypedRegExp<any, Flags, RegExpParsedAST>
+    ): Matcher[] extends RegExpParsedAST
+      ? never
+      : MatchAllRegExp<InputString, RegExpParsedAST, Flags>
 
     /** @deprecated String.matchAll requires global flag to be set. */
-    matchAll<RE extends TypedRegExp<string, never>>(regexp: RE): never
+    matchAll(regexp: TypedRegExp<string, never, any>): never
 
     replace<
       InputString extends string,
-      RE extends TypedRegExp,
+      RegExpParsedAST extends Matcher[],
+      Flags extends Flag,
       ReplaceValue extends string,
-      REParts extends RegExpParts = ExtractRegExpParts<RE>,
-      MatchResult = MatchRegExp<InputString, REParts['pattern'], REParts['flags']>,
+      MatchResult = MatchRegExp<InputString, RegExpParsedAST, Flags>,
       Match extends any[] = MatchResult extends RegExpMatchResult<
         {
           matched: infer MatchArray extends any[]
@@ -222,8 +209,10 @@ declare global {
         : never
     >(
       this: InputString,
-      regexp: RE,
+      regexp: TypedRegExp<string, Flags, RegExpParsedAST>,
       replaceValue: ReplaceValue | ((...match: Match) => ReplaceValue)
-    ): ReplaceWithRegExp<InputString, REParts['pattern'], ReplaceValue, REParts['flags']>
+    ): Matcher[] extends RegExpParsedAST
+      ? never
+      : ReplaceWithRegExp<InputString, RegExpParsedAST, ReplaceValue, Flags>
   }
 }

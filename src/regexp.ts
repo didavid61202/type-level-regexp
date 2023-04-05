@@ -1,23 +1,16 @@
+import type { RegExpSyntaxError, ParseRegExp } from './parse'
+import type { Matcher } from './utils'
+
 export type Flag = 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'y'
 
-const ValueS = Symbol('Value')
-const FlagsS = Symbol('Flags')
-
-export type TypedRegExp<Value extends string = string, Flags extends Flag = Flag> = RegExp & {
-  [ValueS]: Value
-  [FlagsS]: Flags
-}
-
-export type ExtractRegExpParts<RE extends TypedRegExp<string, Flag>> = RE extends TypedRegExp<
-  infer Pattern,
-  infer Flags
->
-  ? RegExpParts<Pattern, Flags>
-  : never
-
-export type RegExpParts<Pattern extends string = string, Flags extends Flag = Flag> = {
-  pattern: Pattern
+export type TypedRegExp<
+  RegExpPattern extends string,
+  Flags extends Flag,
+  ParsedRegExpAST extends Matcher[]
+> = RegExp & {
+  regexp: RegExpPattern
   flags: Flags
+  parsedRegExpAST: ParsedRegExpAST
 }
 
 export type RegExpIterableIterator<MatchedTuple extends any[]> = Omit<
@@ -28,11 +21,21 @@ export type RegExpIterableIterator<MatchedTuple extends any[]> = Omit<
   next: () => IteratorResult<MatchedTuple[number], MatchedTuple[number] | undefined>
 }
 
-export function createRegExp<Pattern extends string, Flags extends Flag = never>(
-  pattern: Pattern,
-  flags?: Flags[] | Set<Flags>
-) {
-  return new RegExp(pattern, [...(flags || '')].join('')) as TypedRegExp<Pattern, Flags>
+type CheckForParseError<
+  RawRegExpPattern extends string,
+  RegExpParsedResult extends Matcher[] | RegExpSyntaxError<any> = ParseRegExp<RawRegExpPattern>
+> = RegExpParsedResult extends RegExpSyntaxError<any> ? RegExpParsedResult : RawRegExpPattern
+
+export function createRegExp<
+  RegExpPattern extends string,
+  Flags extends Flag = never,
+  RegExpParsedResult extends Matcher[] = ParseRegExp<RegExpPattern>
+>(pattern: CheckForParseError<RegExpPattern>, flags?: Flags[] | Set<Flags>) {
+  return new RegExp(pattern, [...(flags || '')].join('')) as TypedRegExp<
+    RegExpPattern,
+    Flags,
+    RegExpParsedResult
+  >
 }
 
 export function spreadRegExpMatchArray<
