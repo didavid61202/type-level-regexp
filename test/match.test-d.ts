@@ -373,6 +373,8 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         ['g0', undefined] | ['g1', 'bar-baz'] | ['g2', undefined] | ['g3', 'qux']
       >
     >()
+    expectTypeOf<MRE<'a', 'a|'>>().toEqualTypeOf<MatchedResult<['a'], '', never>>()
+    expectTypeOf<MRE<'a', '|a'>>().toEqualTypeOf<MatchedResult<[''], 'a', never>>()
   })
   it('Repeat exactly n times (Greedy)', () => {
     expectTypeOf<

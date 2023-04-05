@@ -248,7 +248,9 @@ type Match<
         'step',
         true
       >
-    : InputString extends `${PrefixType}${Type extends 'string'
+    : InputString extends `${[Type, StringOrName] extends ['string', '']
+        ? ''
+        : PrefixType}${Type extends 'string'
         ? StringOrName
         : NameCaptureValue<NamedCaptures, StringOrName>}${infer Rest}`
     ? MatchedResult<
@@ -476,7 +478,26 @@ type MatchOrMatchers<
       ResolveNamedCaptureUnion<OrMatchersArray, NamedCaptures>,
       StartOf,
       [...Count, ''],
-      InputString extends `${infer Prefix}${OrMatch}${string}`
+      [OrMatch, [...Count, '']['length'] extends OrMatchersArray['length'] ? true : false] extends [
+        '',
+        false
+      ]
+        ? [
+            '',
+            MatchedResult<
+              [
+                OrMatch,
+                ...ResolveOrCaptureTuple<
+                  OrMatchersArray,
+                  OrCaptures,
+                  IndexOf<OrMatchersArray, CurrentOrMatchers>
+                >
+              ],
+              RestInputString,
+              ResolveNamedCaptureUnion<OrMatchersArray, NestNamedCaptures>
+            >
+          ]
+        : InputString extends `${infer Prefix}${OrMatch}${string}`
         ? BestMatchedWithPrefix[0] extends Prefix
           ? BestMatchedWithPrefix
           : BestMatchedWithPrefix[0] extends undefined | `${string}${Prefix}${string}`

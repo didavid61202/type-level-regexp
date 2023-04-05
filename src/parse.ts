@@ -107,9 +107,18 @@ export type ParseRegExp<
     ? ParseOrAsTupleOnly extends true
       ? ParseRegExp<Rest, [], true> extends infer RestOrMatchersTuple
         ? [
-            [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>],
+            [
+              ...ParsedMatchers,
+              ...ResolvesAccStringMatcher<AccString>
+            ] extends infer CurrentOrMatchersTuple
+              ? CurrentOrMatchersTuple extends []
+                ? [{ type: 'string'; value: '' }]
+                : CurrentOrMatchersTuple
+              : never,
             ...(RestOrMatchersTuple extends Matcher[][]
-              ? RestOrMatchersTuple
+              ? RestOrMatchersTuple extends []
+                ? [[{ type: 'string'; value: '' }]]
+                : RestOrMatchersTuple
               : [RestOrMatchersTuple])
           ]
         : never
@@ -118,9 +127,18 @@ export type ParseRegExp<
           {
             type: 'or'
             value: [
-              [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>],
+              [
+                ...ParsedMatchers,
+                ...ResolvesAccStringMatcher<AccString>
+              ] extends infer CurrentOrMatchersTuple
+                ? CurrentOrMatchersTuple extends []
+                  ? [{ type: 'string'; value: '' }]
+                  : CurrentOrMatchersTuple
+                : never,
               ...(RestOrMatchersTuple extends Matcher[][]
-                ? RestOrMatchersTuple
+                ? RestOrMatchersTuple extends []
+                  ? [[{ type: 'string'; value: '' }]]
+                  : RestOrMatchersTuple
                 : [RestOrMatchersTuple])
             ]
           }

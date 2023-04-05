@@ -1,4 +1,4 @@
-import type { ParseRegExp } from '../src/parse'
+import type { RegExpSyntaxError, ParseRegExp } from '../src/parse'
 
 describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers', () => {
   it('Exact string', () => {
@@ -579,6 +579,48 @@ describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers
     >()
   })
   it('Or', () => {
+    expectTypeOf<ParseRegExp<'foo|(bar|)'>>().toEqualTypeOf<
+      [
+        {
+          type: 'or'
+          value: [
+            [{ type: 'string'; value: 'foo' }],
+            [
+              {
+                type: 'capture'
+                value: [
+                  {
+                    type: 'or'
+                    value: [[{ type: 'string'; value: 'bar' }], [{ type: 'string'; value: '' }]]
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    >()
+    expectTypeOf<ParseRegExp<'foo|(|bar)'>>().toEqualTypeOf<
+      [
+        {
+          type: 'or'
+          value: [
+            [{ type: 'string'; value: 'foo' }],
+            [
+              {
+                type: 'capture'
+                value: [
+                  {
+                    type: 'or'
+                    value: [[{ type: 'string'; value: '' }], [{ type: 'string'; value: 'bar' }]]
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    >()
     expectTypeOf<ParseRegExp<'foo-bar|bar-(?:qux|quk)|ba(?:r|z)-foo'>>().toEqualTypeOf<
       [
         {
