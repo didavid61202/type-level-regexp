@@ -687,6 +687,39 @@ describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers
       ]
     >()
   })
+  it('Do not parse as `Repeat` matcher if `{NaN}` or {NaN,NaN}', () => {
+    expectTypeOf<ParseRegExp<'foo{2bar'>>().toEqualTypeOf<
+      [
+        { type: 'string'; value: 'fo' },
+        { type: 'string'; value: 'o' },
+        { type: 'string'; value: '{2bar' }
+      ]
+    >()
+    expectTypeOf<ParseRegExp<'fo(o){2bar'>>().toEqualTypeOf<
+      [
+        { type: 'string'; value: 'fo' },
+        { type: 'capture'; value: [{ type: 'string'; value: 'o' }] },
+        { type: 'string'; value: '{2bar' }
+      ]
+    >()
+    expectTypeOf<ParseRegExp<'foo{2w}bar'>>().toEqualTypeOf<
+      [
+        { type: 'string'; value: 'fo' },
+        { type: 'string'; value: 'o' },
+        { type: 'string'; value: '{2w}bar' }
+      ]
+    >()
+    expectTypeOf<ParseRegExp<'fo(o){2w}bar'>>().toEqualTypeOf<
+      [
+        { type: 'string'; value: 'fo' },
+        { type: 'capture'; value: [{ type: 'string'; value: 'o' }] },
+        { type: 'string'; value: '{2w}bar' }
+      ]
+    >()
+    expectTypeOf<ParseRegExp<'foo.{2w}bar'>>().toEqualTypeOf<
+      [{ type: 'string'; value: 'foo' }, { type: 'any' }, { type: 'string'; value: '{2w}bar' }]
+    >()
+  })
   it('Repeat exactly n times (Greedy/Lazy)', () => {
     expectTypeOf<ParseRegExp<'fo{2}o-(?:bar){3}?'>>().toEqualTypeOf<
       [

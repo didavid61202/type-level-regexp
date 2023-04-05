@@ -262,22 +262,32 @@ type ResolveQuantifierForSingleToken<
       infer RepeatInner extends string,
       infer RestAfterRepeat extends string
     ]
-    ? ParseRegExp<
-        RestAfterRepeat extends `?${infer RestAfterGreedy}` ? RestAfterGreedy : RestAfterRepeat,
-        [
-          ...ParsedMatchers,
-          ...ResolvesAccStringMatcher<AccString>,
-          ...ResolveQuantifierTypeMatcher<
-            'repeat',
-            RestAfterRepeat extends `?${string}` ? false : true,
-            `{${RepeatInner}}` extends `{${infer From}${'' | `,${infer To}`}}`
-              ? [Extract<From, `${number}`>, To]
-              : undefined,
-            CurrentTokenResolvedMatchers
-          >
-        ],
-        ParseOrAsTupleOnly
-      >
+    ? RepeatInner extends '{'
+      ? ParseRegExp<
+          `{${RestAfterRepeat}`,
+          [
+            ...ParsedMatchers,
+            ...ResolvesAccStringMatcher<AccString>,
+            ...CurrentTokenResolvedMatchers
+          ],
+          ParseOrAsTupleOnly
+        >
+      : ParseRegExp<
+          RestAfterRepeat extends `?${infer RestAfterGreedy}` ? RestAfterGreedy : RestAfterRepeat,
+          [
+            ...ParsedMatchers,
+            ...ResolvesAccStringMatcher<AccString>,
+            ...ResolveQuantifierTypeMatcher<
+              'repeat',
+              RestAfterRepeat extends `?${string}` ? false : true,
+              `{${RepeatInner}}` extends `{${infer From}${'' | `,${infer To}`}}`
+                ? [Extract<From, `${number}`>, To]
+                : undefined,
+              CurrentTokenResolvedMatchers
+            >
+          ],
+          ParseOrAsTupleOnly
+        >
     : never
   : never
 
@@ -369,8 +379,12 @@ type ParsePair<
           `${ResolvedInner}${Inner}${CloseBracketMap[OpenBracket]}`
         >
       : [...CloseBracketCount, '']['length'] extends OpenBracketCount['length']
-      ? OpenBracket extends '[' | '{'
+      ? OpenBracket extends '['
         ? [`${ResolvedInner}${Inner}`, InnerAfterCloseBracket]
+        : OpenBracket extends '{'
+        ? `${ResolvedInner}${Inner}` extends `${number}` | `${number},${number}` | `${number},`
+          ? [`${ResolvedInner}${Inner}`, InnerAfterCloseBracket]
+          : ['{', `${ResolvedInner}${InputRest}`]
         : [ResolveInner<`${ResolvedInner}${Inner}`>, ResolveRest<InnerAfterCloseBracket>]
       : ParsePair<
           OpenBracket,
@@ -439,15 +453,19 @@ type ResolveRest<Rest extends string> = Rest extends `${infer Quantifier extends
       infer RepeatInner extends string,
       infer RestAfterRepeat extends string
     ]
-    ? RestResult<
-        RestAfterRepeat extends `?${infer RestAfterGreedyOp}` ? RestAfterGreedyOp : RestAfterRepeat,
-        [
-          'repeat',
-          RestAfterRepeat extends `?${string}` ? false : true,
-          `{${RepeatInner}}` extends `{${infer From}${'' | `,${infer To}`}}`
-            ? [Exclude<From, `${string},${string}`>, To]
-            : undefined
-        ]
-      >
+    ? RepeatInner extends '{'
+      ? RestResult<Rest, [undefined, false, undefined]>
+      : RestResult<
+          RestAfterRepeat extends `?${infer RestAfterGreedyOp}`
+            ? RestAfterGreedyOp
+            : RestAfterRepeat,
+          [
+            'repeat',
+            RestAfterRepeat extends `?${string}` ? false : true,
+            `{${RepeatInner}}` extends `{${infer From}${'' | `,${infer To}`}}`
+              ? [Exclude<From, `${string},${string}`>, To]
+              : undefined
+          ]
+        >
     : never
   : RestResult<Rest, [undefined, false, undefined]>
