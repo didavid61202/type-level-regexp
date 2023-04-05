@@ -244,6 +244,19 @@ export type ParseRegExp<
         AccString,
         ParseOrAsTupleOnly
       >
+    : InputString extends `${'*' | '+'}${string}` | `{${number}${'' | ',' | `,${number}`}}${string}`
+    ? [{ type: never }, ...ParsedMatchers][ParsedMatchers['length']]['type'] extends
+        | 'optional'
+        | 'zeroOrMore'
+        | 'oneOrMore'
+        | 'repeat'
+      ? RegExpSyntaxError<`Invalid regular expression, the preceding token to ${[
+          FirstChar,
+          Rest
+        ] extends ['{', `${infer Repeat}}${string}`]
+          ? `{${Repeat}}`
+          : FirstChar} is not quantifiable`>
+      : never
     : ParseRegExp<Rest, ParsedMatchers, ParseOrAsTupleOnly, `${AccString}${FirstChar}`>
   : [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>]
 

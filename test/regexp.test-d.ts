@@ -91,6 +91,34 @@ describe('Function `createRegExp`', () => {
     )
   })
 
+  it('Should throw `RegExpSyntaxError` for repeating non-quantifiable pattern', () => {
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, the preceding token to + is not quantifiable">
+    expect(() => createRegExp('(foo)?+')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /(foo)?+/: Nothing to repeat"'
+    )
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, the preceding token to * is not quantifiable">
+    expect(() => createRegExp('(foo)+*')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /(foo)+*/: Nothing to repeat"'
+    )
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, the preceding token to {2} is not quantifiable">
+    expect(() => createRegExp('(foo)*{2}')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /(foo)*{2}/: Nothing to repeat"'
+    )
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, the preceding token to {3,} is not quantifiable">
+    expect(() => createRegExp('(foo)*{3,}')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /(foo)*{3,}/: Nothing to repeat"'
+    )
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, the preceding token to {1,4} is not quantifiable">
+    expect(() => createRegExp('(foo)*{1,4}')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /(foo)*{1,4}/: Nothing to repeat"'
+    )
+  })
+
   it('`.match()` on invalid RegExp should infer as `never`', () => {
     try {
       const InvalidSyntaxMatchResult = 'foobar'.match(
