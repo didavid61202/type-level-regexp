@@ -63,17 +63,27 @@ describe('Function `createRegExp`', () => {
 
   it('Should throw `RegExpSyntaxError`', () => {
     // @ts-expect-error `createRegExp` should throw RegExpSyntaxError<"Invalid regular expression, missing closing `)`">
-    const RegExpIncompleteGroup = createRegExp('foo(bar')
+    expect(() => createRegExp('foo(bar')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /foo(bar/: Unterminated group"'
+    )
 
     // @ts-expect-error `createRegExp` should throw RegExpSyntaxError<"Invalid regular expression, missing closing `]`">
-    const RegExpClosingBracket = createRegExp('foo[a-zbar')
+    expect(() => createRegExp('foo[a-zbar')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /foo[a-zbar/: Unterminated character class"'
+    )
   })
 
   it('`.match()` on invalid RegExp should infer as `never`', () => {
-    const InvalidSyntaxMatchResult = 'foobar'.match(
-      // @ts-expect-error `createRegExp` should throw RegExpSyntaxError<"Invalid regular expression, missing closing `)`">
-      createRegExp('foo(bar')
-    )
-    expectTypeOf(InvalidSyntaxMatchResult).toEqualTypeOf<never>()
+    try {
+      const InvalidSyntaxMatchResult = 'foobar'.match(
+        // @ts-expect-error `createRegExp` should throw RegExpSyntaxError<"Invalid regular expression, missing closing `)`">
+        createRegExp('foo(bar')
+      )
+      expectTypeOf(InvalidSyntaxMatchResult).toEqualTypeOf<never>()
+    } catch (error) {
+      expect(error).toMatchInlineSnapshot(
+        '[SyntaxError: Invalid regular expression: /foo(bar/: Unterminated group]'
+      )
+    }
   })
 })
