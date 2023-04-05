@@ -835,3 +835,14 @@ describe('Generic type `ParseRegExp` can parse raw RegExp string to AST matchers
     >()
   })
 })
+
+describe('Generic type `ParseRegExp` shows parse Errors', () => {
+  it('Missing bracket', () => {
+    expectTypeOf<ParseRegExp<'foo(bar'>>().toEqualTypeOf<
+      RegExpSyntaxError<'Invalid regular expression, missing closing `)`'>
+    >()
+    expectTypeOf<ParseRegExp<'foo[a-zbar'>>().toEqualTypeOf<
+      RegExpSyntaxError<'Invalid regular expression, missing closing `]`'>
+    >()
+  })
+})

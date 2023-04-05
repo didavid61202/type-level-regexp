@@ -20,6 +20,11 @@ type IgnoreEscapedChar = {
   f: '\f'
 }
 
+export type RegExpSyntaxError<Msg extends string = string> = {
+  type: 'RegExpSyntaxError'
+  message: Msg
+} & SyntaxError
+
 export type ParseRegExp<
   InputString extends string,
   ParsedMatchers extends Matcher[] = [],
@@ -41,8 +46,10 @@ export type ParseRegExp<
           ParseOrAsTupleOnly
         >
     : FirstChar extends '^'
-    ? ParseRegExp<Rest> extends infer StarOfInnerMatchers
-      ? [{ type: 'startOf'; value: StarOfInnerMatchers }]
+    ? ParseRegExp<Rest> extends infer StarOfInnerMatchersOrError
+      ? StarOfInnerMatchersOrError extends RegExpSyntaxError
+        ? StarOfInnerMatchersOrError
+        : [{ type: 'startOf'; value: StarOfInnerMatchersOrError }]
       : never
     : FirstChar extends '$'
     ? [
@@ -145,78 +152,88 @@ export type ParseRegExp<
         ]
       : never
     : FirstChar extends '['
-    ? ParsePair<FirstChar, Rest> extends [
-        `${infer SetFirstChar}${infer RestAfterSetFirstChar}`,
-        infer Rest extends string
-      ]
-      ? Rest extends `${'?' | '*' | '+' | '{'}${string}`
-        ? ResolveQuantifierForSingleToken<
-            [
-              {
-                type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
-                value: SetFirstChar extends '^'
-                  ? RestAfterSetFirstChar
-                  : `${SetFirstChar}${RestAfterSetFirstChar}`
-              }
-            ],
-            Rest,
-            ParsedMatchers,
-            AccString,
-            ParseOrAsTupleOnly
-          >
-        : ParseRegExp<
-            Rest,
-            [
-              ...ParsedMatchers,
-              ...ResolvesAccStringMatcher<AccString>,
-              {
-                type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
-                value: SetFirstChar extends '^'
-                  ? RestAfterSetFirstChar
-                  : `${SetFirstChar}${RestAfterSetFirstChar}`
-              }
-            ],
-            ParseOrAsTupleOnly
-          >
+    ? ParsePair<FirstChar, Rest> extends infer ParsePairResult
+      ? ParsePairResult extends RegExpSyntaxError<any>
+        ? ParsePairResult
+        : ParsePairResult extends [
+            `${infer SetFirstChar}${infer RestAfterSetFirstChar}`,
+            infer Rest extends string
+          ]
+        ? Rest extends `${'?' | '*' | '+' | '{'}${string}`
+          ? ResolveQuantifierForSingleToken<
+              [
+                {
+                  type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
+                  value: SetFirstChar extends '^'
+                    ? RestAfterSetFirstChar
+                    : `${SetFirstChar}${RestAfterSetFirstChar}`
+                }
+              ],
+              Rest,
+              ParsedMatchers,
+              AccString,
+              ParseOrAsTupleOnly
+            >
+          : ParseRegExp<
+              Rest,
+              [
+                ...ParsedMatchers,
+                ...ResolvesAccStringMatcher<AccString>,
+                {
+                  type: SetFirstChar extends '^' ? 'notCharSet' : 'charSet'
+                  value: SetFirstChar extends '^'
+                    ? RestAfterSetFirstChar
+                    : `${SetFirstChar}${RestAfterSetFirstChar}`
+                }
+              ],
+              ParseOrAsTupleOnly
+            >
+        : never
       : never
     : FirstChar extends '('
-    ? ParsePair<FirstChar, Rest> extends [
-        InnerResult<
-          infer Inner extends string,
-          [
-            matcherType: infer Type extends Matcher['type'] | 'nonCaputre',
-            positiveOrName: infer positiveOrName extends string | boolean | undefined
+    ? ParsePair<FirstChar, Rest> extends infer ParsePairResult
+      ? ParsePairResult extends RegExpSyntaxError<any>
+        ? ParsePairResult
+        : ParsePairResult extends [
+            InnerResult<
+              infer Inner extends string,
+              [
+                matcherType: infer Type extends Matcher['type'] | 'nonCaputre',
+                positiveOrName: infer positiveOrName extends string | boolean | undefined
+              ]
+            >,
+            RestResult<
+              infer Rest extends string,
+              [
+                matcherType: infer Quantifier extends
+                  | 'optional'
+                  | 'zeroOrMore'
+                  | 'oneOrMore'
+                  | 'repeat'
+                  | undefined,
+                greedy: infer Greedy extends boolean,
+                repeat: infer Repeat extends [`${number}`, `${number}` | '' | string] | undefined
+              ]
+            >
           ]
-        >,
-        RestResult<
-          infer Rest extends string,
-          [
-            matcherType: infer Quantifier extends
-              | 'optional'
-              | 'zeroOrMore'
-              | 'oneOrMore'
-              | 'repeat'
-              | undefined,
-            greedy: infer Greedy extends boolean,
-            repeat: infer Repeat extends [`${number}`, `${number}` | '' | string] | undefined
-          ]
-        >
-      ]
-      ? ParseRegExp<Inner> extends infer ResovledInner extends Matcher[]
-        ? ParseRegExp<
-            Rest,
-            [
-              ...ParsedMatchers,
-              ...ResolvesAccStringMatcher<AccString>,
-              ...ResolveQuantifierTypeMatcher<
-                Quantifier,
-                Greedy,
-                Repeat,
-                ResolveEncloseTypeMatcher<Type, positiveOrName, ResovledInner>
+        ? ParseRegExp<Inner> extends infer ParsedInnerResult
+          ? ParsedInnerResult extends Matcher[]
+            ? ParseRegExp<
+                Rest,
+                [
+                  ...ParsedMatchers,
+                  ...ResolvesAccStringMatcher<AccString>,
+                  ...ResolveQuantifierTypeMatcher<
+                    Quantifier,
+                    Greedy,
+                    Repeat,
+                    ResolveEncloseTypeMatcher<Type, positiveOrName, ParsedInnerResult>
+                  >
+                ],
+                ParseOrAsTupleOnly
               >
-            ],
-            ParseOrAsTupleOnly
-          >
+            : ParsedInnerResult
+          : never
         : never
       : never
     : Rest extends `${'?' | '*' | '+' | '{'}${string}`
@@ -394,7 +411,9 @@ type ParsePair<
           `${ResolvedInner}${Inner}${CloseBracketMap[OpenBracket]}`
         >
     : never
-  : never
+  : OpenBracket extends '{'
+  ? ['{', `${ResolvedInner}${InputRest}`]
+  : RegExpSyntaxError<`Invalid regular expression, missing closing \`${CloseBracketMap[OpenBracket]}\``>
 
 type InnerResult<
   ResolvedInner extends string,
