@@ -402,7 +402,11 @@ type ParsePair<
         ? `${ResolvedInner}${Inner}` extends `${number}` | `${number},${number}` | `${number},`
           ? [`${ResolvedInner}${Inner}`, InnerAfterCloseBracket]
           : ['{', `${ResolvedInner}${InputRest}`]
-        : [ResolveInner<`${ResolvedInner}${Inner}`>, ResolveRest<InnerAfterCloseBracket>]
+        : ResolveInner<`${ResolvedInner}${Inner}`> extends infer ResolvedInner
+        ? ResolvedInner extends InnerResult<any, any>
+          ? [ResolvedInner, ResolveRest<InnerAfterCloseBracket>]
+          : ResolvedInner
+        : never
       : ParsePair<
           OpenBracket,
           InnerAfterCloseBracket,
@@ -435,8 +439,14 @@ type ResolveInner<Inner extends string> = Inner extends `?<${infer CaptureType e
         CaptureType extends ':' ? undefined : CaptureType extends '=' ? true : false
       ]
     >
-  : Inner extends `?<${infer GroupName}>${infer InnerAferNamedGroup}`
-  ? InnerResult<InnerAferNamedGroup, ['namedCapture', GroupName]>
+  : Inner extends `?<${infer InnerIncludeClosingBracket}`
+  ? Inner extends `?<${infer GroupName}>${infer InnerAferNamedGroup}`
+    ? GroupName extends ''
+      ? RegExpSyntaxError<`Invalid regular expression, capture group name can not be empty for capturing \`${InnerAferNamedGroup}\``>
+      : InnerResult<InnerAferNamedGroup, ['namedCapture', GroupName]>
+    : RegExpSyntaxError<`Invalid regular expression, invalid capture group name of \`${InnerIncludeClosingBracket}\`, possibly due to a missing closing '>' for group name`>
+  : Inner extends `?${string}>${infer SyntaxErrorInner}`
+  ? RegExpSyntaxError<`Invalid regular expression, invalid capture group name for capturing \`${SyntaxErrorInner}\`, possibly due to a missing opening '<' and group name`>
   : InnerResult<Inner, ['capture', undefined]>
 
 type RestResult<

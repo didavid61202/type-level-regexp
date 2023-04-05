@@ -61,7 +61,7 @@ describe('Function `createRegExp`', () => {
     >()
   })
 
-  it('Should throw `RegExpSyntaxError`', () => {
+  it('Should throw `RegExpSyntaxError` for missing brackets', () => {
     // @ts-expect-error `createRegExp` should throw RegExpSyntaxError<"Invalid regular expression, missing closing `)`">
     expect(() => createRegExp('foo(bar')).toThrowErrorMatchingInlineSnapshot(
       '"Invalid regular expression: /foo(bar/: Unterminated group"'
@@ -70,6 +70,24 @@ describe('Function `createRegExp`', () => {
     // @ts-expect-error `createRegExp` should throw RegExpSyntaxError<"Invalid regular expression, missing closing `]`">
     expect(() => createRegExp('foo[a-zbar')).toThrowErrorMatchingInlineSnapshot(
       '"Invalid regular expression: /foo[a-zbar/: Unterminated character class"'
+    )
+  })
+
+  it('Should throw `RegExpSyntaxError` for invalid named group syntax', () => {
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, invalid capture group name for capturing `bar`, possibly due to a missing opening '<' and group name">
+    expect(() => createRegExp('foo(?>bar)')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /foo(?>bar)/: Invalid group"'
+    )
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, capture group name can not be empty for capturing `bar`">
+    expect(() => createRegExp('foo(?<>bar)')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /foo(?<>bar)/: Invalid capture group name"'
+    )
+    // @ts-expect-error `createRegExp` should throw
+    // RegExpSyntaxError<"Invalid regular expression, invalid capture group name of `groupNamebar`, possibly due to a missing closing '>' for group name">
+    expect(() => createRegExp('foo(?<groupNamebar)')).toThrowErrorMatchingInlineSnapshot(
+      '"Invalid regular expression: /foo(?<groupNamebar)/: Invalid capture group name"'
     )
   })
 
