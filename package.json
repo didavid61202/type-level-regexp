@@ -28,6 +28,7 @@
   "homepage": "https://github.com/didavid61202/type-level-regexp#readme",
   "scripts": {
     "dev": "vitest --run && vitest typecheck",
+    "test:update": "vitest -u",
     "build": "unbuild",
     "release": "bumpp && npm publish"
   },
