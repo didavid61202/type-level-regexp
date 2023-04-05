@@ -24,9 +24,7 @@ pnpm i -D type-level-regexp
 npm i -D type-level-regexp
 ```
 
-2. Import `createRegExp` function from `type-level-regexp`, pass in a RegExp pattern to it creates a `TypedRegExp`, passing this `TypedRegExp` to `String.match` or `String.replace` functions to get fully typed match result.
-
-```ts
+2. Import `createRegExp` function, pass in a RegExp string pattern to it creates a `TypedRegExp`, passing this `TypedRegExp` to `String.match()`, `String.matchAll()` or `String.replace()` functions to get fully typed match result.
 
 ## Basic Usage
 match result will be fully typed if match against a literal stirng, or shows emumerated results if match against a dynamic string.
