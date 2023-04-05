@@ -10,7 +10,7 @@ import type {
   NullResult,
 } from './utils'
 
-export type { Flag } from './regexp'
+export type { Flag, ValidateRegExpSyntaxError } from './regexp'
 export type { ParseRegExp } from './parse'
 export type { ExhaustiveMatch, GlobalMatch } from './match'
 export type { ResolvePermutation } from './permutation'

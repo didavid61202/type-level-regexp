@@ -21,7 +21,7 @@ export type RegExpIterableIterator<MatchedTuple extends any[]> = Omit<
   next: () => IteratorResult<MatchedTuple[number], MatchedTuple[number] | undefined>
 }
 
-type CheckForParseError<
+export type ValidateRegExpSyntaxError<
   RawRegExpPattern extends string,
   RegExpParsedResult extends Matcher[] | RegExpSyntaxError<any> = ParseRegExp<RawRegExpPattern>
 > = RegExpParsedResult extends RegExpSyntaxError<any> ? RegExpParsedResult : RawRegExpPattern
@@ -30,7 +30,7 @@ export function createRegExp<
   RegExpPattern extends string,
   Flags extends Flag = never,
   RegExpParsedResult extends Matcher[] = ParseRegExp<RegExpPattern>
->(pattern: CheckForParseError<RegExpPattern>, flags?: Flags[] | Set<Flags>) {
+>(pattern: ValidateRegExpSyntaxError<RegExpPattern>, flags?: Flags[] | Set<Flags>) {
   return new RegExp(pattern, [...(flags || '')].join('')) as TypedRegExp<
     RegExpPattern,
     Flags,
