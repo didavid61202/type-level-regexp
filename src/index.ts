@@ -190,7 +190,9 @@ declare global {
       RegExpParsedAST extends Matcher[],
       Flags extends Flag,
       ReplaceValue extends string,
-      MatchResult = MatchRegExp<InputString, RegExpParsedAST, Flags>,
+      MatchResult = Matcher[] extends RegExpParsedAST
+        ? never
+        : MatchRegExp<InputString, RegExpParsedAST, Flags>,
       Match extends any[] = MatchResult extends RegExpMatchResult<
         {
           matched: infer MatchArray extends any[]
