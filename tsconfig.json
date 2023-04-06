@@ -12,7 +12,8 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "paths": {
-      "type-level-regexp": ["./src/index"]
+      "type-level-regexp": ["./src/index"],
+      "type-level-regexp/regexp": ["./src/regexp"]
     }
   },
   "exclude": ["dist"]
