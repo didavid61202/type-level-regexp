@@ -27,7 +27,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "regexp.d.ts"
   ],
   "author": "David Tai <didavid61202@gmail.com>",
   "homepage": "https://github.com/didavid61202/type-level-regexp#readme",
