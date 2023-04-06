@@ -22,7 +22,7 @@ import { Equal, Expect } from '../test/helper'
  */
 type MatchResult = MatchRegExp<
   'MypA$3W0rd',
-  '^(?=.*(?<lower>[a-z]))(?=.*(?<upper>[A-Z]))(?=.*(?<digit>\\d))(?=.*(?<special>[!@#$%^&*])).{8,}$',
+  ParseRegExp<'^(?=.*(?<lower>[a-z]))(?=.*(?<upper>[A-Z]))(?=.*(?<digit>\\d))(?=.*(?<special>[!@#$%^&*])).{8,}$'>,
   never
 >
 
@@ -54,7 +54,7 @@ type MatchTest = [
 type ReplaceReulst = ReplaceWithRegExp<
   //    ^?
   'foo-bar-baz',
-  '(?<=f[a-z]O\\W)b(?<g1>[A|B])r',
+  ParseRegExp<'(?<=f[a-z]O\\W)b(?<g1>[A|B])r'>,
   'qux-$&-$`d$<g1>o',
   'i'
 >
