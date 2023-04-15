@@ -7,5 +7,10 @@ export default defineConfig({
     typecheck: {
       ignoreSourceErrors: true,
     },
+    coverage: {
+      '100': true,
+      include: ['src'],
+      reporter: ['text', 'json', 'html'],
+    },
   },
 })
