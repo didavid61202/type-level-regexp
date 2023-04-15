@@ -53,6 +53,7 @@ export function spreadRegExpMatchArray<
         [Symbol.iterator]: () => IterableIterator<any>
         _matchArray: any[]
       }
+    | null
     | undefined
 >(matchArray: MatchArray) {
   return (matchArray ? [...matchArray] : null) as MatchArray extends {

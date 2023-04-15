@@ -50,6 +50,32 @@ describe('Common, complex examples', () => {
       }>
     >()
 
+    const spreadedResult = spreadRegExpMatchArray(chainedResult)
+    const nullSpread = spreadRegExpMatchArray(null)
+    expect(nullSpread).toBeNull()
+    expect(spreadedResult).toMatchInlineSnapshot(`
+      [
+        "starter templates site at https://nuxt.new",
+        "starter templates",
+        "https",
+        "://",
+        "nuxt",
+        "new",
+        undefined,
+      ]
+    `)
+    expectTypeOf(spreadedResult).toEqualTypeOf<
+      [
+        'starter templates site at https://nuxt.new',
+        'starter templates',
+        'https',
+        '://',
+        'nuxt',
+        'new',
+        undefined
+      ]
+    >()
+
     expect(chainedResult.input).toMatchInlineSnapshot(
       '"Check out the Nuxt starter templates site at https://nuxt.new 💚 it\'s the best place to start a new awesome website of any kind 💚, and it has some clear and concise starter templates 🚀, with excellent examples that make web development a breeze! 💚"'
     )
