@@ -21,6 +21,7 @@ import type {
   StepMatch,
   TupleItemExtendsType,
   RestMatchersBeforeBackReference,
+  InvertCharSetMap,
 } from './utils'
 
 export type GlobalMatch<
@@ -298,6 +299,70 @@ type Match<
           [...RestMatchers, ...OutMostRestMatchers],
           NamedCaptures
         >
+    : //? shortcut zeroOrMore match for single matcher of type char, digit...
+    [Type, OptionalOrMoreMatchers] extends [
+        'zeroOrMore',
+        [
+          {
+            type: infer Type extends keyof InvertCharSetMap
+            value?: infer MaybeCharSet extends string
+          }
+        ]
+      ]
+    ? [...RestMatchers, ...OutMostRestMatchers][0] extends undefined
+      ? Greedy extends false
+        ? MatchedResult<[''], InputString, never>
+        : Match<
+            InputString,
+            Flags,
+            SkippedString,
+            PrevMatchedString,
+            Type extends 'charSet' | 'notCharSet'
+              ? [{ type: InvertCharSetMap[Type]; value: MaybeCharSet }]
+              : [{ type: InvertCharSetMap[Type] }],
+            OutMostRestMatchers,
+            NamedCaptures,
+            false
+          > extends MatchedResult<
+            [infer InvertOpMatch extends string, ...any[]],
+            infer RestInputString,
+            never
+          >
+        ? InputString extends `${infer Match}${InvertOpMatch}${RestInputString}`
+          ? MatchedResult<[Match], `${InvertOpMatch}${RestInputString}`, never>
+          : never
+        : MatchedResult<[InputString], '', never>
+      : Match<
+          InputString,
+          Flags,
+          SkippedString,
+          PrevMatchedString,
+          RestMatchersBeforeBackReference<[...RestMatchers, ...OutMostRestMatchers], []>,
+          OutMostRestMatchers,
+          NamedCaptures,
+          false
+        > extends MatchedResult<
+          [infer NextMatch extends string, ...any[]],
+          infer RestInputString,
+          any
+        >
+      ? InputString extends `${infer PossibleMatch}${NextMatch}${RestInputString}`
+        ? Match<
+            PossibleMatch,
+            Flags,
+            SkippedString,
+            PrevMatchedString,
+            Type extends 'charSet' | 'notCharSet'
+              ? [{ type: InvertCharSetMap[Type]; value: MaybeCharSet }]
+              : [{ type: InvertCharSetMap[Type] }],
+            OutMostRestMatchers,
+            NamedCaptures,
+            false
+          > extends NullResult<any>
+          ? MatchedResult<[PossibleMatch], `${NextMatch}${RestInputString}`, never>
+          : NullResult<''>
+        : never
+      : NullResult<''>
     : MatchOptionalOrMoreMatcher<
         InputString,
         Flags,

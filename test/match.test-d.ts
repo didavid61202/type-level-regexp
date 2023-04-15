@@ -190,6 +190,22 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
       >
     >()
   })
+  it('ZeroOrMore of single metacharacters or charSet (Greedy)', () => {
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '21\\w*'>>().toEqualTypeOf<
+      MatchedResult<['210abcdefghijklmnopqrstuvwxyz0123456789'], '', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '8\\d*'>>().toEqualTypeOf<
+      MatchedResult<['876543210'], 'abcdefghijklmnopqrstuvwxyz0123456789', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz 0123456789', '65\\S*'>>().toEqualTypeOf<
+      MatchedResult<['6543210abcdefghijklmnopqrstuvwxyz'], ' 0123456789', never>
+    >()
+    expectTypeOf<
+      MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '[0-9a-k]*'>
+    >().toEqualTypeOf<
+      MatchedResult<['9876543210abcdefghijk'], 'lmnopqrstuvwxyz0123456789', never>
+    >()
+  })
   it('ZeroOrMore (Lazy)', () => {
     expectTypeOf<
       MRE<
@@ -202,6 +218,22 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         'baz-bas-qux',
         ['g1', 'quf-'] | ['g2', 'f-'] | ['g3', undefined]
       >
+    >()
+  })
+  it('ZeroOrMore of single metacharacters or charSet (Lazy)', () => {
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '21\\w*?'>>().toEqualTypeOf<
+      MatchedResult<['21'], '0abcdefghijklmnopqrstuvwxyz0123456789', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '8\\d*?'>>().toEqualTypeOf<
+      MatchedResult<['8'], '76543210abcdefghijklmnopqrstuvwxyz0123456789', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz 0123456789', '65\\S*?'>>().toEqualTypeOf<
+      MatchedResult<['65'], '43210abcdefghijklmnopqrstuvwxyz 0123456789', never>
+    >()
+    expectTypeOf<
+      MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '[0-9a-k]*?'>
+    >().toEqualTypeOf<
+      MatchedResult<[''], '9876543210abcdefghijklmnopqrstuvwxyz0123456789', never>
     >()
   })
   it('OneOrMore (Greedy)', () => {
@@ -224,6 +256,20 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
       >
     >()
   })
+  it('OneOrMore of single metacharacters or charSet (Greedy)', () => {
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '21\\w+'>>().toEqualTypeOf<
+      MatchedResult<['210abcdefghijklmnopqrstuvwxyz0123456789'], '', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '8\\d+'>>().toEqualTypeOf<
+      MatchedResult<['876543210'], 'abcdefghijklmnopqrstuvwxyz0123456789', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz 0123456789', '65\\S+'>>().toEqualTypeOf<
+      MatchedResult<['6543210abcdefghijklmnopqrstuvwxyz'], ' 0123456789', never>
+    >()
+    expectTypeOf<
+      MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '[0-4a-z]+'>
+    >().toEqualTypeOf<MatchedResult<['43210abcdefghijklmnopqrstuvwxyz01234'], '56789', never>>()
+  })
   it('OneOrMore (Lazy)', () => {
     expectTypeOf<
       MRE<
@@ -237,6 +283,20 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         ['g1', 'quf-'] | ['g2', 'f-'] | ['g3', 'baz-']
       >
     >()
+  })
+  it('OneOrMore of single metacharacters or charSet (Lazy)', () => {
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '21\\w+?'>>().toEqualTypeOf<
+      MatchedResult<['210'], 'abcdefghijklmnopqrstuvwxyz0123456789', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '8\\d+?'>>().toEqualTypeOf<
+      MatchedResult<['87'], '6543210abcdefghijklmnopqrstuvwxyz0123456789', never>
+    >()
+    expectTypeOf<MRE<'9876543210abcdefghijklmnopqrstuvwxyz 0123456789', '65\\S+?'>>().toEqualTypeOf<
+      MatchedResult<['654'], '3210abcdefghijklmnopqrstuvwxyz 0123456789', never>
+    >()
+    expectTypeOf<
+      MRE<'9876543210abcdefghijklmnopqrstuvwxyz0123456789', '[0-4a-z]+?'>
+    >().toEqualTypeOf<MatchedResult<['4'], '3210abcdefghijklmnopqrstuvwxyz0123456789', never>>()
   })
   it('StartOf matching string', () => {
     expectTypeOf<MRE<'bar-baz-qux-foo', '^(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>>().toEqualTypeOf<
