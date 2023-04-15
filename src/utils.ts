@@ -79,6 +79,17 @@ export interface CharSetMap<
   nonBoundary: string
 }
 
+export type InvertCharSetMap = {
+  whitespace: 'nonWhitespace'
+  nonWhitespace: 'whitespace'
+  char: 'nonChar'
+  nonChar: 'char'
+  digit: 'nonDigit'
+  nonDigit: 'digit'
+  charSet: 'notCharSet'
+  notCharSet: 'charSet'
+}
+
 export type ResolveCharSet<
   CharSet extends string,
   Result extends string = ''
