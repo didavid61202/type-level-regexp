@@ -1,6 +1,33 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createRegExp } from '../src/index'
-import type { TypedRegExp } from '../src/regexp'
+import { createRegExp, spreadRegExpIterator } from '../src/index'
+import type { RegExpMatchResult, TypedRegExp } from '../src/regexp'
+
+describe('Generic type `MatchAllRegExp`', () => {
+  it('return iterableIterator of `RegExpMatchResult` if matched, can be spread using `spreadRegExpIterator` helper function', () => {
+    expectTypeOf(
+      spreadRegExpIterator('foo bar fao'.matchAll(createRegExp('f\\wo', ['g'])))
+    ).toEqualTypeOf<
+      [
+        RegExpMatchResult<{
+          matched: ['foo']
+          namedCaptures: never
+          input: 'foo bar fao'
+          restInput: ' bar fao'
+        }>,
+        RegExpMatchResult<{
+          matched: ['fao']
+          namedCaptures: never
+          input: 'foo bar fao'
+          restInput: ''
+        }>
+      ]
+    >()
+  })
+
+  it('return `null` if no match', () => {
+    expectTypeOf('foo bar fao'.matchAll(createRegExp('cat', ['g']))).toEqualTypeOf<null>()
+  })
+})
 
 describe('Function `createRegExp`', () => {
   it('Return `TypedRegExp` with pattern, parsed AST, and flags', () => {
