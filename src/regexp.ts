@@ -64,10 +64,14 @@ export function spreadRegExpMatchArray<
     : null
 }
 
-export function spreadRegExpIterator<Iter extends Iterable<any> & { _matchedTuple: any }>(
+export function spreadRegExpIterator<Iter extends (Iterable<any> & { _matchedTuple: any }) | null>(
   iterableIterator: Iter
 ) {
-  return [...iterableIterator] as Iter extends { _matchedTuple: infer Tuple } ? Tuple : never
+  return (iterableIterator ? [...iterableIterator] : null) as Iter extends {
+    _matchedTuple: infer Tuple
+  }
+    ? Tuple
+    : null
 }
 
 export type MatchRegExp<
