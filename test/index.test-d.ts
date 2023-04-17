@@ -455,7 +455,6 @@ describe('<literal-string>.matchAll() return iterableIterator with each iter ret
       fileTypes: 'pdf' | 'docx' | 'txt',
       prefix: '(?<date>\\d{4}-\\d{2}-\\d{2})' | '(?<id>[A-Z]{2}\\d{6})'
     ) =>
-      //     ^?
       `PO033543-document.txt, 2023-03-12-report.pdf, MO001234-memo.docx, 2020-01-02-notes.doc, 2019-09-21-receipt.pdf,`.matchAll(
         createRegExp(`\\b${prefix}-(?<filename>\\w+)(?<ext>\\.${fileTypes})`, ['g'])
       )
@@ -464,7 +463,7 @@ describe('<literal-string>.matchAll() return iterableIterator with each iter ret
 
     const spreadedMatchedFile = spreadRegExpIterator(matchedFiles)
 
-    expect(spreadRegExpMatchArray(spreadedMatchedFile[0])).toMatchInlineSnapshot(`
+    expect(spreadRegExpMatchArray(spreadedMatchedFile?.[0])).toMatchInlineSnapshot(`
       [
         "2023-03-12-report.pdf",
         "2023-03-12",
@@ -472,14 +471,14 @@ describe('<literal-string>.matchAll() return iterableIterator with each iter ret
         ".pdf",
       ]
     `)
-    expectTypeOf(spreadRegExpMatchArray(spreadedMatchedFile[0])).toEqualTypeOf<
+    expectTypeOf(spreadRegExpMatchArray(spreadedMatchedFile?.[0])).toEqualTypeOf<
       | ['2023-03-12-report.pdf', '2023-03-12', 'report', '.pdf']
       | ['MO001234-memo.docx', 'MO001234', 'memo', '.docx']
       | ['PO033543-document.txt', 'PO033543', 'document', '.txt']
       | null
     >()
 
-    expect(spreadRegExpMatchArray(spreadedMatchedFile[1])).toMatchInlineSnapshot(`
+    expect(spreadRegExpMatchArray(spreadedMatchedFile?.[1])).toMatchInlineSnapshot(`
       [
         "2019-09-21-receipt.pdf",
         "2019-09-21",
@@ -487,26 +486,26 @@ describe('<literal-string>.matchAll() return iterableIterator with each iter ret
         ".pdf",
       ]
     `)
-    expectTypeOf(spreadRegExpMatchArray(spreadedMatchedFile[1])).toEqualTypeOf<
+    expectTypeOf(spreadRegExpMatchArray(spreadedMatchedFile?.[1])).toEqualTypeOf<
       ['2019-09-21-receipt.pdf', '2019-09-21', 'receipt', '.pdf'] | null
     >()
 
-    expect(spreadedMatchedFile[0]?.index).toMatchInlineSnapshot('23')
-    expectTypeOf(spreadedMatchedFile[0]?.index).toEqualTypeOf<0 | 23 | 46 | undefined>()
-    expect(spreadedMatchedFile[1]?.index).toMatchInlineSnapshot('88')
-    expectTypeOf(spreadedMatchedFile[1]?.index).toEqualTypeOf<88 | undefined>()
+    expect(spreadedMatchedFile?.[0]?.index).toMatchInlineSnapshot('23')
+    expectTypeOf(spreadedMatchedFile?.[0]?.index).toEqualTypeOf<0 | 23 | 46 | undefined>()
+    expect(spreadedMatchedFile?.[1]?.index).toMatchInlineSnapshot('88')
+    expectTypeOf(spreadedMatchedFile?.[1]?.index).toEqualTypeOf<88 | undefined>()
 
-    expect(spreadedMatchedFile[0]?.length).toMatchInlineSnapshot('4')
-    expectTypeOf(spreadedMatchedFile[0]?.length).toEqualTypeOf<4 | undefined>()
+    expect(spreadedMatchedFile?.[0]?.length).toMatchInlineSnapshot('4')
+    expectTypeOf(spreadedMatchedFile?.[0]?.length).toEqualTypeOf<4 | undefined>()
 
-    expect(spreadedMatchedFile[1]?.groups).toMatchInlineSnapshot(`
+    expect(spreadedMatchedFile?.[1]?.groups).toMatchInlineSnapshot(`
       {
         "date": "2019-09-21",
         "ext": ".pdf",
         "filename": "receipt",
       }
     `)
-    expectTypeOf(spreadedMatchedFile[1]?.groups).toEqualTypeOf<
+    expectTypeOf(spreadedMatchedFile?.[1]?.groups).toEqualTypeOf<
       { date: '2019-09-21'; filename: 'receipt'; ext: '.pdf' } | undefined
     >()
   })
