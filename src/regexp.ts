@@ -183,6 +183,8 @@ export type MatchAllRegExp<
           ],
           InitialInputString
         >
+      : MatchedResultTuple extends []
+      ? null
       : RegExpIterableIterator<MatchedResultTuple>
     : never
   : never
