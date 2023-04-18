@@ -352,6 +352,10 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', 'baz']
       >
     >()
+
+    expectTypeOf<MRE<'foobar', 'f\\w+(?=bar)'>>().toEqualTypeOf<
+      MatchedResult<['foo'], 'bar', never>
+    >()
   })
   it('Lookahead (Negative)', () => {
     expectTypeOf<
@@ -369,6 +373,10 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     expectTypeOf<
       MRE<'bar-foo-bar-baz-qux-foo', '(?!.*baz)(?<g1>bar-(?<g2>baz))-(?<g3>qux)'>
     >().toEqualTypeOf<NullResult<'', unknown, false>>()
+
+    expectTypeOf<MRE<'foobar', 'f\\w+(?!boo)'>>().toEqualTypeOf<
+      MatchedResult<['foobar'], '', never>
+    >()
   })
 
   it('Lookbehind (Positive)', () => {

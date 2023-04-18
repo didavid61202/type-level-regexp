@@ -118,7 +118,7 @@ export type Matcher =
       type: 'any' | Exclude<keyof CharSetMap, 'charSet' | 'notCharSet'> | 'endMark' | 'debug'
     }
   | {
-      type: 'capture' | 'startOf' | 'endOf' | 'captureLast'
+      type: 'capture' | 'startOf' | 'endOf' | 'captureLast' | 'not'
       value: Matcher[]
     }
   | {
@@ -591,9 +591,8 @@ export type RestMatchersBeforeBackReference<
       [...ResultMatchers, Matchers[Index['length']]]
     >
 
-export type FlattenMatcherType<
+export type FlattenLookahead<
   Matchers extends Matcher[],
-  TypeToFlatten extends Matcher['type'],
   FlattenMatchers extends Matcher[] = [],
   Count extends any[] = [],
   CurrentMatcer extends Matcher = Matchers[Count['length']]
@@ -603,33 +602,31 @@ export type FlattenMatcherType<
       type: 'or'
       value: infer NestedArrMatchers extends Matcher[][]
     }
-  ? FlattenMatcherType<
+  ? FlattenLookahead<
       Matchers,
-      TypeToFlatten,
       [
         ...FlattenMatchers,
         {
           type: 'or'
           value: {
-            [K in keyof NestedArrMatchers]: FlattenMatcherType<NestedArrMatchers[K], TypeToFlatten>
+            [K in keyof NestedArrMatchers]: FlattenLookahead<NestedArrMatchers[K]>
           }
         }
       ],
       [...Count, '']
     >
   : CurrentMatcer extends {
-      type: TypeToFlatten
+      type: 'lookahead'
       value: infer NestedMatchers extends Matcher[]
+      positive: infer Positive extends boolean
     }
-  ? FlattenMatcherType<
-      NestedMatchers,
-      TypeToFlatten
-    > extends infer FlattenNestedMatchers extends Matcher[]
-    ? FlattenMatcherType<
-        Matchers,
-        TypeToFlatten,
-        [...FlattenMatchers, ...FlattenNestedMatchers],
-        [...Count, '']
-      >
+  ? FlattenLookahead<NestedMatchers> extends infer FlattenNestedMatchers extends Matcher[]
+    ? Positive extends false
+      ? FlattenLookahead<
+          Matchers,
+          [...FlattenMatchers, { type: 'not'; value: FlattenNestedMatchers }],
+          [...Count, '']
+        >
+      : FlattenLookahead<Matchers, [...FlattenMatchers, ...FlattenNestedMatchers], [...Count, '']>
     : never
-  : FlattenMatcherType<Matchers, TypeToFlatten, [...FlattenMatchers, CurrentMatcer], [...Count, '']>
+  : FlattenLookahead<Matchers, [...FlattenMatchers, CurrentMatcer], [...Count, '']>

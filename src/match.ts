@@ -21,7 +21,7 @@ import type {
   TupleItemExtendsType,
   RestMatchersBeforeBackReference,
   InvertCharSetMap,
-  FlattenMatcherType,
+  FlattenLookahead,
 } from './utils'
 
 export type GlobalMatch<
@@ -321,9 +321,8 @@ type Match<
           ? MatchedResult<[Match], `${InvertOpMatch}${RestInputString}`, never>
           : never
         : MatchedResult<[InputString], '', never>
-      : FlattenMatcherType<
-          RestMatchersBeforeBackReference<[...RestMatchers, ...OutMostRestMatchers], []>,
-          'lookahead'
+      : FlattenLookahead<
+          RestMatchersBeforeBackReference<[...RestMatchers, ...OutMostRestMatchers], []>
         > extends infer ResolvedRestMatchers extends Matcher[]
       ? (
           Type extends 'any'
@@ -489,6 +488,22 @@ type Match<
         InputString,
         ResolveNamedCaptureUnion<[LookbehindMatchers], never>
       >
+  : CurrentMatcher extends {
+      type: 'not'
+      value: infer NotMatchers extends Matcher[]
+    }
+  ? EnumerateMatchers<
+      InputString,
+      NotMatchers,
+      Flags,
+      SkippedString,
+      [...RestMatchers, ...OutMostRestMatchers],
+      [''],
+      NamedCaptures,
+      StartOf
+    > extends NullResult<any>
+    ? MatchedResult<[''], '', never>
+    : NullResult<''>
   : CurrentMatcher extends {
       type: 'endMark'
     }
