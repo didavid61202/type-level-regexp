@@ -349,6 +349,27 @@ type Match<
                 false
               > extends NullResult<any>
             ? MatchedResult<[PossibleMatch], `${NextMatch}${RestInputString}`, never>
+            : NextMatch extends '' //? if eager match till end of string by `negative lookahead`
+            ? Match<
+                PossibleMatch,
+                Flags,
+                SkippedString,
+                PrevMatchedString,
+                Type extends 'charSet' | 'notCharSet'
+                  ? [{ type: InvertCharSetMap[Type]; value: MaybeCharSet }]
+                  : [{ type: InvertCharSetMap[Type] }],
+                OutMostRestMatchers,
+                NamedCaptures,
+                false
+              > extends MatchedResult<
+                [infer InvertOpMatch extends string, ...any[]],
+                infer RestInputString,
+                never
+              >
+              ? PossibleMatch extends `${infer Match}${InvertOpMatch}${RestInputString}`
+                ? MatchedResult<[Match], `${InvertOpMatch}${RestInputString}`, never>
+                : never
+              : MatchedResult<[PossibleMatch], '', never>
             : NullResult<''>
           : never
         : NullResult<''>
