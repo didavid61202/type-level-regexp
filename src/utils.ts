@@ -80,6 +80,7 @@ export interface CharSetMap<
 }
 
 export type InvertCharSetMap = {
+  any: 'any'
   whitespace: 'nonWhitespace'
   nonWhitespace: 'whitespace'
   char: 'nonChar'
@@ -589,3 +590,46 @@ export type RestMatchersBeforeBackReference<
       [...Index, ''],
       [...ResultMatchers, Matchers[Index['length']]]
     >
+
+export type FlattenMatcherType<
+  Matchers extends Matcher[],
+  TypeToFlatten extends Matcher['type'],
+  FlattenMatchers extends Matcher[] = [],
+  Count extends any[] = [],
+  CurrentMatcer extends Matcher = Matchers[Count['length']]
+> = Count['length'] extends Matchers['length']
+  ? FlattenMatchers
+  : CurrentMatcer extends {
+      type: 'or'
+      value: infer NestedArrMatchers extends Matcher[][]
+    }
+  ? FlattenMatcherType<
+      Matchers,
+      TypeToFlatten,
+      [
+        ...FlattenMatchers,
+        {
+          type: 'or'
+          value: {
+            [K in keyof NestedArrMatchers]: FlattenMatcherType<NestedArrMatchers[K], TypeToFlatten>
+          }
+        }
+      ],
+      [...Count, '']
+    >
+  : CurrentMatcer extends {
+      type: TypeToFlatten
+      value: infer NestedMatchers extends Matcher[]
+    }
+  ? FlattenMatcherType<
+      NestedMatchers,
+      TypeToFlatten
+    > extends infer FlattenNestedMatchers extends Matcher[]
+    ? FlattenMatcherType<
+        Matchers,
+        TypeToFlatten,
+        [...FlattenMatchers, ...FlattenNestedMatchers],
+        [...Count, '']
+      >
+    : never
+  : FlattenMatcherType<Matchers, TypeToFlatten, [...FlattenMatchers, CurrentMatcer], [...Count, '']>
