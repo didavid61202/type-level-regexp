@@ -324,7 +324,7 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
       NullResult<
         'bar-baz-qux',
         {
-          msg: 'not matching at the end of input string.'
+          msg: 'Not matching at the end of input string, remaining input: `-foo`'
         },
         true
       >

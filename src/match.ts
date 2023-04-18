@@ -143,7 +143,13 @@ export type EnumerateMatchers<
     ? Result extends MatchedResult<infer MatchArray, infer RestInputString, any>
       ? '' extends (Type extends 'endOf' ? false : '') | RestInputString
         ? Result
-        : NullResult<MatchArray[0], { msg: 'not matching at the end of input string.' }, true>
+        : NullResult<
+            MatchArray[0],
+            {
+              msg: `Not matching at the end of input string, remaining input: \`${RestInputString}\``
+            },
+            true
+          >
       : Result extends NullResult<infer PartialMatched extends string, infer DebugObj, any>
       ? NullResult<PartialMatched, DebugObj, true>
       : never
