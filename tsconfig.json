@@ -16,7 +16,6 @@
       "type-level-regexp/regexp": ["./src/regexp"]
     }
   },
-  "include": ["src"],
   "exclude": ["dist"]
 }
 
