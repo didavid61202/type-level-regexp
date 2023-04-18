@@ -459,12 +459,12 @@ type Match<
       value: infer LookbehindMatchers extends Matcher[]
       positive: infer Positive extends boolean
     }
-  ? ExhaustiveMatch<
+  ? MatchLast<
       `${PrevMatchedString}${SkippedString}`,
       LookbehindMatchers,
       Flags,
-      SkippedString,
-      false
+      NamedCaptures,
+      SkippedString
     > extends MatchedResult<
       [any, ...infer Captures extends any[]],
       infer RestInputString,

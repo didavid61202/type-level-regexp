@@ -401,6 +401,10 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         ['g1', 'bar-baz'] | ['g2', 'baz'] | ['g3', 'qux'] | ['g4', 'baz']
       >
     >()
+
+    expectTypeOf<MRE<'foobar', '(?<=[a-z])bar'>>().toEqualTypeOf<
+      MatchedResult<['bar'], '', never>
+    >()
   })
   it('Lookbehind (Negative)', () => {
     expectTypeOf<
