@@ -40,7 +40,7 @@
     "release": "bumpp && npm publish"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.38.4",
+    "@antfu/eslint-config": "^0.38.5",
     "@vitest/coverage-c8": "^0.30.1",
     "bumpp": "^9.1.0",
     "c8": "^7.13.0",
@@ -50,7 +50,7 @@
     "prettier": "^2.8.7",
     "typescript": "^5.0.4",
     "unbuild": "^1.2.1",
-    "vite": "^4.2.2",
+    "vite": "^4.3.0",
     "vitest": "^0.30.1"
   },
   "resolutions": {
