@@ -162,6 +162,9 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     >()
   })
   it('ZeroOrMore (Greedy)', () => {
+    expectTypeOf<MRE<'document.txt report.pdf image.jpg', '\\w*\\.pdf'>>().toEqualTypeOf<
+      MatchedResult<['report.pdf'], ' image.jpg', never>
+    >()
     expectTypeOf<
       MRE<'baaar-foo-bar-baz-bat-qux', 'ba*r-(?<g1>qu(?<g2>[a-z]-))*(?<g3>ba[r-z]-)*'>
     >().toEqualTypeOf<
@@ -188,6 +191,11 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         '-qux',
         ['g1', 'quf-'] | ['g2', 'f-'] | ['g3', 'baw']
       >
+    >()
+  })
+  it('ZeroOrMore, consecutive (Lazy)', () => {
+    expectTypeOf<MRE<'foo1234barbuz#@$', 'foo(\\d*)(\\w*)(\\w*)'>>().toEqualTypeOf<
+      MatchedResult<['foo1234barbuz', '1234', 'barbuz', ''], '#@$', never>
     >()
   })
   it('ZeroOrMore of single metacharacters or charSet (Greedy)', () => {
@@ -254,6 +262,12 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
         '-qux',
         ['g1', 'quf-'] | ['g2', 'f-'] | ['g3', 'baw']
       >
+    >()
+  })
+
+  it('OneOrMore, consecutive (Greedy)', () => {
+    expectTypeOf<MRE<'foo1234barbuz#@$', 'foo(\\d+)(\\w+)(\\w+)'>>().toEqualTypeOf<
+      MatchedResult<['foo1234barbuz', '1234', 'barbu', 'z'], '#@$', never>
     >()
   })
   it('OneOrMore of single metacharacters or charSet (Greedy)', () => {
@@ -331,6 +345,9 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     >()
   })
   it('Lookahead (Positive)', () => {
+    expectTypeOf<MRE<'foobaz foobar fooqux', 'f\\w+(?=bar)'>>().toEqualTypeOf<
+      MatchedResult<['foo'], 'bar fooqux', never>
+    >()
     expectTypeOf<
       MRE<'bar-foo-bar-baz-qux-foo', '(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?=\\W(?<g4>f.[a-z]))'>
     >().toEqualTypeOf<
@@ -358,6 +375,9 @@ describe('Generic type `ExhaustiveMatch` can match input string with parsed RegE
     >()
   })
   it('Lookahead (Negative)', () => {
+    expectTypeOf<MRE<'faoberboo foobarbow', 'f\\w+r(?!boo)'>>().toEqualTypeOf<
+      MatchedResult<['foobar'], 'bow', never>
+    >()
     expectTypeOf<
       MRE<'bar-foo-bar-baz-qux-foo', '(?<g1>bar-(?<g2>baz))-(?<g3>qux)(?!-(?<g4>bar))'>
     >().toEqualTypeOf<
