@@ -244,7 +244,7 @@ export type LastCharOfOr<
     : LastCharOfOr<Rest>
   : Or
 
-export type StrintToUnion<
+export type StringToUnion<
   S extends string,
   Original extends string = S,
   Union extends string = never,
@@ -252,7 +252,7 @@ export type StrintToUnion<
 > = Count['length'] extends 13
   ? `[ any char in [${Original}] ]`
   : S extends `${infer Char}${infer Rest}`
-  ? StrintToUnion<Rest, Original, Union | Char, [...Count, '']>
+  ? StringToUnion<Rest, Original, Union | Char, [...Count, '']>
   : Union
 
 export type SliceMatchers<

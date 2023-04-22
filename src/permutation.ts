@@ -10,7 +10,7 @@ import type {
   ResolveNamedCaptureUnion,
   ResolveOrCaptureTuple,
   SliceMatchers,
-  StrintToUnion,
+  StringToUnion,
   TupleItemExtendsType,
 } from './utils'
 
@@ -63,7 +63,7 @@ interface LiteralCharSetMap<
   nonChar: '[any non-char]'
   digit: `${number}` | '[any digit]'
   nonDigit: '[non-digit]'
-  charSet: StrintToUnion<ResolvedCharSet>
+  charSet: StringToUnion<ResolvedCharSet>
   notCharSet: `[any char NOT in [${CharSet}]]`
   boundary: '[boundary]'
   nonBoundary: '[non-boundary]'
