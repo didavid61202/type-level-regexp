@@ -88,6 +88,8 @@ export type MatchLast<
   Flags extends Flag,
   NamedCaptures extends NamedCapturesTuple,
   SkippedString extends string = '',
+  StepChar extends boolean = false,
+  InvertMatcher extends Matcher = never,
   LastMatched extends MatchedResult<any, any, any> | NullResult<''> = NullResult<''>
 > = EnumerateMatchers<
   InputString,
@@ -99,13 +101,76 @@ export type MatchLast<
   NamedCaptures,
   false
 > extends infer Result
-  ? Result extends MatchedResult<any, infer RestInput, any>
-    ? MatchLast<RestInput, Matchers, Flags, NamedCaptures, SkippedString, Result>
+  ? Result extends MatchedResult<
+      [infer CurrentMatch extends string, ...any[]],
+      infer RestInput,
+      any
+    >
+    ? `${CurrentMatch}${RestInput}` extends '' //? match by `not` matcher
+      ? MatchedResult<[''], ''>
+      : StepChar extends true
+      ? InputString extends `${infer Skipped}${CurrentMatch}${RestInput}`
+        ? Match<
+            `${SkippedString}${Skipped}`,
+            Flags,
+            '',
+            '',
+            [InvertMatcher],
+            [],
+            never,
+            false
+          > extends NullResult<any, any, any>
+          ? InputString extends `${infer SkippedChar}${infer Rest}`
+            ? MatchLast<
+                Rest,
+                Matchers,
+                Flags,
+                NamedCaptures,
+                `${SkippedString}${SkippedChar}`,
+                StepChar,
+                InvertMatcher,
+                Result
+              >
+            : MatchedResult<[''], '', never>
+          : LastMatched
+        : never
+      : MatchLast<
+          RestInput,
+          Matchers,
+          Flags,
+          NamedCaptures,
+          SkippedString,
+          StepChar,
+          InvertMatcher,
+          Result
+        >
     : Result extends NullResult<infer PartialMatched extends string, any, any>
     ? PartialMatched extends ''
-      ? LastMatched
-      : InputString extends `${string}${PartialMatched}${infer NextSeg}`
-      ? MatchLast<NextSeg, Matchers, Flags, NamedCaptures, SkippedString, LastMatched>
+      ? false extends StepChar | (InputString extends '' ? false : true)
+        ? LastMatched
+        : InputString extends `${infer Skipped}${infer Rest}`
+        ? MatchLast<
+            Rest,
+            Matchers,
+            Flags,
+            NamedCaptures,
+            `${SkippedString}${Skipped}`,
+            StepChar,
+            InvertMatcher,
+            LastMatched
+          >
+        : LastMatched
+      : InputString extends `${infer Skipped}${PartialMatched}${infer NextSeg}`
+      ? MatchLast<
+          NextSeg,
+          Matchers,
+          Flags,
+          NamedCaptures,
+          `${SkippedString}${Skipped}`,
+          StepChar,
+          InvertMatcher,
+          LastMatched
+        >
       : LastMatched
     : never
   : never
@@ -287,7 +352,7 @@ type Match<
       'zeroOrMore',
       [
         {
-          type: infer Type extends keyof InvertCharSetMap
+          type: infer OrMoreMatcherType extends keyof InvertCharSetMap
           value?: infer MaybeCharSet extends string
         }
       ]
@@ -296,15 +361,15 @@ type Match<
       ? Greedy extends false
         ? MatchedResult<[''], InputString, never>
         : [
-            Type extends 'any' ? false : true,
+            OrMoreMatcherType extends 'any' ? false : true,
             Match<
               InputString,
               Flags,
               SkippedString,
               PrevMatchedString,
-              Type extends 'charSet' | 'notCharSet'
-                ? [{ type: InvertCharSetMap[Type]; value: MaybeCharSet }]
-                : [{ type: InvertCharSetMap[Type] }],
+              OrMoreMatcherType extends 'charSet' | 'notCharSet'
+                ? [{ type: InvertCharSetMap[OrMoreMatcherType]; value: MaybeCharSet }]
+                : [{ type: InvertCharSetMap[OrMoreMatcherType] }],
               OutMostRestMatchers,
               NamedCaptures,
               false
@@ -324,53 +389,50 @@ type Match<
       : FlattenLookahead<
           RestMatchersBeforeBackReference<[...RestMatchers, ...OutMostRestMatchers], []>
         > extends infer ResolvedRestMatchers extends Matcher[]
-      ? (
-          Type extends 'any'
-            ? MatchLast<InputString, ResolvedRestMatchers, Flags, NamedCaptures, SkippedString>
-            : EnumerateMatchers<InputString, ResolvedRestMatchers, Flags, ''>
-        ) extends MatchedResult<
+      ? MatchLast<
+          InputString,
+          ResolvedRestMatchers,
+          Flags,
+          NamedCaptures,
+          '',
+          true,
+          OrMoreMatcherType extends 'any'
+            ? never
+            : OrMoreMatcherType extends 'charSet' | 'notCharSet'
+            ? { type: InvertCharSetMap[OrMoreMatcherType]; value: MaybeCharSet }
+            : { type: InvertCharSetMap[OrMoreMatcherType] }
+        > extends MatchedResult<
           [infer NextMatch extends string, ...any[]],
           infer RestInputString,
           any
         >
         ? InputString extends `${infer PossibleMatch}${NextMatch}${RestInputString}`
-          ? Type extends 'any'
+          ? OrMoreMatcherType extends 'any'
             ? MatchedResult<[PossibleMatch], `${NextMatch}${RestInputString}`, never>
             : Match<
                 PossibleMatch,
                 Flags,
                 SkippedString,
                 PrevMatchedString,
-                Type extends 'charSet' | 'notCharSet'
-                  ? [{ type: InvertCharSetMap[Type]; value: MaybeCharSet }]
-                  : [{ type: InvertCharSetMap[Type] }],
-                OutMostRestMatchers,
-                NamedCaptures,
-                false
-              > extends NullResult<any>
-            ? MatchedResult<[PossibleMatch], `${NextMatch}${RestInputString}`, never>
-            : NextMatch extends '' //? if eager match till end of string by `negative lookahead`
-            ? Match<
-                PossibleMatch,
-                Flags,
-                SkippedString,
-                PrevMatchedString,
-                Type extends 'charSet' | 'notCharSet'
-                  ? [{ type: InvertCharSetMap[Type]; value: MaybeCharSet }]
-                  : [{ type: InvertCharSetMap[Type] }],
+                OrMoreMatcherType extends 'charSet' | 'notCharSet'
+                  ? [{ type: InvertCharSetMap[OrMoreMatcherType]; value: MaybeCharSet }]
+                  : [{ type: InvertCharSetMap[OrMoreMatcherType] }],
                 OutMostRestMatchers,
                 NamedCaptures,
                 false
               > extends MatchedResult<
                 [infer InvertOpMatch extends string, ...any[]],
-                infer RestInputString,
+                infer RestPossibleMatch,
                 never
               >
-              ? PossibleMatch extends `${infer Match}${InvertOpMatch}${RestInputString}`
-                ? MatchedResult<[Match], `${InvertOpMatch}${RestInputString}`, never>
-                : never
-              : MatchedResult<[PossibleMatch], '', never>
-            : NullResult<''>
+            ? PossibleMatch extends `${infer Match}${InvertOpMatch}${RestPossibleMatch}`
+              ? MatchedResult<
+                  [Match],
+                  `${InvertOpMatch}${RestPossibleMatch}${NextMatch}${RestInputString}`,
+                  never
+                >
+              : never
+            : MatchedResult<[PossibleMatch], `${NextMatch}${RestInputString}`, never>
           : never
         : NullResult<''>
       : NullResult<''>
@@ -513,17 +575,8 @@ type Match<
       type: 'not'
       value: infer NotMatchers extends Matcher[]
     }
-  ? EnumerateMatchers<
-      InputString,
-      NotMatchers,
-      Flags,
-      SkippedString,
-      [...RestMatchers, ...OutMostRestMatchers],
-      [''],
-      NamedCaptures,
-      StartOf
-    > extends NullResult<any>
-    ? MatchedResult<[''], '', never>
+  ? ExhaustiveMatch<InputString, NotMatchers, Flags, SkippedString, StartOf> extends NullResult<any>
+    ? MatchedResult<[''], Count['length'] extends Matchers['length'] ? '' : InputString, never>
     : NullResult<''>
   : CurrentMatcher extends {
       type: 'endMark'

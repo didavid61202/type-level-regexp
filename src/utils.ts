@@ -593,6 +593,7 @@ export type RestMatchersBeforeBackReference<
 
 export type FlattenLookahead<
   Matchers extends Matcher[],
+  ReduceOrMoreMatcher extends boolean = true,
   FlattenMatchers extends Matcher[] = [],
   Count extends any[] = [],
   CurrentMatcer extends Matcher = Matchers[Count['length']]
@@ -604,12 +605,16 @@ export type FlattenLookahead<
     }
   ? FlattenLookahead<
       Matchers,
+      ReduceOrMoreMatcher,
       [
         ...FlattenMatchers,
         {
           type: 'or'
           value: {
-            [K in keyof NestedArrMatchers]: FlattenLookahead<NestedArrMatchers[K]>
+            [K in keyof NestedArrMatchers]: FlattenLookahead<
+              NestedArrMatchers[K],
+              ReduceOrMoreMatcher
+            >
           }
         }
       ],
@@ -620,13 +625,66 @@ export type FlattenLookahead<
       value: infer NestedMatchers extends Matcher[]
       positive: infer Positive extends boolean
     }
-  ? FlattenLookahead<NestedMatchers> extends infer FlattenNestedMatchers extends Matcher[]
+  ? FlattenLookahead<
+      NestedMatchers,
+      ReduceOrMoreMatcher
+    > extends infer FlattenNestedMatchers extends Matcher[]
     ? Positive extends false
       ? FlattenLookahead<
           Matchers,
+          ReduceOrMoreMatcher,
           [...FlattenMatchers, { type: 'not'; value: FlattenNestedMatchers }],
           [...Count, '']
         >
-      : FlattenLookahead<Matchers, [...FlattenMatchers, ...FlattenNestedMatchers], [...Count, '']>
+      : FlattenLookahead<
+          Matchers,
+          ReduceOrMoreMatcher,
+          [...FlattenMatchers, ...FlattenNestedMatchers],
+          [...Count, '']
+        >
     : never
-  : FlattenLookahead<Matchers, [...FlattenMatchers, CurrentMatcer], [...Count, '']>
+  : CurrentMatcer extends { type: 'capture'; value: infer NestedMatchers extends Matcher[] }
+  ? FlattenLookahead<
+      NestedMatchers,
+      ReduceOrMoreMatcher
+    > extends infer FlattenNestedMatchers extends Matcher[]
+    ? FlattenLookahead<
+        Matchers,
+        ReduceOrMoreMatcher,
+        [...FlattenMatchers, ...FlattenNestedMatchers],
+        [...Count, '']
+      >
+    : never
+  : [ReduceOrMoreMatcher, CurrentMatcer] extends [
+      true,
+      {
+        type: infer Type extends 'zeroOrMore' | 'oneOrMore'
+        value: infer NestedMatchers extends [
+          {
+            type: keyof InvertCharSetMap
+            value?: string
+          }
+        ]
+      }
+    ]
+  ? NestedMatchers extends Matcher[]
+    ? FlattenLookahead<
+        Matchers,
+        ReduceOrMoreMatcher,
+        [
+          ...FlattenMatchers,
+
+          ...(Type extends 'zeroOrMore'
+            ? [
+                {
+                  type: 'optional'
+                  greedy: true
+                  value: NestedMatchers
+                }
+              ]
+            : NestedMatchers)
+        ],
+        [...Count, '']
+      >
+    : never
+  : FlattenLookahead<Matchers, false, [...FlattenMatchers, CurrentMatcer], [...Count, '']>
