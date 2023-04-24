@@ -257,6 +257,8 @@ export type ParseRegExp<
           ? `{${Repeat}}`
           : FirstChar} is not quantifiable`>
       : never
+    : FirstChar extends ')'
+    ? RegExpSyntaxError<`Invalid regular expression, missing opening \`(\``>
     : ParseRegExp<Rest, ParsedMatchers, ParseOrAsTupleOnly, `${AccString}${FirstChar}`>
   : [...ParsedMatchers, ...ResolvesAccStringMatcher<AccString>]
 
