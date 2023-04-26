@@ -1,6 +1,6 @@
 {
   "name": "type-level-regexp",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Type-Level RegExp parser, matcher and permutation resolver",
   "keywords": [
     "RegExp",
