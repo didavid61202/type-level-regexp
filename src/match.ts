@@ -600,16 +600,20 @@ type MatchOrMatchers<
   CurrentOrMatchers extends Matcher[] = OrMatchersArray[Count['length']]
 > = Count['length'] extends OrMatchersArray['length']
   ? BestMatchedWithPrefix[1]
-  : EnumerateMatchers<
-      InputString,
-      CurrentOrMatchers,
-      Flags,
-      SkippedString,
-      OutMostRestMatchers,
-      [''],
-      NamedCaptures,
-      StartOf
-    > extends MatchedResult<
+  : (
+      StartOf extends true
+        ? EnumerateMatchers<
+            InputString,
+            CurrentOrMatchers,
+            Flags,
+            SkippedString,
+            OutMostRestMatchers,
+            [''],
+            NamedCaptures,
+            StartOf
+          >
+        : ExhaustiveMatch<InputString, CurrentOrMatchers, Flags, SkippedString, StartOf>
+    ) extends MatchedResult<
       [infer OrMatch extends string, ...infer OrCaptures extends any[]],
       infer RestInputString,
       infer NestNamedCaptures
