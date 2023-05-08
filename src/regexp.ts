@@ -78,7 +78,9 @@ export type MatchRegExp<
   InputString extends string,
   ParsedRegExpAST extends Matcher[],
   Flags extends Flag
-> = string extends InputString
+> = Matcher[] extends ParsedRegExpAST
+  ? RegExpMatchArray | null
+  : string extends InputString
   ? ResolvePermutation<ParsedRegExpAST> extends PermutationResult<
       infer MatchArray,
       infer NamedCaptures extends NamedCapturesTuple
@@ -149,7 +151,9 @@ export type MatchAllRegExp<
   Flags extends Flag,
   MatchedResultTuple extends any[] = [],
   InitialInputString extends string = InputString
-> = ParsedRegExpAST extends ParsedRegExpAST
+> = Matcher[] extends ParsedRegExpAST
+  ? RegExpMatchArray[]
+  : ParsedRegExpAST extends ParsedRegExpAST
   ? string extends InputString
     ? ResolvePermutation<ParsedRegExpAST> extends PermutationResult<
         infer MatchArray,

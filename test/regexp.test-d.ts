@@ -1,8 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createRegExp, spreadRegExpIterator } from '../src/index'
-import type { RegExpMatchResult, TypedRegExp } from '../src/regexp'
+import type {
+  RegExpMatchResult,
+  TypedRegExp,
+  MatchRegExp,
+  MatchAllRegExp,
+  Matcher,
+} from '../src/regexp'
 
-describe('Generic type `MatchAllRegExp`', () => {
+describe('`String.match` and Generic type `MatchRegExp`', () => {
+  it('return `RegExpMatchResult` without global `g` flag', () => {
+    expectTypeOf('foo bar fao'.match(createRegExp('f\\wo'))).toEqualTypeOf<
+      RegExpMatchResult<{
+        matched: ['foo']
+        namedCaptures: never
+        input: 'foo bar fao'
+        restInput: ' bar fao'
+      }>
+    >()
+  })
+
+  it('return `null` if no match', () => {
+    expectTypeOf('foo bar fao'.match(createRegExp('cat'))).toEqualTypeOf<null>()
+  })
+
+  it('infer as `RegExpMatchArray | null` when passing generic `Matcher[]` as `ParsedRegExpAST`', () => {
+    expectTypeOf<MatchRegExp<'foobar', Matcher[], never>>().toEqualTypeOf<RegExpMatchArray | null>()
+  })
+})
+
+describe('`String.matchAll` and Generic type `MatchAllRegExp`', () => {
   it('return iterableIterator of `RegExpMatchResult` if matched, can be spread using `spreadRegExpIterator` helper function', () => {
     expectTypeOf(
       spreadRegExpIterator('foo bar fao'.matchAll(createRegExp('f\\wo', ['g'])))
@@ -26,6 +53,10 @@ describe('Generic type `MatchAllRegExp`', () => {
 
   it('return `null` if no match', () => {
     expectTypeOf('foo bar fao'.matchAll(createRegExp('cat', ['g']))).toEqualTypeOf<null>()
+  })
+
+  it('infer as `RegExpMatchArray[]` when passing generic `Matcher[]` as `ParsedRegExpAST`', () => {
+    expectTypeOf<MatchAllRegExp<'foobar', Matcher[], never>>().toEqualTypeOf<RegExpMatchArray[]>()
   })
 })
 
