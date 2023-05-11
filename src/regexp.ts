@@ -87,14 +87,16 @@ export type MatchRegExp<
     >
     ? 'g' extends Flags
       ? MatchArray[0][]
-      : RegExpMatchResult<{
-          matched: 'i' extends Flags
-            ? PrependAndUnionToAll<MatchArray, '[Case Insensitive] ', string & { all: true }>
-            : MatchArray //TODO: string collape issue after TS 4.8, have to check if matchers include 'notCharSet' (check `[^` is in pattern?), 'notChar'... then union all array item with (string&{})
-          namedCaptures: NamedCaptures //TODO: add '[Case Insensitive] ' prefix to named captures values
-          input: InputString
-          restInput: undefined
-        }> | null
+      :
+          | (('i' extends Flags
+              ? PrependAndUnionToAll<MatchArray, '[Case Insensitive] ', string & { all: true }>
+              : MatchArray) & {
+              index: number
+              groups: (() => NamedCaptures) extends () => never
+                ? undefined
+                : { [K in NamedCaptures[0]]: Extract<NamedCaptures, [K, any]>[1] }
+            })
+          | null
     : never
   : 'g' extends Flags
   ? GlobalMatch<InputString, ParsedRegExpAST, Flags>
@@ -104,12 +106,14 @@ export type MatchRegExp<
       infer RestInputString extends string,
       infer NamedCaptures extends NamedCapturesTuple
     >
-    ? RegExpMatchResult<{
-        matched: MatchArray
-        namedCaptures: NamedCaptures
-        input: InputString
-        restInput: RestInputString
-      }>
+    ? MatchArray & {
+        index: InputString extends `${infer Precedes}${MatchArray[0]}${RestInputString}`
+          ? LengthOfString<Precedes>
+          : never
+        groups: (() => NamedCaptures) extends () => never
+          ? undefined
+          : { [K in NamedCaptures[0]]: Extract<NamedCaptures, [K, any]>[1] }
+      }
     : Result extends NullResult<any, any, any>
     ? Result['results']
     : never
